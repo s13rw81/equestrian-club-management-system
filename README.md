@@ -1,7 +1,7 @@
-# Khyyal Backend
+# Khayyal Backend
 
 
 
 
-# TODOs:
-- protect main branch from accidental pushes
+## TODOs:
+- protect main branch from accidental 

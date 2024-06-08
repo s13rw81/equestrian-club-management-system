@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-
+from config import log
 app = FastAPI()
 
 
 @app.get("/")
-def root():
+async def root():
+    log.info('')
     return {"Hello": "World"}

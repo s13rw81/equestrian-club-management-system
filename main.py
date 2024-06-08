@@ -1,6 +1,7 @@
 import uvicorn
+from config import HOST, PORT, DEBUG
 from fastapi import FastAPI, Request
-from config import log
+from logging_config import log
 app = FastAPI()
 
 
@@ -10,4 +11,4 @@ async def root(request: Request):
     return {"Hello": "World"}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=80, reload=True)
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=DEBUG)

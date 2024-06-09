@@ -2,13 +2,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from logging_config import log
 from typing import Annotated
-from .models.sign_up_user import SignUpUser
-from .models.response_user import ResponseUser
-from .models.update_user import UpdateUser
+from .models import SignUpUser, ResponseUser, UpdateUser
 from models.user import UserInternal, UpdateUserInternal
 from data.dbapis.user.write_queries import save_user, update_user as update_user_db
-from logic.auth import generate_password_hash
-# from logic.auth.user_auth import get_current_user
+from logic.auth import generate_password_hash, get_current_user
 
 user_api_router = APIRouter(
     prefix="/user",
@@ -39,3 +36,14 @@ async def signup(sign_up_user: SignUpUser):
         )
 
     return {"id": result}
+
+
+@user_api_router.get("/me")
+async def me(user: Annotated[UserInternal, Depends(get_current_user)]) -> ResponseUser:
+    log.info(f"/me invoked")
+
+    response_user = ResponseUser(**user.model_dump())
+
+    log.info(f"returning {response_user}")
+
+    return response_user

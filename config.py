@@ -7,19 +7,12 @@ ENV = os.environ.get('ENVIRONMENT', False)
 log.info(f'running in {ENV} environment.')
 
 # read secrets.json
-SECRETS = dict()
-try:
-    secrets_file = open('secrets.json', 'r')
-    SECRETS = json.loads(secrets_file.read())
-    secrets_file.close()
-
-except FileNotFoundError:
-    log.error('secrets.json not found.')
-except Exception as e:
-    log.error(e)
-
+with open("secrets.json", "r") as f:
+    SECRETS = json.load(f)
 
 # CONSTANTS
 HOST = SECRETS.get('HOST', '0.0.0.0')
-PORT = SECRETS.get('PORT', 80)
+PORT = SECRETS.get('PORT', 8000)
 DEBUG = False if ENV == 'PROD' else True
+DATABASE_NAME = SECRETS['DATABASE_NAME']
+DATABASE_MAX_POOL_SIZE = SECRETS['DATABASE_MAX_POOL_SIZE']

@@ -1,0 +1,6 @@
+.*
+# ignore __pycache__ files
+__pycache__
+secrets.json
+logs
+playground.py

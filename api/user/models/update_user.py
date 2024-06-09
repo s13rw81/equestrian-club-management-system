@@ -1,8 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
+from models.user import RidingStage, HorseOwnership, EquestrianDiscipline
 
 
 class UpdateUser(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    phone_number: Optional[str] = None
+    full_name: Optional[str] = None
+    riding_stage: Optional[RidingStage] = None
+    horse_ownership_status: Optional[HorseOwnership] = None
+    equestrian_discipline: Optional[EquestrianDiscipline] = None
+
+

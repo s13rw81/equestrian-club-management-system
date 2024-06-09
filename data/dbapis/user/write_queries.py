@@ -1,6 +1,7 @@
-from models.user import UserInternal, UpdateUserInternal
+from models.user import UserInternal, UpdateUserInternal, SignUpCredentialType
 from data.db import get_users_collection
 from logging_config import log
+from typing import Optional
 
 users_collection = get_users_collection()
 
@@ -25,23 +26,27 @@ def save_user(user: UserInternal) -> str:
     return retval
 
 
-def update_user(update_user_data: UpdateUserInternal, email_address: str) -> bool:
+def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> bool:
     """
         updates the user as per the data provided in the edit_user dict
 
         :param update_user_data: UpdateUserInternal
-        :param email_address: str
+        :param user: str
 
         :returns: True if successfully updated false otherwise
 
     """
 
-    log.info(f"update_user invoked: edit_user={update_user_data}, email_address={email_address}")
+    log.info(f"inside update_user(update_user_data={update_user_data}, user={user})")
 
     update_user_dict = update_user_data.model_dump(exclude_none=True)
 
+    update_filter = ({"email_address": user.email_address}
+                     if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
+                     else {"phone_number": user.phone_number})
+
     result = users_collection.update_one(
-        {"email_address": email_address},
+        update_filter,
         {"$set": update_user_dict, "$currentDate": {"lastModified": True}}
     )
 

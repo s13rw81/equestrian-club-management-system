@@ -47,3 +47,23 @@ async def me(user: Annotated[UserInternal, Depends(get_current_user)]) -> Respon
     log.info(f"returning {response_user}")
 
     return response_user
+
+
+@user_api_router.put("/update")
+async def update_user_api(
+        update_user: UpdateUser,
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"/user/update (update_user={update_user}, user={user})")
+
+    update_user = UpdateUserInternal(**update_user.model_dump())
+
+    result = update_user_db(update_user_data=update_user, user=user)
+
+    if result:
+        return {"status": "OK"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="could not update user"
+        )

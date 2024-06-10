@@ -1,7 +1,6 @@
-from models.user import UserInternal, UpdateUserInternal, SignUpCredentialType
 from data.db import get_users_collection
 from logging_config import log
-from typing import Optional
+from models.user import UserInternal, UpdateUserInternal, SignUpCredentialType
 
 users_collection = get_users_collection()
 
@@ -50,6 +49,28 @@ def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> boo
         {"$set": update_user_dict, "$currentDate": {"lastModified": True}}
     )
 
+    log.info(f"matched_count={result.matched_count}, modified_count={result.modified_count}")
+
+    return result.modified_count == 1
+
+
+def update_user_password(hashed_password: str, user: UserInternal) -> bool:
+    """
+        updates the user password to a new hashed password
+
+        :param new_password: str
+        :param user: UserInternal
+
+        :returns: True if successfully updated false otherwise
+
+    """
+
+    log.info(f"inside update_user_password for user={user})")
+
+    result = users_collection.update_one(
+        {'email_address': user.email_address},
+        {'$set': {'hashed_password': hashed_password}}
+    )
     log.info(f"matched_count={result.matched_count}, modified_count={result.modified_count}")
 
     return result.modified_count == 1

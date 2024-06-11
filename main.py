@@ -12,6 +12,7 @@ app = FastAPI()
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)
+app.include_router(logistics_api_router)
 
 
 @app.get("/", include_in_schema=False)

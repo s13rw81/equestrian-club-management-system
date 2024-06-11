@@ -21,14 +21,14 @@ def create_transfer(
     user: Annotated[UserInternal, Depends(get_current_user)],
 ) -> ResponseCreateTransfer:
 
-    log.info(f"asdfasdfasdfadsfads {create_transfer}")
+    log.info(f"create_transfer {create_transfer}")
 
     transfer_status = TransferStatus.CREATED
 
     transfer = Transfers(
         customer_id=create_transfer.customer_id,
         horse_id=create_transfer.horse_id,
-        source_club_id="",
+        source_club_id=create_transfer.source_club_id,
         destination_club_id=create_transfer.destination_club_id,
         logistics_company_id=create_transfer.logistics_company_id,
         truck_id=create_transfer.truck_id,

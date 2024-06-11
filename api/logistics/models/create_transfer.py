@@ -1,11 +1,13 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, computed_field, field_validator
 
 from data.dbapis.user.read_queries import get_user_by_object_id
 
 
+# SOURCE CLUB ID IS NOT DEFINED IN THE API SPECIFICATIONS
+# SOURCE CLUD IS CONSIDERED AS THE CURRENT CLUD ID
 class CreateTransfer(BaseModel):
     customer_id: str
     horse_id: str
@@ -13,6 +15,11 @@ class CreateTransfer(BaseModel):
     logistics_company_id: str
     truck_id: str
     pickup_time: str
+
+    @computed_field
+    @property
+    def source_club_id(self) -> str:
+        return f"{self.horse_id}-{self.logistics_company_id}"
 
     @field_validator("pickup_time")
     def parse_date(cls, pickup_time: Optional[str]) -> Optional[datetime]:

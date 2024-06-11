@@ -49,22 +49,3 @@ def get_user_by_phone_number(phone_number: str) -> UserInternal | None:
     log.info(f"returning {retval}")
 
     return retval
-
-
-def get_user_by_otp(otp: str) -> UserInternal | None:
-    """
-            get user by OTP
-            :param otp: str
-            :returns: User if exists otherwise None
-    """
-    log.info(f"get_user_by_otp invoked: OTP={otp}")
-    user = users_collection.find_one({"password_reset_verification_otp.otp": otp})
-
-    if user is None:
-        retval = None
-    else:
-        retval = UserInternal(**user)
-
-    log.info(f"returning {retval}")
-
-    return retval

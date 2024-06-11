@@ -110,9 +110,4 @@ def verify_password_reset_otp(user: UserInternal, user_provided_otp: str) -> boo
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="invalid OTP"
         )
-
-    update_user_data = UpdateUserInternal(otp_verified=True)
-
-    result = update_user(update_user_data=update_user_data, user=user)
-
-    return result
+    return True

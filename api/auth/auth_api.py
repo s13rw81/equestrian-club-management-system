@@ -1,14 +1,14 @@
 from typing import Annotated, Optional
 
 from api.auth.models.reset_password_verify import ResetPasswordVerify
-from data.dbapis.user.read_queries import get_user_by_email, get_user_by_phone_number, get_user_by_otp
-from data.dbapis.user.write_queries import update_user_password
+from data.dbapis.user.read_queries import get_user_by_email, get_user_by_phone_number
+from data.dbapis.user.write_queries import update_user
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from logging_config import log
 from logic.auth import authenticate_user, create_access_token, get_current_user, generate_password_hash
 from logic.auth.otp_management import send_sign_up_otp, verify_sign_up_otp, send_reset_password_otp
-from models.user import UserInternal
+from models.user import UserInternal, UpdateUserInternal
 from validators.regex_validators import is_valid_email
 
 from .models import Token
@@ -126,6 +126,7 @@ async def reset_password(email_address: Optional[str] = None, phone_number: Opti
 
 @user_auth_router.post("/reset-password-verify")
 async def reset_password_verify(request: ResetPasswordVerify):
+    log.info(f"updating password for : {request}")  # TODO: check how this looks in the actual log file
     email_address = request.email_address
     phone_number = request.phone_number
     new_password = request.new_password
@@ -143,18 +144,31 @@ async def reset_password_verify(request: ResetPasswordVerify):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="either email or phone must be passed"
         )
-    user = get_user_by_otp(otp=user_provided_otp)
-    if user:
-        if user.email_address == email_address:
-            log.info(f'USER FOUND: {user}, user provided email and user email matched.')
-            new_hashed_password = generate_password_hash(new_password)
-            result = update_user_password(new_hashed_password, user)
-            if result:
-                return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="user provided email and OPT user email do not match."
-            )
-    else:
-        log.error(f'OTP : {user_provided_otp} does not match any user')
+    if email_address:
+        user = get_user_by_email(email=email_address)
+
+    if phone_number:
+        user = get_user_by_phone_number(phone_number=phone_number)
+
+    if not user:
+        emsg = f'no user found with email_address : {email_address} or phone_number : {phone_number}'
+        log.error(emsg)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=emsg
+        )
+
+    if user.password_reset_verification_otp.otp != user_provided_otp:
+        emsg = f"user provided OTP {user_provided_otp} and password reset OTP of user : {user.password_reset_verification_otp.otp} do not match."
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=emsg
+        )
+
+    log.info(f'USER FOUND: {user}, user provided TOP and user OTP matched.')
+    new_hashed_password = generate_password_hash(new_password)
+    update_user_data = UpdateUserInternal(hashed_password=new_hashed_password)
+    result = update_user(update_user_data, user)
+
+    if result:
+        return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}

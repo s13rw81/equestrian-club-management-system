@@ -1,5 +1,6 @@
 import uvicorn
 from api.auth import user_auth_router
+from api.logistics import logistics_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
 from config import HOST, PORT, DEBUG

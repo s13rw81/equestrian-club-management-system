@@ -1,15 +1,15 @@
 from data.db import get_transfer_collection
 from logging_config import log
-from models.transfer import Transfers
+from models.transfer import TransfersInternal
 
 transfer_collection = get_transfer_collection()
 
 
-def save_transfer(transfer: Transfers) -> str:
+def save_transfer(transfer: TransfersInternal) -> str:
     """saves the new transfer in the database and returns the id
 
     Args:
-        transfer (Transfers)
+        transfer (TransfersInternal)
     Returns:
         str: id
     """

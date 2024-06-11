@@ -1,1 +1,1 @@
-from .transfer import Transfers
+from .transfer import TransfersInternal

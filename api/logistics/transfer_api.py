@@ -6,7 +6,7 @@ from fastapi.exceptions import HTTPException
 from data.dbapis.transfer.write_queries import save_transfer
 from logging_config import log
 from logic.auth import get_current_user
-from models.transfer import Transfers
+from models.transfer import TransfersInternal
 from models.transfer.enums import TransferStatus
 from models.user import UserInternal
 
@@ -25,7 +25,7 @@ def create_transfer(
 
     transfer_status = TransferStatus.CREATED
 
-    transfer = Transfers(
+    transfer = TransfersInternal(
         customer_id=create_transfer.customer_id,
         horse_id=create_transfer.horse_id,
         source_club_id=create_transfer.source_club_id,
@@ -36,16 +36,16 @@ def create_transfer(
         status=transfer_status,
     )
 
-    result = save_transfer(transfer=transfer)
+    transfer_id = save_transfer(transfer=transfer)
 
-    if not result:
+    if not transfer_id:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="could not save the transfer in the database",
         )
 
     return ResponseCreateTransfer(
-        transfer_id=result,
+        transfer_id=transfer_id,
         status=transfer_status,
         message="Transfer created Successfully.",
     )

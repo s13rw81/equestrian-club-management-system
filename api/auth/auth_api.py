@@ -2,13 +2,13 @@ from typing import Annotated, Optional
 
 from api.auth.models.reset_password_verify import ResetPasswordVerify
 from data.dbapis.user.read_queries import get_user_by_email, get_user_by_phone_number
-from data.dbapis.user.write_queries import update_user
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from logging_config import log
-from logic.auth import authenticate_user, create_access_token, get_current_user, generate_password_hash
-from logic.auth.otp_management import send_sign_up_otp, verify_sign_up_otp, send_reset_password_otp
-from models.user import UserInternal, UpdateUserInternal
+from logic.auth import authenticate_user, create_access_token, get_current_user
+from logic.auth.otp_management import send_sign_up_otp, verify_sign_up_otp, send_reset_password_otp, \
+    verify_password_reset_otp
+from models.user import UserInternal
 from validators.regex_validators import is_valid_email
 
 from .models import Token
@@ -157,18 +157,7 @@ async def reset_password_verify(request: ResetPasswordVerify):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=emsg
         )
-
-    if user.password_reset_verification_otp.otp != user_provided_otp:
-        emsg = f"user provided OTP {user_provided_otp} and password reset OTP of user : {user.password_reset_verification_otp.otp} do not match."
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=emsg
-        )
-
-    log.info(f'USER FOUND: {user}, user provided TOP and user OTP matched.')
-    new_hashed_password = generate_password_hash(new_password)
-    update_user_data = UpdateUserInternal(hashed_password=new_hashed_password)
-    result = update_user(update_user_data, user)
+    result = verify_password_reset_otp(user=user, user_provided_otp=user_provided_otp, new_password=new_password)
 
     if result:
         return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}

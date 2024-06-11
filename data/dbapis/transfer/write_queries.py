@@ -25,7 +25,7 @@ def save_transfer(transfer: TransfersInternal) -> str:
     return retval
 
 
-def update_transfer_status_db(transfer_id: str, status: UpdateTransferStatus) -> str:
+def update_transfer_status_db(transfer_id: str, body: UpdateTransferStatus) -> str:
     """updates the transfer status in the database for the provided transfer_id
     and returns the transfer_id
 
@@ -38,12 +38,12 @@ def update_transfer_status_db(transfer_id: str, status: UpdateTransferStatus) ->
     """
 
     log.info(
-        f"update_transfer_status_db invoked : transfer_id {transfer_id}, status{status}"
+        f"update_transfer_status_db invoked : transfer_id {transfer_id}, status{body}"
     )
 
     update_response = transfer_collection.update_one(
         filter={"_id": convert_to_object_id(transfer_id)},
-        update={"$set": {"status": status.status.value}},
+        update={"$set": {"status": body.status.value, "updated_at": body.updated_at}},
     )
 
     log.info(

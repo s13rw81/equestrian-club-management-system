@@ -67,13 +67,11 @@ def create_transfer(
 def update_transfer_status(
     user: Annotated[UserInternal, Depends(get_current_user)],
     transfer_id: str,
-    transfer_status: UpdateTransferStatus,
+    update_body: UpdateTransferStatus,
 ) -> ResponseUpdateTransferStatus:
-    log.info(
-        f"/transfers/{transfer_id}/status invoked : transfer_status={transfer_status}"
-    )
+    log.info(f"/transfers/{transfer_id}/status invoked : transfer_status={update_body}")
 
-    updated = update_transfer_status_db(transfer_id=transfer_id, status=transfer_status)
+    updated = update_transfer_status_db(transfer_id=transfer_id, body=update_body)
 
     if not updated:
         raise HTTPException(
@@ -83,7 +81,7 @@ def update_transfer_status(
 
     response = ResponseUpdateTransferStatus(
         transfer_id=transfer_id,
-        status=transfer_status.status.value,
+        status=update_body.status.value,
         message="Transfer status updated successfully",
     )
 

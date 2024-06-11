@@ -6,7 +6,7 @@ from models.transfer import TransfersInternal
 transfer_collection = get_transfer_collection()
 
 
-def save_transfer(transfer: TransfersInternal) -> str:
+def save_transfer_db(transfer: TransfersInternal) -> str:
     """saves the new transfer in the database and returns the id
 
     Args:

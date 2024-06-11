@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 
-from data.dbapis.transfer.write_queries import save_transfer, update_transfer_status_db
+from data.dbapis.transfer.read_queries import get_transfer_by_object_id
+from data.dbapis.transfer.write_queries import (
+    save_transfer_db,
+    update_transfer_status_db,
+)
 from logging_config import log
 from logic.auth import get_current_user
 from models.transfer import TransfersInternal
@@ -41,7 +45,7 @@ def create_transfer(
         status=transfer_status,
     )
 
-    transfer_id = save_transfer(transfer=transfer)
+    transfer_id = save_transfer_db(transfer=transfer)
 
     if not transfer_id:
         raise HTTPException(
@@ -86,5 +90,30 @@ def update_transfer_status(
     )
 
     log.info(f"/transfer/{transfer_id}/status returning : {response}")
+
+    return response
+
+
+# TODO
+# 1. Add logging in get_transfer_by_object_id function
+# 2. Add transfer_id alias in TransferInternal model
+@logistics_api_router.get("/transfers/{transfer_id}")
+def get_transfer_details(
+    user: Annotated[UserInternal, Depends(get_current_user)], transfer_id: str
+) -> TransfersInternal:
+
+    log.info(f"/transfers/{transfer_id} invoked : transfer_id {transfer_id}")
+
+    transfer_details = get_transfer_by_object_id(transfer_id=transfer_id)
+
+    if not transfer_details:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="invalid transfer_id provided",
+        )
+
+    response = TransfersInternal(**transfer_details)
+
+    log.info(f"/transfers/{transfer_id} returning : {response}")
 
     return response

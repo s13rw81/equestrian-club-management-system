@@ -1,7 +1,6 @@
-from models.user import UserInternal, UpdateUserInternal, SignUpCredentialType
 from data.db import get_users_collection
 from logging_config import log
-from typing import Optional
+from models.user import UserInternal, UpdateUserInternal, SignUpCredentialType
 
 users_collection = get_users_collection()
 

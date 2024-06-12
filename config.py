@@ -3,8 +3,8 @@ import os
 from logging_config import log
 
 # env
-ENV = os.environ.get('ENVIRONMENT', False)
-log.info(f'running in {ENV} environment.')
+ENV = os.environ.get("ENVIRONMENT", False)
+log.info(f"running in {ENV} environment.")
 
 # read secrets.json
 with open("secrets.json", "r") as f:

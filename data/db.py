@@ -21,7 +21,12 @@ def get_database():
 def get_users_collection():
     # TODO: create a unique index in the email_address field
     log.info("inside get_users_collection()")
-    return get_database()['users']
+    return get_database()["users"]
+
+
+def get_transfer_collection():
+    log.info("inside get_transfer_collection()")
+    return get_database()["transfers"]
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

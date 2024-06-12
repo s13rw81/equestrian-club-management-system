@@ -22,10 +22,10 @@ from .models import (
     UpdateTransferStatus,
 )
 
-logistics_api_router = APIRouter(prefix="/logistics", tags=["logistics"])
+transfer_api_router = APIRouter(prefix="/transfers", tags=["logistics"])
 
 
-@logistics_api_router.post("/transfers")
+@transfer_api_router.post("")
 def create_transfer(
     create_transfer: CreateTransfer,
     user: Annotated[UserInternal, Depends(get_current_user)],
@@ -65,7 +65,7 @@ def create_transfer(
     return response
 
 
-@logistics_api_router.patch("/transfers/{transfer_id}/status")
+@transfer_api_router.patch("/{transfer_id}/status")
 def update_transfer_status(
     user: Annotated[UserInternal, Depends(get_current_user)],
     transfer_id: str,
@@ -103,7 +103,7 @@ def update_transfer_status(
     return response
 
 
-@logistics_api_router.get("/transfers/{transfer_id}")
+@transfer_api_router.get("/{transfer_id}")
 def get_transfer_details(
     user: Annotated[UserInternal, Depends(get_current_user)], transfer_id: str
 ) -> TransfersInternalWithID:

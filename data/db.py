@@ -1,9 +1,14 @@
-from pymongo import MongoClient
+from typing import Annotated
+
 from bson.objectid import ObjectId
-from config import DATABASE_NAME, DATABASE_MAX_POOL_SIZE
+from pydantic import BeforeValidator
+from pymongo import MongoClient
+
+from config import DATABASE_MAX_POOL_SIZE, DATABASE_NAME
 from logging_config import log
 
 CONNECTION_STRING = "mongodb://localhost:27017"
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
 def get_database():

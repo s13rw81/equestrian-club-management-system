@@ -10,7 +10,7 @@ from data.dbapis.transfer.write_queries import (
 )
 from logging_config import log
 from logic.auth import get_current_user
-from models.transfer import TransfersInternal
+from models.transfer import TransfersInternal, TransfersInternalWithID
 from models.transfer.enums import TransferStatus
 from models.user import UserInternal
 
@@ -100,7 +100,7 @@ def update_transfer_status(
 @logistics_api_router.get("/transfers/{transfer_id}")
 def get_transfer_details(
     user: Annotated[UserInternal, Depends(get_current_user)], transfer_id: str
-) -> TransfersInternal:
+) -> TransfersInternalWithID:
 
     log.info(f"/transfers/{transfer_id} invoked : transfer_id {transfer_id}")
 
@@ -112,7 +112,7 @@ def get_transfer_details(
             detail="invalid transfer_id provided",
         )
 
-    response = TransfersInternal(**transfer_details)
+    response = TransfersInternalWithID(**transfer_details)
 
     log.info(f"/transfers/{transfer_id} returning : {response}")
 

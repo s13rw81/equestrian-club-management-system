@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_serializer
+from bson import ObjectId
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
 from utils.date_time import get_current_utc_datetime
 
@@ -25,3 +26,7 @@ class TransfersInternal(BaseModel):
             return
 
         return enum.value
+
+
+class TransfersInternalWithID(TransfersInternal):
+    transfer_id: str

@@ -1,11 +1,11 @@
 from data.db import convert_to_object_id, get_transfer_collection
 from logging_config import log
-from models.transfer import TransfersInternal
+from models.transfer import TransfersInternalWithID
 
 transfer_collection = get_transfer_collection()
 
 
-def get_transfer_by_object_id(transfer_id: str) -> str:
+def get_transfer_by_object_id(transfer_id: str) -> TransfersInternalWithID:
     """fetch transfer details from database for the provided id
 
     Args:
@@ -19,4 +19,4 @@ def get_transfer_by_object_id(transfer_id: str) -> str:
         filter={"_id": convert_to_object_id(transfer_id)}
     )
 
-    return transfer_details
+    return {**transfer_details, "transfer_id": transfer_id}

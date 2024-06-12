@@ -10,6 +10,7 @@ from data.dbapis.transfer.write_queries import (
 )
 from logging_config import log
 from logic.auth import get_current_user
+from logic.logistics.status_validation import is_valid_update
 from models.transfer import TransfersInternal, TransfersInternalWithID
 from models.transfer.enums import TransferStatus
 from models.user import UserInternal
@@ -72,8 +73,13 @@ def update_transfer_status(
     user: Annotated[UserInternal, Depends(get_current_user)],
     transfer_id: str,
     update_body: UpdateTransferStatus,
-) -> ResponseUpdateTransferStatus:
+    # ) -> ResponseUpdateTransferStatus:
+):
     log.info(f"/transfers/{transfer_id}/status invoked : transfer_status={update_body}")
+
+    is_valid_update(transfer_id=transfer_id, status_to_update=update_body.status)
+
+    return {"status": "ok"}
 
     updated = update_transfer_status_db(transfer_id=transfer_id, body=update_body)
 

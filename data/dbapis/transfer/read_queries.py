@@ -15,8 +15,19 @@ def get_transfer_by_object_id(transfer_id: str) -> TransfersInternalWithID:
         TransfersInternal: transfer_details
     """
 
+    log.info(f"get_transfer_by_object_id invoked : transfer_id {transfer_id}")
+
     transfer_details = transfer_collection.find_one(
         filter={"_id": convert_to_object_id(transfer_id)}
     )
 
-    return {**transfer_details, "transfer_id": transfer_id}
+    transfer_details = {
+        **transfer_collection.find_one(
+            filter={"_id": convert_to_object_id(transfer_id)}
+        ),
+        "transfer_id": transfer_id,
+    }
+
+    log.info(f"get_transfer_by_object_id returning : {transfer_details}")
+
+    return transfer_details

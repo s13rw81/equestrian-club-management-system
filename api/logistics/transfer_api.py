@@ -94,9 +94,6 @@ def update_transfer_status(
     return response
 
 
-# TODO
-# 1. Add logging in get_transfer_by_object_id function
-# 2. Add transfer_id alias in TransferInternal model
 @logistics_api_router.get("/transfers/{transfer_id}")
 def get_transfer_details(
     user: Annotated[UserInternal, Depends(get_current_user)], transfer_id: str

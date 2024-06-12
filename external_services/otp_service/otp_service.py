@@ -5,7 +5,9 @@ import random
 
 
 def generate_otp() -> str:
-    return str(random.randrange(100000, 1000000))
+    # TODO: Remove it, this is only a temporary fix
+    return "123654"
+    # return str(random.randrange(100000, 1000000))
 
 
 def send_otp_email(email_address: str) -> str:

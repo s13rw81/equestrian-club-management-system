@@ -3,7 +3,7 @@ from logging_config import log
 from models.transfer.enums import TransferStatus, TransferStatusPriority
 
 
-def is_valid_update(transfer_id: str, status_to_update: TransferStatus) -> bool:
+def validate_update_status(transfer_id: str, status_to_update: TransferStatus) -> bool:
     """validates if the transfer with provided transfer_id can be updated
     to the provided status
 
@@ -24,13 +24,8 @@ def is_valid_update(transfer_id: str, status_to_update: TransferStatus) -> bool:
     )
     current_transfer_status = TransferStatus(transfer_details.get("status"))
 
-    # def check_status_equality():
-    #     return status_to_update == current_transfer_status
-
-    # # this indicates that both the current and provided status are equal so no
-    # # need to update
-    # if check_status_equality:
-    #     return False
+    def valid_update_status_provided():
+        return status_to_update != current_transfer_status
 
     def check_valid_update():
         """status can only be updated to the next status.
@@ -38,10 +33,15 @@ def is_valid_update(transfer_id: str, status_to_update: TransferStatus) -> bool:
         wrong to update the transfer status to 'created' or 'cancelled'
         """
 
-        current_status_priority = TransferStatusPriority[current_transfer_status.name]
-        update_to_status_priority = TransferStatusPriority[status_to_update.name]
+        current_status_priority = TransferStatusPriority[
+            current_transfer_status.name
+        ].value
+        update_to_status_priority = TransferStatusPriority[status_to_update.name].value
 
-        log.info(f"current_status_priority {current_status_priority}")
-        log.info(f"update_to_status_priority {update_to_status_priority}")
+        return update_to_status_priority > current_status_priority
 
-    check_valid_update()
+    response = valid_update_status_provided() and check_valid_update()
+
+    log.info(f"validte_update_status returning : {response}")
+
+    return response

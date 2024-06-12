@@ -22,7 +22,8 @@ def get_transfer_by_object_id(transfer_id: str, fields: List = None) -> dict:
 
     transfer_details = {
         **transfer_collection.find_one(
-            {"_id": convert_to_object_id(transfer_id)}, {field: 1 for field in fields}
+            {"_id": convert_to_object_id(transfer_id)},
+            {field: 1 for field in fields} if fields else {},
         ),
         "transfer_id": transfer_id,
     }

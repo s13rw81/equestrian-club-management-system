@@ -29,6 +29,16 @@ def get_transfer_collection():
     return get_database()["transfers"]
 
 
+def get_truck_collection():
+    log.info("inside get_truck_collection()")
+    return get_database()["trucks"]
+
+
+def get_company_collection():
+    log.info("inside get_company_collection()")
+    return get_database()["company"]
+
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

@@ -5,7 +5,7 @@ from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
 from data.db import PyObjectId
 
 
-class Truck(BaseModel):
+class TruckInternal(BaseModel):
     truck_type: str
     capacity: int
     special_features: str

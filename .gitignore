@@ -1,4 +1,6 @@
 .*
+# don't ignore the .dockerignore file
+!.dockerignore
 # ignore __pycache__ files
 __pycache__
 secrets.json

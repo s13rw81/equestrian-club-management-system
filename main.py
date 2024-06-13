@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, Request
+from starlette.responses import RedirectResponse
 
 from api.auth import user_auth_router
 from api.logistics import transfer_api_router, trucks_api_router
@@ -17,12 +18,12 @@ app.include_router(transfer_api_router)
 app.include_router(trucks_api_router)
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root(request: Request):
     log.info(
         f"method: {request.method}, headers: {request.headers}, client: {request.client}"
     )
-    return {"Hello": "World"}
+    return RedirectResponse(url="/docs")
 
 
 if __name__ == "__main__":

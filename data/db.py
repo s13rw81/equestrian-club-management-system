@@ -1,13 +1,28 @@
 from typing import Annotated
+from urllib.parse import quote_plus
 
 from bson.objectid import ObjectId
 from pydantic import BeforeValidator
 from pymongo import MongoClient
 
-from config import DATABASE_MAX_POOL_SIZE, DATABASE_NAME
+from config import (
+    DATABASE_MAX_POOL_SIZE,
+    DATABASE_NAME,
+    DATABASE_PASSWORD,
+    DATABASE_PORT,
+    DATABASE_URL,
+    DATABASE_USER,
+)
 from logging_config import log
 
-CONNECTION_STRING = "mongodb://localhost:27017"
+ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
+ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
+
+CONNECTION_STRING = (
+    f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}"
+    if ESCAPED_DATABASE_USERNAME != ""
+    else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
+)
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 

@@ -1,6 +1,6 @@
-from data.dbapis.user.read_queries import get_user_by_email, get_user_by_phone_number
-from models.user import UserInternal
 from typing import Optional
+
+from data.dbapis.user.read_queries import get_user_by_email, get_user_by_phone_number
 from logging_config import log
 
 

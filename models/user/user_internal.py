@@ -11,6 +11,11 @@ class SignUpVerificationOTP(BaseModel):
     generated_on: datetime = get_current_utc_datetime()
 
 
+class PasswordResetVerificationOTP(BaseModel):
+    otp: str
+    generated_on: datetime = get_current_utc_datetime()
+
+
 class UserInternal(BaseModel):
     full_name: str
     email_address: Optional[str] = None
@@ -18,6 +23,7 @@ class UserInternal(BaseModel):
     hashed_password: str
     otp_verified: bool = False
     sign_up_verification_otp: Optional[SignUpVerificationOTP] = None
+    password_reset_verification_otp: Optional[PasswordResetVerificationOTP] = None
     sign_up_credential_type: Optional[SignUpCredentialType] = None
     riding_stage: RidingStage
     horse_ownership_status: HorseOwnership

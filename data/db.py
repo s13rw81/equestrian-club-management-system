@@ -54,6 +54,11 @@ def get_company_collection():
     return get_database()["company"]
 
 
+def get_horses_collection():
+    log.info("inside get_horses_collection()")
+    return get_database()["horses_collection"]
+
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

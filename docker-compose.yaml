@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  fastapi_app:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "80:80"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=80
+      - DEBUG=1
+      - DATABASE_NAME=DEMO
+      - DATABASE_MAX_POOL_SIZE=10
+      - DATABASE_URL=mongodb
+      - DATABASE_PORT=27017
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=example
+      - JWT_TOKEN_EXPIRY_IN_DAYS=7
+      - JWT_SECRET_KEY=your_secret_key
+      - JWT_ALGORITHM=HS256
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

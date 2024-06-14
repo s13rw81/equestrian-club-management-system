@@ -1,6 +1,7 @@
 fastapi~=0.111.0
 uvicorn~=0.30.1
-pymongo
+pymongo==4.1.1
 pytz
 passlib[bcrypt]
 python-jose[cryptography]
+pydantic

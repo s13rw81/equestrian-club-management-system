@@ -3,6 +3,7 @@ from api.auth import user_auth_router
 from api.logistics import logistics_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
+from api.rbac_demo import demo_rbac_router
 from config import HOST, PORT, DEBUG
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException
@@ -17,6 +18,7 @@ app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)
 app.include_router(logistics_api_router)
+app.include_router(demo_rbac_router)
 
 
 @app.exception_handler(Exception)

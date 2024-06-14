@@ -115,3 +115,21 @@ def update_truck_images(
     updated = truck_collection.update_one(filter=filter, update=update)
 
     return updated.modified_count == 1
+
+
+def update_truck_availability(truck_id: str, availability: str) -> bool:
+    """given the truck_id update the availability of the truck
+
+    Args:
+        truck_id (str)
+        availability (str)
+    """
+
+    log.info(f"update_truck_availability() invoke : {truck_id} {availability}")
+
+    filter = {"_id": convert_to_object_id(truck_id)}
+    update = {"$set": {"availability": availability}}
+
+    updated = truck_collection.update_one(filter=filter, update=update)
+
+    return updated.modified_count == 1

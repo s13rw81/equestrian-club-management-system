@@ -12,13 +12,19 @@ from fastapi import APIRouter, File, UploadFile, status
 from fastapi.exceptions import HTTPException
 
 from data.dbapis.truck.read_queries import (
+    get_available_trucks_db,
     get_truck_details_by_id_db,
     get_trucks_company_by_id,
 )
-from data.dbapis.truck.write_queries import add_truck_db, update_truck_images
+from data.dbapis.truck.write_queries import (
+    add_truck_db,
+    update_truck_availability,
+    update_truck_images,
+)
 from logging_config import log
 from logic.logistics.write_truck_images import write_images
 from models.truck import TruckInternal
+from models.truck.enums import TruckAvailability
 
 from .models import (
     AddTruck,
@@ -33,6 +39,8 @@ trucks_api_router = APIRouter(prefix="/trucks", tags=["logistics"])
 # TODO
 # 1. Add Depends on admin auth
 # 2. Reference the Updated company model
+# 3. Add validations to all APIs to consider whether logged in user is authorized to manage the truck
+# 4. Add exception handling to all apis
 
 
 @trucks_api_router.post("/add_truck")
@@ -78,6 +86,19 @@ def view_truck_list(company_id: str) -> List[ViewTruckResponse]:
     return trucks_list
 
 
+@trucks_api_router.get("/available", response_model_by_alias=False)
+def view_available_trucks(type: str, location: str) -> List[ViewTruckResponse]:
+    log.info(f"/trucks/available invoked : {type} location {location}")
+
+    available_trucks_list = get_available_trucks_db(
+        type=type,
+        location=location,
+        fields=["name", "type", "capacity", "availability"],
+    )
+
+    return available_trucks_list
+
+
 @trucks_api_router.get("/{truck_id}", response_model_by_alias=False)
 def get_truck_details(truck_id: str) -> ResponseTruckDetails:
     log.info(f"/trucks/{truck_id} invoked")
@@ -121,3 +142,12 @@ def upload_truck_images(
     )
 
     return {"message": "Images uploaded successfully"}
+
+
+@trucks_api_router.patch("{truck_id}/availability")
+def set_truck_availability(truck_id: str, availability: TruckAvailability):
+    log.info(f"/trucks/{truck_id}/availability invoked")
+
+    update_truck_availability(truck_id=truck_id, availability=availability.value)
+
+    return {"message": "Truck availability updated successfully"}

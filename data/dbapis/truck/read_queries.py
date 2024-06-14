@@ -4,6 +4,7 @@ from pymongo.cursor import Cursor
 
 from data.db import convert_to_object_id, get_truck_collection
 from logging_config import log
+from models.truck.enums import TruckAvailability
 
 truck_collection = get_truck_collection()
 
@@ -44,3 +45,35 @@ def get_truck_details_by_id_db(truck_id: str, fields: List) -> dict:
     log.info(f"get_truck_details_by_id_db() returning : {truck_details}")
 
     return truck_details
+
+
+def get_available_trucks_db(
+    type: str = None,
+    location: str = None,
+    fields: List = [],
+) -> dict:
+    """retrieve the list of available trucks based on the truck type or
+    truck location
+
+    Args:
+        type (str)
+        location (str)
+
+    Returns:
+        dict
+    """
+
+    log.info(f"inside get_available_trucks_db()")
+
+    filter = {"availability": TruckAvailability.AVAILABLE.value}
+    if type:
+        filter["type"] = type
+
+    if location:
+        filter["location"] = location
+
+    available_trucks = truck_collection.find(filter=filter, fields=fields)
+
+    log.info(f"get_available_trucks_db() returning : {available_trucks}")
+
+    return available_trucks

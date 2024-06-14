@@ -11,12 +11,15 @@ from typing import List
 from fastapi import APIRouter, status
 from fastapi.exceptions import HTTPException
 
-from data.dbapis.truck.read_queries import get_trucks_company_by_id
+from data.dbapis.truck.read_queries import (
+    get_truck_details_by_id_db,
+    get_trucks_company_by_id,
+)
 from data.dbapis.truck.write_queries import add_truck_db
 from logging_config import log
 from models.truck import TruckInternal
 
-from .models import AddTruck, AddTruckResponse, ViewTruckResponse
+from .models import AddTruck, AddTruckResponse, ResponseTruckDetails, ViewTruckResponse
 
 trucks_api_router = APIRouter(prefix="/trucks", tags=["logistics"])
 
@@ -66,3 +69,16 @@ def view_truck_list(company_id: str) -> List[ViewTruckResponse]:
     )
 
     return trucks_list
+
+
+@trucks_api_router.get("/trucks/{truck_id}", response_model_by_alias=False)
+def get_truck_details(truck_id: str) -> ResponseTruckDetails:
+    log.info(f"/trucks/{truck_id} invoked")
+
+    truck_details = get_truck_details_by_id_db(
+        truck_id=truck_id, fields=["name", "truck_type", "availability", "images"]
+    )
+
+    log.info(f"/trucks/{truck_id} returning : {truck_details}")
+
+    return truck_details

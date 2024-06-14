@@ -3,7 +3,7 @@ from typing import Optional
 from typing_extensions import Self
 from datetime import datetime
 from utils.date_time import get_current_utc_datetime
-from .enums import EquestrianDiscipline, HorseOwnership, RidingStage, SignUpCredentialType
+from .enums import EquestrianDiscipline, HorseOwnership, RidingStage, SignUpCredentialType, UserRoles
 
 
 class SignUpVerificationOTP(BaseModel):
@@ -25,6 +25,7 @@ class UserInternal(BaseModel):
     sign_up_verification_otp: Optional[SignUpVerificationOTP] = None
     password_reset_verification_otp: Optional[PasswordResetVerificationOTP] = None
     sign_up_credential_type: Optional[SignUpCredentialType] = None
+    user_role: UserRoles = UserRoles.USER
     riding_stage: RidingStage
     horse_ownership_status: HorseOwnership
     equestrian_discipline: EquestrianDiscipline

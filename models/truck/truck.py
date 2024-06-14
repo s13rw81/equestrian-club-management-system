@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from data.db import PyObjectId
 from utils.date_time import get_current_utc_datetime
@@ -10,7 +10,7 @@ from .enums import TruckAvailability
 
 
 class TruckImages(BaseModel):
-    url: AnyHttpUrl
+    image_key: str
     description: str = Field(max_length=200)
 
 

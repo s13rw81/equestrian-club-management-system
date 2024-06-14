@@ -1,4 +1,4 @@
-from pymongo.client_session import ClientSession
+from typing import List
 
 from data.db import convert_to_object_id, get_company_collection, get_truck_collection
 from logging_config import log
@@ -89,3 +89,29 @@ def add_truck_db(truck: TruckInternal) -> bool:
         return False
 
     return updated, truck_id
+
+
+def update_truck_images(
+    truck_id: str, file_paths: List[str], description: List[str]
+) -> bool:
+    """given a list of file_paths and a list of image descriptions update the same to truck
+    collection
+
+    Args:
+        truck_id (str)
+        file_paths (List[str])
+        description (List[str])
+    """
+
+    log.info(f"update_truck_images() invoked : truck_id {truck_id}")
+
+    image_data = [
+        {"image_key": image_key, "description": description}
+        for image_key, description in zip(file_paths, description)
+    ]
+    update = {"$set": {"images": image_data}}
+
+    filter = {"_id": convert_to_object_id(truck_id)}
+    updated = truck_collection.update_one(filter=filter, update=update)
+
+    return updated.modified_count == 1

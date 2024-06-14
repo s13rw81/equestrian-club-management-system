@@ -5,4 +5,5 @@ from .response_create_transfer import *
 from .response_truck_details import *
 from .response_update_transfer_status import *
 from .update_transfer_status import *
+from .upload_truck_images import *
 from .view_trucks_response import *

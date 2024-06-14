@@ -8,18 +8,25 @@ company_collection will have a reference field
 
 from typing import List
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, File, UploadFile, status
 from fastapi.exceptions import HTTPException
 
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
     get_trucks_company_by_id,
 )
-from data.dbapis.truck.write_queries import add_truck_db
+from data.dbapis.truck.write_queries import add_truck_db, update_truck_images
 from logging_config import log
+from logic.logistics.write_truck_images import write_images
 from models.truck import TruckInternal
 
-from .models import AddTruck, AddTruckResponse, ResponseTruckDetails, ViewTruckResponse
+from .models import (
+    AddTruck,
+    AddTruckResponse,
+    ResponseTruckDetails,
+    UploadTruckImages,
+    ViewTruckResponse,
+)
 
 trucks_api_router = APIRouter(prefix="/trucks", tags=["logistics"])
 
@@ -60,7 +67,7 @@ def add_truck(truck_details: AddTruck) -> AddTruckResponse:
     return response
 
 
-@trucks_api_router.get("/trucks", response_model_by_alias=False)
+@trucks_api_router.get("/", response_model_by_alias=False)
 def view_truck_list(company_id: str) -> List[ViewTruckResponse]:
     log.info(f"/trucks invoked : company_id {company_id}")
 
@@ -71,7 +78,7 @@ def view_truck_list(company_id: str) -> List[ViewTruckResponse]:
     return trucks_list
 
 
-@trucks_api_router.get("/trucks/{truck_id}", response_model_by_alias=False)
+@trucks_api_router.get("/{truck_id}", response_model_by_alias=False)
 def get_truck_details(truck_id: str) -> ResponseTruckDetails:
     log.info(f"/trucks/{truck_id} invoked")
 
@@ -82,3 +89,35 @@ def get_truck_details(truck_id: str) -> ResponseTruckDetails:
     log.info(f"/trucks/{truck_id} returning : {truck_details}")
 
     return truck_details
+
+
+@trucks_api_router.post("/{truck_id}/images")
+def upload_truck_images(
+    truck_id: str,
+    truck_descriptions: UploadTruckImages,
+    files: List[UploadFile] = File(...),
+):
+
+    log.info(f"/{truck_id}/images invoked truck_id {truck_id}")
+
+    if len(truck_descriptions.description) != len(files):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="truck images and descriptions are required",
+        )
+
+    file_paths = write_images(truck_id=truck_id, files=files)
+
+    if not file_paths:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to save image at this time",
+        )
+
+    update_truck_images(
+        truck_id=truck_id,
+        file_paths=file_paths,
+        description=truck_descriptions.description,
+    )
+
+    return {"message": "Images uploaded successfully"}

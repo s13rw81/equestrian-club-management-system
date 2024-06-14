@@ -6,5 +6,6 @@ __pycache__
 secrets.json
 logs
 playground.py
+api/test
 docs/
 

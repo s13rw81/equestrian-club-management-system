@@ -17,3 +17,13 @@ class UpdateTransferStatus(BaseModel):
     @property
     def updated_at(self) -> datetime:
         return get_current_utc_datetime()
+
+
+class ResponseUpdateTransferStatus(BaseModel):
+    transfer_id: str
+    status: TransferStatus
+    message: str
+
+    @field_serializer("status")
+    def enum_serializer(self, enum):
+        return enum.value

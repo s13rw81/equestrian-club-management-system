@@ -6,12 +6,13 @@ from api.logistics import transfer_api_router, trucks_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
 from api.rbac_demo import demo_rbac_router
+from api.horses.horses_api import horse_api_router
 from config import HOST, PORT, DEBUG
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from logging_config import log
-from api.horses.horses_api import horse_api_router
+
 app = FastAPI()
 
 app.include_router(user_api_router)
@@ -27,8 +28,7 @@ app.include_router(horse_api_router)
 async def general_exception_handler(request: Request, exc):
     exception_id = uuid.uuid4().hex
     log.exception(
-        f"[exception: {type(exc)}, assigned_id: {exception_id}] \
-            Something went wrong..."
+        f"[exception: {type(exc)}, assigned_id: {exception_id}] Something went wrong..."
     )
     exception_for_the_user = HTTPException(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -40,8 +40,7 @@ async def general_exception_handler(request: Request, exc):
 @app.get("/", include_in_schema=False)
 async def root(request: Request):
     log.info(
-        f"method: {request.method}, headers: {request.headers}, \
-            client: {request.client}"
+        f"method: {request.method}, headers: {request.headers}, client: {request.client}"
     )
     return RedirectResponse(url="/docs")
 

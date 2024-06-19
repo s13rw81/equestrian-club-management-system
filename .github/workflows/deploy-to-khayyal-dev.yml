@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.KHAYYAL_BACKEND_DEV_PEM_KEY }}" > ~/.ssh/khayyal-backend.pem
-          cat ~/.ssh/khayyal-backend.pem
+          echo $(cat ~/.ssh/khayyal-backend.pem)
           chmod 600 ~/.ssh/khayyal-backend.pem
           echo -e "Host khayyal-backend\n\tStrictHostKeyChecking no\n\tHostName ${{ secrets.KHAYYAL_BACKEND_DEV_IP }}\n\tPort 22\n\tIdentityFile ~/.ssh/khayyal-backend.pem" >> ~/.ssh/config
 

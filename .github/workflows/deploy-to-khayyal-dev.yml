@@ -10,6 +10,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: set up docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build docker image
+        run: docker build -t khayyal-backend:latest .
+
+      - name: save docker image to tarball
+        run: docker save khayyal-backend:latest -o khayyal-backend.tar
+
+      - name: set up ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KHAYYAL_BACKEND_DEV_PEM_KEY }}" > ~/.ssh/khayyal-backend.pem
+          chmod 600 ~/.ssh/khayyal-backend.pem
+          echo -e "Host khayyal-backend\n\tStrictHostKeyChecking no\n\tHostName ${{ secrets.KHAYYAL_BACKEND_DEV_IP }}\n\tPort 22\n\tIdentityFile ~/.ssh/khayyal-backend.pem" >> ~/.ssh/config
+
+      - name: copy tarball to GCE instance using rsync
+        run: rsync -avz khayyal-backend.tar "khayyal-backend:~/"
+
       - name: prints hello world
         run: echo "Hello World from Build"
   deploy:

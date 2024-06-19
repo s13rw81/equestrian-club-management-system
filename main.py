@@ -7,6 +7,8 @@ from api.user import user_api_router
 from api.validators import validators_api_router
 from api.rbac_demo import demo_rbac_router
 from api.horses.horses_api import horse_api_router
+from api.horses.horses_sale_api import horse_sell_api_router
+from api.horses.horse_rent_api import horse_rent_router
 from config import HOST, PORT, DEBUG
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException
@@ -22,6 +24,8 @@ app.include_router(demo_rbac_router)
 app.include_router(transfer_api_router)
 app.include_router(trucks_api_router)
 app.include_router(horse_api_router)
+app.include_router(horse_sell_api_router)
+app.include_router(horse_rent_router)
 
 
 @app.exception_handler(Exception)

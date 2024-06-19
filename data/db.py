@@ -54,9 +54,15 @@ def get_company_collection():
     return get_database()["company"]
 
 
-# def get_horses_collection():
-#     log.info("inside get_horses_collection()")
-#     return get_database()["horses_collection"]
+def get_horses_selling_collection():
+    log.info("inside get_horses_selling_collection")
+    return get_database()["horses_selling_collection"]
+
+def get_horses_renting_collection():
+    log.info("inside get_horses_selling_collection")
+    return get_database()["horses_selling_collection"]
+
+
 def get_horses_collection():
     log.info("inside get_horses_collection()")
     return get_database()["horses"]

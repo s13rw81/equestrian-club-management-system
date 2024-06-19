@@ -29,6 +29,12 @@ jobs:
           chmod 600 ~/.ssh/khayyal-backend.pem
           echo -e "Host khayyal-backend\n\tStrictHostKeyChecking no\n\tHostName ${{ secrets.KHAYYAL_BACKEND_DEV_IP }}\n\tPort 22\n\tIdentityFile ~/.ssh/khayyal-backend.pem" >> ~/.ssh/config
 
+      - name: try ssh login
+        run: |
+          ssh khayyal-backend << 'EOF'
+          touch 'sweet_touch_from_github_actions.nilanjan'
+          EOF
+
       - name: copy tarball to GCE instance using rsync
         run: rsync -avz khayyal-backend.tar "khayyal-backend:~/"
 

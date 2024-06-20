@@ -34,9 +34,13 @@ jobs:
 
       - name: load docker image and run on GCE instance
         run: |
-          rsync -avzP -e "ssh -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no" ~/.ssh/config "khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }}:/home/khayyal-backend/"
           ssh khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }} -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no << 'EOF'
-          echo $(date) >> date_from_github_actions
+            echo $(date) > github_actions_last_run
+            docker stop khayyal-backend | true &&
+            docker rm khayyal-backend | true &&
+            docker image rm khayyal-backend | true &&
+            docker load -i /home/khayyal-backend/docker-image-tarballs/khayyal-backend.tar &&
+            docker run -d -p 8000:80 --name khayyal-backend --mount type=bind,source=/home/khayyal-backend/secrets.json,target=/app/secrets.json --mount type=bind,source=/home/khayyal-backend/logs,target=/app/logs khayyal-backend
           EOF
   deploy:
     needs: build

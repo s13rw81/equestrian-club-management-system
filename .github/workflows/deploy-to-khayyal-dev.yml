@@ -34,7 +34,7 @@ jobs:
 
       - name: load docker image and run on GCE instance
         run: |
-          run: rsync -avzP -e "ssh -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no" ~/.ssh/config "khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }}:/home/khayyal-backend/"
+          rsync -avzP -e "ssh -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no" ~/.ssh/config "khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }}:/home/khayyal-backend/"
           ssh khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }} -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no << 'EOF'
           echo $(date) >> date_from_github_actions
           EOF

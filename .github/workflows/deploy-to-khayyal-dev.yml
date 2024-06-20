@@ -42,11 +42,3 @@ jobs:
             sudo docker load -i /home/khayyal-backend/docker-image-tarballs/khayyal-backend.tar &&
             sudo docker run -d -p 8000:80 --name khayyal-backend --mount type=bind,source=/home/khayyal-backend/secrets.json,target=/app/secrets.json --mount type=bind,source=/home/khayyal-backend/logs,target=/app/logs khayyal-backend
           EOF
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-
-    steps:
-      - name: prints hello world
-        run: echo "Hello World from deploy"

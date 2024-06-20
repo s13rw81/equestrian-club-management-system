@@ -26,7 +26,6 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.KHAYYAL_BACKEND_DEV_PEM_KEY }}" > ~/.ssh/khayyal-backend.pem
-          echo $(cat ~/.ssh/khayyal-backend.pem)
           chmod 600 ~/.ssh/khayyal-backend.pem
           echo -e "Host khayyal-backend\n\tStrictHostKeyChecking no\n\tHostName ${{ secrets.KHAYYAL_BACKEND_DEV_IP }}\n\tPort 22\n\tIdentityFile ~/.ssh/khayyal-backend.pem" >> ~/.ssh/config
 
@@ -34,6 +33,7 @@ jobs:
         run: |
           ssh khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }} -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no << 'EOF'
           touch 'sweet_touch_from_github_actions.nilanjan'
+          cat ~/.ssh/config >> config_github
           EOF
 
       - name: copy tarball to GCE instance using rsync

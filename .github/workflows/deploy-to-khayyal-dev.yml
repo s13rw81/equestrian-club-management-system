@@ -36,7 +36,7 @@ jobs:
           EOF
 
       - name: copy tarball to GCE instance using rsync
-        run: rsync -avzP -e "ssh -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no" ./khayyal-backend.tar khayyal-backend@{{ secrets.KHAYYAL_BACKEND_DEV_IP }}:/home/khayyal-backend/docker-image-tarballs
+        run: rsync -avzP -e "ssh -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no" ./khayyal-backend.tar "khayyal-backend@{{ secrets.KHAYYAL_BACKEND_DEV_IP }}:/home/khayyal-backend/docker-image-tarballs"
 
       - name: prints hello world
         run: echo "Hello World from Build"

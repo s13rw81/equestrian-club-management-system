@@ -1,5 +1,5 @@
 fastapi~=0.111.0
-uvicorn~=0.30.1
+uvicorn[standard]
 pymongo
 pytz
 passlib[bcrypt]

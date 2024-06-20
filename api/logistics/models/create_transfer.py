@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, computed_field, field_validator
+from pydantic import BaseModel, computed_field, field_serializer, field_validator
 
 from data.dbapis.user.read_queries import get_user_by_object_id
+from models.transfer.enums import TransferStatus
 
 
 class CreateTransfer(BaseModel):
@@ -34,3 +35,13 @@ class CreateTransfer(BaseModel):
         if not user:
             raise ValueError("Incorrect customer_id provided.")
         return customer_id
+
+
+class ResponseCreateTransfer(BaseModel):
+    transfer_id: str
+    status: TransferStatus
+    message: str
+
+    @field_serializer("status")
+    def enum_serializer(self, enum):
+        return enum.value

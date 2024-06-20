@@ -8,5 +8,4 @@ logs
 playground.py
 api/test
 docs/
-docker-compose.yaml
-instructions.txt
+images

@@ -9,3 +9,5 @@ class ViewTruckResponse(BaseModel):
     id: PyObjectId = Field(alias="_id")
     name: str
     availability: str
+    type: str
+    capacity: int

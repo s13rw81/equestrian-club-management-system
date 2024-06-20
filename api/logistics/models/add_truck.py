@@ -15,3 +15,9 @@ class AddTruck(BaseModel):
     name: str = ""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class AddTruckResponse(BaseModel):
+    success: bool
+    truck_id: str
+    message: str

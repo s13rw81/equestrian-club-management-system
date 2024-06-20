@@ -32,12 +32,11 @@ jobs:
       - name: try ssh login
         run: |
           ssh khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }} -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no << 'EOF'
-          touch 'sweet_touch_from_github_actions.nilanjan'
-          cat ~/.ssh/config >> config_github
+          $(date) >> date_from_github_actions
           EOF
 
       - name: copy tarball to GCE instance using rsync
-        run: rsync -avz khayyal-backend.tar "khayyal-backend:~/"
+        run: rsync
 
       - name: prints hello world
         run: echo "Hello World from Build"

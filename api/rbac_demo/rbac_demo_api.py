@@ -6,7 +6,7 @@ from .role_based_parameter_control import DifferentRolesDifferentParameters
 
 demo_rbac_router = APIRouter(
     prefix="/rbac-demo",
-    tags=["rbac", "demo"]
+    tags=["rbac-demo"]
 )
 
 

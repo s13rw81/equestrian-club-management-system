@@ -74,11 +74,9 @@ def get_company_collection():
     return get_database()["company"]
 
 
-<<<<<<< HEAD
 async def async_get_clubs_collection():
     log.info("inside get_clubs_collection()")
     return get_database()["clubs"]
-=======
 def get_horses_selling_collection():
     log.info("inside get_horses_selling_collection")
     return get_database()["horses_selling_collection"]
@@ -92,7 +90,6 @@ def get_horses_renting_collection():
 def get_horses_collection():
     log.info("inside get_horses_collection()")
     return get_database()["horses"]
->>>>>>> f4d248dfe54efe95ede5c27eeee9f146c840af36
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

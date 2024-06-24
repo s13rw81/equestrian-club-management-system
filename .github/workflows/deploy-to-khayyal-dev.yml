@@ -1,0 +1,44 @@
+name: Build and Deploy to Khayyal Dev Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: set up docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build docker image
+        run: docker build -t khayyal-backend:latest .
+
+      - name: save docker image to tarball
+        run: docker save khayyal-backend:latest -o khayyal-backend.tar
+
+      - name: set up ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KHAYYAL_BACKEND_DEV_PEM_KEY }}" > ~/.ssh/khayyal-backend.pem
+          chmod 600 ~/.ssh/khayyal-backend.pem
+          echo -e "Host khayyal-backend\n\tStrictHostKeyChecking no\n\tHostName ${{ secrets.KHAYYAL_BACKEND_DEV_IP }}\n\tPort 22\n\tIdentityFile ~/.ssh/khayyal-backend.pem" >> ~/.ssh/config
+
+      - name: copy tarball to GCE instance using rsync
+        run: rsync -avzP -e "ssh -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no" ./khayyal-backend.tar "khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }}:/home/khayyal-backend/docker-image-tarballs"
+
+      - name: load docker image and run on GCE instance
+        run: |
+          ssh khayyal-backend@${{ secrets.KHAYYAL_BACKEND_DEV_IP }} -i ~/.ssh/khayyal-backend.pem -o StrictHostKeyChecking=no << 'EOF'
+            echo $(date) > github_actions_last_run
+            sudo docker stop khayyal-backend | true &&
+            sudo docker rm khayyal-backend | true &&
+            sudo docker image rm khayyal-backend | true &&
+            sudo docker load -i /home/khayyal-backend/docker-image-tarballs/khayyal-backend.tar &&
+            sudo docker run -d -p 8000:80 --name khayyal-backend --mount type=bind,source=/home/khayyal-backend/secrets.json,target=/app/secrets.json --mount type=bind,source=/home/khayyal-backend/logs,target=/app/logs khayyal-backend
+          EOF

@@ -1,9 +1,14 @@
 from api.logistics.models import UpdateTransferStatus
-from data.db import convert_to_object_id, get_transfer_collection
+from data.db import (
+    convert_to_object_id,
+    get_customer_transfer_collection,
+    get_transfer_collection,
+)
 from logging_config import log
-from models.transfer import TransfersInternal
+from models.transfer import CustomersTransfersInternal, TransfersInternal
 
 transfer_collection = get_transfer_collection()
+customer_transfer_collection = get_customer_transfer_collection()
 
 
 def save_transfer_db(transfer: TransfersInternal) -> str:
@@ -17,6 +22,27 @@ def save_transfer_db(transfer: TransfersInternal) -> str:
 
     log.info(f"save_transfer invoked : {transfer}")
     transfer_id = (transfer_collection.insert_one(transfer.model_dump())).inserted_id
+
+    retval = str(transfer_id)
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
+def save_customer_transfer_db(customer_transfer: CustomersTransfersInternal) -> str:
+    """saves the new customer requested transfer in the database and returns the id
+
+    Args:
+        transfer (CustomersTransfersInternal)
+
+    Returns:
+        str: id
+    """
+    log.info(f"save_transfer invoked : {customer_transfer}")
+    transfer_id = (
+        customer_transfer_collection.insert_one(customer_transfer.model_dump())
+    ).inserted_id
 
     retval = str(transfer_id)
 

@@ -22,6 +22,7 @@ CONNECTION_STRING = (
     if ESCAPED_DATABASE_USERNAME != ""
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
+CONNECTION_STRING = "mongodb://localhost:27017"
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
@@ -38,9 +39,29 @@ def get_users_collection():
     return get_database()["users"]
 
 
+def get_collection(collection_name: str):
+    log.info(f"inside get_collection : {collection_name}")
+    return get_database()[collection_name]
+
+
 def get_transfer_collection():
     log.info("inside get_transfer_collection()")
     return get_database()["transfers"]
+
+
+def get_customer_transfer_collection():
+    log.info("inside get_customer_transfer_collection()")
+    return get_database()["customer_transfers"]
+
+
+def get_horse_profiles_collection():
+    log.info(f"inside get_horse_profile_collection()")
+    return get_database()["horse_profiles"]
+
+
+def get_groomers_info_collection():
+    log.info(f"inside get_groomers_info_collection()")
+    return get_database()["groomers"]
 
 
 def get_truck_collection():
@@ -53,9 +74,25 @@ def get_company_collection():
     return get_database()["company"]
 
 
+<<<<<<< HEAD
 async def async_get_clubs_collection():
     log.info("inside get_clubs_collection()")
     return get_database()["clubs"]
+=======
+def get_horses_selling_collection():
+    log.info("inside get_horses_selling_collection")
+    return get_database()["horses_selling_collection"]
+
+
+def get_horses_renting_collection():
+    log.info("inside get_horses_selling_collection")
+    return get_database()["horses_selling_collection"]
+
+
+def get_horses_collection():
+    log.info("inside get_horses_collection()")
+    return get_database()["horses"]
+>>>>>>> f4d248dfe54efe95ede5c27eeee9f146c840af36
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

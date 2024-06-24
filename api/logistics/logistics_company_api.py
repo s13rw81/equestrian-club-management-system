@@ -1,4 +1,6 @@
-from fastapi import APIRouter, status
+from typing import List
+
+from fastapi import APIRouter, File, UploadFile, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import Response
 
@@ -11,7 +13,13 @@ from data.dbapis.logistics.services.write_queries import (
     save_club_to_club_service_db,
     update_club_to_club_service,
 )
+from data.dbapis.truck.read_queries import (
+    get_truck_details_by_id_db,
+    get_trucks_by_logistics_company_id,
+)
+from data.dbapis.truck.write_queries import add_truck_db, update_truck_images
 from logging_config import log
+from logic.logistics.write_truck_images import write_images
 from models.logistics import (
     ClubToClubServiceInternal,
     Provider,
@@ -19,18 +27,124 @@ from models.logistics import (
     UserTransferServiceWithInsuranceInternal,
 )
 from models.logistics.enums.service_enums import ServiceAvailability
+from models.truck.trucks import TruckInternal
 
 from .models import (
     AddClubToClubService,
+    AddTruck,
+    AddTruckResponse,
     ResponseAddClubToClubService,
     ResponseGetClubToClubService,
+    ResponseTruckDetails,
     UpdateClubToClubService,
+    UploadTruckImages,
+    ViewTruckResponse,
 )
 
 logistics_company_api_router = APIRouter(
     prefix="/logistic-company",
     tags=["logistic-company"],
 )
+
+
+@logistics_company_api_router.post("/add-truck")
+def add_truck(truck_details: AddTruck) -> AddTruckResponse:
+
+    log.info(f"/add_truck invoked : {truck_details}")
+
+    truck = TruckInternal(
+        registration_number=truck_details.registration_number,
+        truck_type=truck_details.truck_type,
+        capacity=truck_details.capacity,
+        special_features=truck_details.special_features,
+        gps_equipped=truck_details.gps_equipped,
+        air_conditioning=truck_details.air_conditioning,
+        logistics_company_id=truck_details.logistics_company_id,
+        name=truck_details.name,
+        services=truck_details.services,
+    )
+
+    log.info(f"truck {truck}")
+
+    updated, truck_id = add_truck_db(truck=truck)
+
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="unable to save truck.",
+        )
+
+    response = AddTruckResponse(
+        success=updated, truck_id=truck_id, message="Truck successfully added"
+    )
+
+    log.info(f"/add_truck returning {response}")
+
+    return response
+
+
+@logistics_company_api_router.get(
+    "/get-trucks/{logistics_company_id}", response_model_by_alias=False
+)
+def get_trucks(logistics_company_id: str) -> List[ViewTruckResponse]:
+    log.info(f"/logistics-company/get-trucks/{logistics_company_id} invoked ")
+
+    trucks_list = get_trucks_by_logistics_company_id(
+        logistics_company_id=logistics_company_id,
+        fields=["name", "availability", "logistics_company_id", "capacity"],
+    )
+
+    return trucks_list
+
+
+@logistics_company_api_router.get("/get-truck/{truck_id}")
+def get_truck(truck_id: str) -> ResponseTruckDetails:
+    log.info(f"/trucks/{truck_id} invoked")
+
+    truck_details = get_truck_details_by_id_db(
+        truck_id=truck_id,
+        fields=["name", "truck_type", "availability", "images", "logistics_company_id"],
+    )
+
+    log.info(f"/trucks/{truck_id} returning : {truck_details}")
+
+    return truck_details
+
+
+@logistics_company_api_router.post("/{truck_id}/images")
+def upload_truck_images(
+    truck_id: str,
+    truck_descriptions: UploadTruckImages,
+    files: List[UploadFile] = File(...),
+):
+
+    log.info(f"/{truck_id}/images invoked truck_id {truck_id}")
+
+    if len(truck_descriptions.description) != len(files):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="truck images and descriptions are required",
+        )
+
+    file_paths = write_images(truck_id=truck_id, files=files)
+
+    if not file_paths:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to save image at this time",
+        )
+
+    update_truck_images(
+        truck_id=truck_id,
+        file_paths=file_paths,
+        description=truck_descriptions.description,
+    )
+
+    return {"message": "Images uploaded successfully"}
+
+
+@logistics_company_api_router.put("/update-truck/{truck_id}")
+def update_truck(): ...
 
 
 @logistics_company_api_router.get("/get-club-to-club-service/{logistics_company_id}")

@@ -3,7 +3,6 @@ from datetime import datetime
 from functools import lru_cache
 from typing import List, Optional
 
-from bson import ObjectId
 from models.generic_models.generic_address_model import Address
 from models.generic_models.generic_contacts_model import Contact
 from models.ratings.club_ratings_internal import ClubRatingsInternal
@@ -14,7 +13,7 @@ from utils.date_time import get_current_utc_datetime
 
 
 class ClubInternal(BaseModel):
-    id: Optional[str] = Field(default_factory = lambda: str(ObjectId()), alias = "_id")
+    id: Optional[StrObjectId] = None
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
     price: Optional[float] = Field(..., gt = 0)

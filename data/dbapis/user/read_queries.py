@@ -21,7 +21,7 @@ def get_user_by_email(email: str) -> UserInternal | None:
     if user is None:
         retval = None
     else:
-        retval = UserInternal(**user, id=str(user['_id']))
+        retval = UserInternal(**user)
 
     log.info(f"returning {retval}")
 

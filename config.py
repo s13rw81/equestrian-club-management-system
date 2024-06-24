@@ -3,7 +3,7 @@ import os
 from logging_config import log
 
 # env
-ENV = os.environ.get("ENVIRONMENT", False)
+ENV = os.environ.get("ENVIRONMENT", "PROD")
 log.info(f"running in {ENV} environment.")
 
 # read secrets.json
@@ -23,3 +23,4 @@ DATABASE_USER = SECRETS['DATABASE_USER']
 JWT_TOKEN_EXPIRY_IN_DAYS = SECRETS['JWT_TOKEN_EXPIRY_IN_DAYS']
 JWT_SECRET_KEY = SECRETS['JWT_SECRET_KEY']
 JWT_ALGORITHM = SECRETS['JWT_ALGORITHM']
+IMAGES_UPLOAD_FOLDER = SECRETS['IMAGES_UPLOAD_FOLDER']

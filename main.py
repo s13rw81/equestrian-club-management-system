@@ -1,5 +1,6 @@
 import uuid
 import uvicorn
+from api.clubs.clubs_api import clubs_api_router
 from fastapi.responses import RedirectResponse
 from api.auth import user_auth_router
 from api.logistics import transfer_api_router, trucks_api_router
@@ -14,6 +15,7 @@ from logging_config import log
 
 app = FastAPI()
 
+app.include_router(clubs_api_router)
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)

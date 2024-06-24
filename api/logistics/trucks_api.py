@@ -11,10 +11,9 @@ from typing import List
 from fastapi import APIRouter, File, UploadFile, status
 from fastapi.exceptions import HTTPException
 
-from data.dbapis.truck.read_queries import (
+from data.dbapis.truck.read_queries import (  # get_trucks_company_by_id,
     get_available_trucks_db,
     get_truck_details_by_id_db,
-    get_trucks_company_by_id,
 )
 from data.dbapis.truck.write_queries import (
     add_truck_db,
@@ -75,15 +74,15 @@ def add_truck(truck_details: AddTruck) -> AddTruckResponse:
     return response
 
 
-@trucks_api_router.get("/", response_model_by_alias=False)
-def view_truck_list(company_id: str) -> List[ViewTruckResponse]:
-    log.info(f"/trucks invoked : company_id {company_id}")
+# @trucks_api_router.get("/", response_model_by_alias=False)
+# def view_truck_list(company_id: str) -> List[ViewTruckResponse]:
+#     log.info(f"/trucks invoked : company_id {company_id}")
 
-    trucks_list = get_trucks_company_by_id(
-        company_id=company_id, fields=["name", "availability", "company_id"]
-    )
+#     trucks_list = get_trucks_company_by_id(
+#         company_id=company_id, fields=["name", "availability", "company_id"]
+#     )
 
-    return trucks_list
+#     return trucks_list
 
 
 @trucks_api_router.get("/available", response_model_by_alias=False)

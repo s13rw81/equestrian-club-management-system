@@ -1,1 +1,1 @@
-from .truck import *
+from .trucks import *

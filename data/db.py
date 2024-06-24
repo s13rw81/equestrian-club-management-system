@@ -23,6 +23,7 @@ CONNECTION_STRING = (
     if ESCAPED_DATABASE_USERNAME != ""
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
+CONNECTION_STRING = "mongodb://localhost:27017"
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
@@ -37,6 +38,11 @@ def get_users_collection():
     # TODO: create a unique index in the email_address field
     log.info("inside get_users_collection()")
     return get_database()["users"]
+
+
+def get_collection(collection_name: str):
+    log.info(f"inside get_collection : {collection_name}")
+    return get_database()[collection_name]
 
 
 def get_transfer_collection():

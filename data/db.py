@@ -39,6 +39,11 @@ def get_users_collection():
     return get_database()["users"]
 
 
+def get_collection(collection_name: str):
+    log.info(f"inside get_collection : {collection_name}")
+    return get_database()[collection_name]
+
+
 def get_transfer_collection():
     log.info("inside get_transfer_collection()")
     return get_database()["transfers"]

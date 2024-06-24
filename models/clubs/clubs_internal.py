@@ -10,17 +10,18 @@ from models.ratings.club_ratings_internal import ClubRatingsInternal
 from models.user import StrObjectId
 from models.user.user_external import UserExternal
 from pydantic import BaseModel, Field, field_validator
+from utils.date_time import get_current_utc_datetime
 
 
 class ClubInternal(BaseModel):
-    # id: Optional[StrObjectId] = Field(alias = '_id')
+    id: Optional[str] = Field(default_factory = lambda: str(ObjectId()), alias = "_id")
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
     price: Optional[float] = Field(..., gt = 0)
     address: Optional[Address] = None
     contact: Optional[Contact] = None
-    creation_date_time: Optional[datetime] = None
-    update_date_time: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=get_current_utc_datetime)
+    updated_at: datetime = Field(default_factory=get_current_utc_datetime)
     image_urls: Optional[List[str]] = None
     admins: Optional[List[UserExternal]] = list()
 

@@ -28,7 +28,7 @@ class StrObjectId(ObjectId):
 
 
 class UserInternal(BaseModel):
-    id: Optional[StrObjectId] = None
+    id: Optional[str] = Field(default_factory = lambda: str(ObjectId()), alias = "_id")
     full_name: str
     email_address: Optional[str] = None
     phone_number: Optional[str] = None

@@ -11,6 +11,8 @@ class InternalSellHorse(BaseModel):
     description: str
     year: int
     height_cm: int
-    club_name: Optional[str]
     price_sar: int
     image_url: str
+    uploaded_by_id: str
+    uploaded_by_type: str
+

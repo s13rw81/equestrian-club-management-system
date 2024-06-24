@@ -2,30 +2,32 @@ from typing import List
 
 from pymongo.cursor import Cursor
 
-from data.db import convert_to_object_id, get_truck_collection
+from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.truck.enums import TruckAvailability
 
-truck_collection = get_truck_collection()
+truck_collection = get_collection(collection_name="trucks")
 
 
-def get_trucks_company_by_id(company_id: str, fields: List) -> Cursor:
+def get_trucks_by_logistics_company_id(
+    logistics_company_id: str, fields: List
+) -> Cursor:
     """get list of trucks that the company owns
 
     Args:
-        company_id (str): the company id for which to fetch the trucks
+        logistics_company_id (str): the company id for which to fetch the trucks
 
     Returns:
         dict: list of trucks
     """
 
-    log.info(f"get_trucks_by_company_id() invoked : {company_id}")
+    log.info(f"get_trucks_by_logistics_company_id() invoked : {logistics_company_id}")
 
-    filter = {"company_id": company_id}
+    filter = {"logistics_company_id": logistics_company_id}
 
     trucks_list = truck_collection.find(filter=filter, projection=fields)
 
-    log.info(f"get_trucks_by_company_id() returning")
+    log.info(f"get_trucks_by_logistics_company_id() returning")
 
     return trucks_list
 

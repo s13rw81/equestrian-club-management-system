@@ -1,20 +1,19 @@
 from typing import Annotated, Optional, List
 
 from api.clubs.models import CreateClubRequest
-from api.clubs.models.delete_club_model import DeleteClubRequest
 from api.clubs.models.update_club_model import UpdateClubRequest
-from data.dbapis.clubs.delete_queries import async_delete_club_by_id
-from data.dbapis.clubs.read_queries import async_get_clubs, async_get_club_by_id
-from data.dbapis.clubs.update_queries import async_update_club_by_id
-from data.dbapis.clubs.write_queries import async_save_club
+from data.dbapis.clubs.delete_queries import delete_club_by_id_logic
+from data.dbapis.clubs.read_queries import get_all_clubs_logic, get_club_by_id_logic
+from data.dbapis.clubs.update_queries import update_club_by_id_logic
+from data.dbapis.clubs.write_queries import save_club
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import status
 from logging_config import log
 from logic.auth import get_current_user
 from models.clubs.clubs_external import ClubExternal
 from models.clubs.clubs_internal import ClubInternal
 from models.user import UserInternal
 from models.user.user_external import UserExternal
-from fastapi import status
 from utils.date_time import get_current_utc_datetime
 
 clubs_api_router = APIRouter(
@@ -34,11 +33,9 @@ async def create_club(create_new_club: CreateClubRequest,
     # TODO: [phase ii] check if user has permission to add club
     log.info(f"creating club, user: {user}")
     user_ext = UserExternal(**user.model_dump())
-    utc_date_time = get_current_utc_datetime()
     # Convert the request model to the DB model
-    new_club_internal = ClubInternal(**create_new_club.dict(), creation_date_time = utc_date_time,
-                                     update_date_time = utc_date_time, admins = [user_ext])
-    result = await async_save_club(new_club_internal)
+    new_club_internal = ClubInternal(**create_new_club.dict(), admins = [user_ext])
+    result = save_club(new_club_internal)
     msg = f"new club created with id: {result} by user: {user_ext}"
     return {'status_code': 201, 'details': msg, 'data': result}
 
@@ -49,7 +46,7 @@ async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]
     # TODO: [phase ii] add filtering
     user_ext = UserExternal(**user.model_dump())
     log.info(f"getting list of clubs, user: {user} this is {__name__} module")
-    result = await async_get_clubs()
+    result = get_all_clubs_logic()
     log.info(f"result {result}, user: {user_ext}")
     return result
 
@@ -64,7 +61,7 @@ async def get_club_by_id(user: Annotated[UserInternal, Depends(get_current_user)
     user_ext = UserExternal(**user.model_dump())
     log.info(f"fetching club with id: {club_id}, user is {user_ext}")
 
-    club = await async_get_club_by_id(club_id)
+    club = get_club_by_id_logic(club_id)
 
     if not club:
         raise HTTPException(status_code = 404, detail = "Club not found")
@@ -88,7 +85,7 @@ async def update_club_by_id(club_id: str, user: Annotated[UserExternal, Depends(
     user_ext = UserExternal(**user.model_dump())
     log.info(f"updating club with id: {club_id}, user: {user_ext}")
 
-    existing_club = await async_get_club_by_id(club_id)
+    existing_club = get_club_by_id_logic(club_id)
     if not existing_club:
         raise HTTPException(status_code = 404, detail = "Club not found")
 
@@ -96,16 +93,16 @@ async def update_club_by_id(club_id: str, user: Annotated[UserExternal, Depends(
     # if existing_club.created_by.email_address != user.email_address:
     #     raise HTTPException(status_code = 403, detail = "User does not have permission to update this club")
 
-    utc_date_time = get_current_utc_datetime()
-
     updated_club_details = ClubInternal(
         name = update_club.name if update_club.name else existing_club.name,
         description = update_club.description if update_club.description else existing_club.description,
         price = update_club.price if update_club.price else existing_club.price,
-        update_date_time = utc_date_time,
         image_urls = update_club.image_urls if update_club.image_urls else existing_club.image_urls,
+        address = update_club.address if update_club.address else existing_club.address,
+        contact = update_club.contact if update_club.contact else existing_club.contact,
+        admins = update_club.admins if update_club.admins else existing_club.admins
     )
-    result = await async_update_club_by_id(club_id=club_id, updated_club = updated_club_details)
+    result = update_club_by_id_logic(club_id=club_id, updated_club = updated_club_details)
 
     if not result:
         raise HTTPException(status_code = 404, detail = "Club not found or not updated")
@@ -125,7 +122,7 @@ async def delete_club(club_id: str, user: Annotated[UserInternal, Depends(get_cu
     user_ext = UserExternal(**user.model_dump())
     log.info(f"deleting club, user: {user}")
     # Check if the user is the creator of the club
-    club = await async_get_club_by_id(club_id)
+    club = get_club_by_id_logic(club_id)
     if not club:
         emsg = f'club with id {club_id} not found.'
         raise HTTPException(
@@ -135,7 +132,7 @@ async def delete_club(club_id: str, user: Annotated[UserInternal, Depends(get_cu
     for admin in club.admins:
         if user.id == admin.id:
             # Delete the club
-            result = await async_delete_club_by_id(club_id = club_id)
+            result = delete_club_by_id_logic(club_id = club_id)
             msg = f"club deleted with id: {club_id} by user: {user_ext}"
             return {'status_code': 200, 'details': msg, 'data': result}
 

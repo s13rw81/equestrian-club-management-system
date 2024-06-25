@@ -74,7 +74,7 @@ def get_company_collection():
     return get_database()["company"]
 
 
-async def async_get_clubs_collection():
+def get_clubs_collection():
     log.info("inside get_clubs_collection()")
     return get_database()["clubs"]
 

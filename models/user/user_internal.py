@@ -28,7 +28,7 @@ class StrObjectId(ObjectId):
 
 
 class UserInternal(BaseModel):
-    id: Optional[StrObjectId] = None
+    id: Optional[StrObjectId] = Field(alias = '_id', default = None)
     full_name: str
     email_address: Optional[str] = None
     phone_number: Optional[str] = None
@@ -42,15 +42,10 @@ class UserInternal(BaseModel):
     horse_ownership_status: HorseOwnership
     equestrian_discipline: EquestrianDiscipline
 
-    # def dict(self, *args, **kwargs):
-    #     model_dict = super().dict(*args, **kwargs)
-    #     model_dict['id'] = str(model_dict['_id'])
-    #     return model_dict
-
-    # class Config:
-    #     populate_by_name = True
-    #     json_encoders = {ObjectId: str}
-    #     arbitrary_types_allowed = True
+    class Config:
+        arbitrary_types_allowed = True
+        populate_by_name = True
+        json_encoders = {ObjectId: str}
 
     @field_serializer(
         "user_role",

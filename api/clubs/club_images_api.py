@@ -2,9 +2,9 @@ from typing import List, Annotated
 
 from api.clubs.clubs_api import clubs_api_router
 from bson import ObjectId
-from data.db import async_get_clubs_collection
-from data.dbapis.clubs.read_queries import async_get_club_by_id
-from data.dbapis.clubs.update_queries import async_update_club_by_id
+from data.db import get_clubs_collection
+from data.dbapis.clubs.read_queries import get_club_by_id_logic
+from data.dbapis.clubs.update_queries import update_club_by_id_logic
 from fastapi import UploadFile, File, Depends, HTTPException
 from logging_config import log
 from logic.auth import get_current_user
@@ -13,6 +13,8 @@ from models.user.user_external import UserExternal
 from pydantic import BaseModel
 from utils.async_upload_image import async_upload_image
 from utils.date_time import get_current_utc_datetime
+
+club_collection = get_clubs_collection()
 
 
 class UpdateClubImagesRequest(BaseModel):
@@ -41,13 +43,13 @@ async def upload_images(user: Annotated[UserInternal, Depends(get_current_user)]
     image_paths.append(path)
 
     # Update the club with the new image paths
-    updated_club = await async_get_club_by_id(club_id)
+    updated_club = get_club_by_id_logic(club_id)
     if updated_club.image_urls is None:
         updated_club.image_urls = image_paths
     else:
         updated_club.image_urls.extend(image_paths)
-    updated_club.update_date_time = utc_date_time
-    result = await async_update_club_by_id(club_id = club_id, updated_club = updated_club)
+    updated_club.updated_at = utc_date_time
+    result = update_club_by_id_logic(club_id = club_id, updated_club = updated_club)
 
     msg = f"uploaded {len(image_paths)} images for club {club_id} by user: {user_ext}"
     return {'status_code': 200, 'details': msg, 'data': result}
@@ -58,8 +60,8 @@ async def get_club_images(club_id: str) -> dict:
     """
     Retrieves image URLs for a club based on club_id.
     """
-    club_collection = await async_get_clubs_collection()
-    club = await club_collection.find_one({"_id": ObjectId(club_id)})
+
+    club = club_collection.find_one({"_id": ObjectId(club_id)})
     if not club or "image_urls" not in club:
         raise HTTPException(status_code = 404, detail = f"No images found for club with id {club_id}")
 

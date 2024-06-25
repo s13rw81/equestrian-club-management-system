@@ -1,18 +1,21 @@
-from data.db import async_get_clubs_collection
+from data.db import get_clubs_collection
 from fastapi import HTTPException
 from logging_config import log
 from models.clubs.clubs_internal import ClubInternal
 from fastapi import status
 
 
-async def async_save_club(new_club: ClubInternal) -> str:
+club_collection = get_clubs_collection()
+
+
+def save_club(new_club: ClubInternal) -> str:
     """
         saves the new user in the database and returns the id
         :param new_club: ClubInternal
         :returns: id
     """
     log.info(f"save_club invoked: {new_club}")
-    club_collection = await async_get_clubs_collection()
+
     # Check if a club with the same name and city already exists
     existing_club = club_collection.find_one({"name": new_club.name, "address.city": new_club.address.city})
 

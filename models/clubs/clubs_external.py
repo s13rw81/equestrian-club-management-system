@@ -10,12 +10,12 @@ from pydantic import BaseModel
 
 class ClubExternal(BaseModel):
     id: Optional[str] = None
-    name: str = Field(..., min_length = 1)
-    description: Optional[str] = Field(None, max_length = 500)
-    price: Optional[float] = Field(..., gt = 0)
-    address: Optional[Address] = None
-    contact: Optional[Contact] = None
-    creation_date_time: Optional[datetime]
-    update_date_time: Optional[datetime]
-    image_urls: Optional[List[str]] = None
-    admins: Optional[List[UserExternal]] = None
+    name: str
+    description: Optional[str]
+    price: Optional[float]
+    address: Optional[Address]
+    contact: Optional[Contact]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
+    image_urls: Optional[List[str]]
+    admins: Optional[List[UserExternal]]

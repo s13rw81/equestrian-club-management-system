@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from api.clubs import CreateClubRequest
+from api.onboarding.models import CreateClubRequest
 from data.dbapis.clubs import save_club
 from fastapi import Depends
 from logging_config import log
@@ -11,7 +11,7 @@ from models.user.user_external import UserExternal
 from api.onboarding.onboarding_router import onboarding_api_router
 
 
-@onboarding_api_router.post("/club")
+@onboarding_api_router.post("/create-club")
 async def create_club(create_new_club: CreateClubRequest,
                       user: Annotated[UserInternal, Depends(get_current_user)]) -> dict:
     """

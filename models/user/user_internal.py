@@ -1,9 +1,12 @@
-from bson import ObjectId
-from pydantic import BaseModel, field_serializer, model_validator, Field
-from typing import Optional, Any
-from typing_extensions import Self
 from datetime import datetime
+from typing import Optional
+
+from bson import ObjectId
+from data.db import PyObjectId
+from pydantic import BaseModel, field_serializer, model_validator, Field
+from typing_extensions import Self
 from utils.date_time import get_current_utc_datetime
+
 from .enums import EquestrianDiscipline, HorseOwnership, RidingStage, SignUpCredentialType, UserRoles
 
 
@@ -18,7 +21,7 @@ class PasswordResetVerificationOTP(BaseModel):
 
 
 class UserInternal(BaseModel):
-    id: Optional[str] = Field(alias = '_id', default = None)
+    id: Optional[PyObjectId] = Field(alias = '_id', default = None)
     full_name: str
     email_address: Optional[str] = None
     phone_number: Optional[str] = None

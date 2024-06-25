@@ -3,7 +3,8 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from data.db import PyObjectId
-from models.logistics.enums.service_enums import ServiceType
+from models.logistics_company_services.enums.service_enums import ServiceType
+from models.truck.enums.availability import TruckAvailability
 
 
 class AddTruck(BaseModel):
@@ -36,10 +37,11 @@ class ViewTruckResponse(BaseModel):
     availability: str
     capacity: int
     logistics_company_id: str
+    registration_number: str
 
 
 class TruckImages(BaseModel):
-    url: str
+    image_key: str
     description: str = Field(max_length=200)
 
 
@@ -50,3 +52,13 @@ class ResponseTruckDetails(BaseModel):
     availability: str
     images: List[TruckImages]
     logistics_company_id: str
+    registration_number: str
+
+
+class UpdateTruckDetails(BaseModel):
+    truck_id: str
+    availability: TruckAvailability
+
+    @field_serializer("availability")
+    def enum_serializer(self, enum):
+        return enum.value

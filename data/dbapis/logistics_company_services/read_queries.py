@@ -1,7 +1,9 @@
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.company import Company
-from models.logistics.services import ClubToClubServiceInternal
+from models.logistics_company_services.logistics_company_services import (
+    ClubToClubServiceInternal,
+)
 
 logistics_company_collection = get_collection(collection_name="company")
 logistics_service_club_to_club_collection = get_collection(

@@ -1,7 +1,9 @@
-from api.logistics.models.services import UpdateClubToClubService
+from api.logistics.models.logistics_company_services import UpdateClubToClubService
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
-from models.logistics.services import ClubToClubServiceInternal
+from models.logistics_company_services.logistics_company_services import (
+    ClubToClubServiceInternal,
+)
 
 club_to_club_service_collection = get_collection(
     collection_name="logistics_service_club_to_club"

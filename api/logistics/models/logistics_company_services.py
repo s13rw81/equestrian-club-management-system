@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, computed_field, field_serializer
 
-from models.logistics.enums.service_enums import ServiceAvailability
+from models.logistics_company_services.enums.service_enums import ServiceAvailability
 from utils.date_time import get_current_utc_datetime
 
 

@@ -17,18 +17,8 @@ class PasswordResetVerificationOTP(BaseModel):
     generated_on: datetime = get_current_utc_datetime()
 
 
-class StrObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v: Any, x) -> str:
-        return str(ObjectId(v))
-
-
 class UserInternal(BaseModel):
-    id: Optional[StrObjectId] = Field(alias = '_id', default = None)
+    id: Optional[str] = Field(alias = '_id', default = None)
     full_name: str
     email_address: Optional[str] = None
     phone_number: Optional[str] = None

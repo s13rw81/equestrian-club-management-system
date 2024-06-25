@@ -1,6 +1,5 @@
 from fastapi import HTTPException, APIRouter, status
 from typing import List
-from models.horse.horse_selling_service_internal import HorseSellingServiceInternal
 from .models.horse_selling_service import HorseSellingItem
 from data.dbapis.horses.horse_selling_service_queries import get_horse_by_id
 from fastapi.encoders import jsonable_encoder
@@ -11,7 +10,7 @@ horse_selling_service_api_router = APIRouter(
     tags=["horses_selling_services"]
 )
 
-@horse_selling_service_api_router.get("/{horse_id}", response_model=List[HorseSellingServiceInternal])
+@horse_selling_service_api_router.get("/{horse_id}", response_model=List[HorseSellingItem])
 async def get_horses_selling(horse_id: str):
     horse = get_horse_by_id(horse_id)
     if horse:

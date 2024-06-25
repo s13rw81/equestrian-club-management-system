@@ -1,14 +1,19 @@
-# horses_schema.py
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
+
+
+class UploadedBy(BaseModel):
+    uploaded_by_id: Optional[str] = Field(None, example="1234")
+    uploaded_by_type: Optional[str] = Field(None, example="user")
+
 
 class HorseSellCreate(BaseModel):
     name: str = Field(..., example="Bobby")
-    type: str = Field(..., example="Gelding")
+    year_of_birth: int = Field(..., example=2015)
+    breed: str = Field(..., example="Thoroughbred")
+    size: int = Field(..., example=150000)
+    gender: str = Field(..., example="Gelding")
     description: str = Field(..., example="A horse for the future.")
-    year: int = Field(..., example=2015)
-    height_cm: int = Field(..., example=160)
     price_sar: int = Field(..., example=50000)
-    image_url: str = Field(..., example="http://example.com/image.jpg")
-    uploaded_by_id: Optional[str] = Field(None, example="1234")
-    uploaded_by_type: Optional[str] = Field(None, example="user")
+    images: List[str] = Field(..., example=["http://example.com/image1.jpg", "http://example.com/image2.jpg"])
+    uploaded_by: UploadedBy = Field(...)

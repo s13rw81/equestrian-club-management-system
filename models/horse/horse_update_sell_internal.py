@@ -1,14 +1,19 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+
+class UploadedBy(BaseModel):
+    uploaded_by_id: Optional[str]
+    uploaded_by_type: Optional[str]
 
 
 class InternalUpdateSellHorse(BaseModel):
     name: Optional[str]
-    type: Optional[str]
+    year_of_birth: Optional[int]
+    breed: Optional[str]
+    sire: Optional[str]
+    gender: Optional[str]
     description: Optional[str]
-    year: Optional[int]
-    height_cm: Optional[int]
     price_sar: Optional[int]
-    image_url: Optional[str]
-    uploaded_by_id: Optional[str]
-    uploaded_by_type: Optional[str]
+    images: Optional[List[str]]
+    uploaded_by: Optional[UploadedBy]

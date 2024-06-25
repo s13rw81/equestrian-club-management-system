@@ -16,4 +16,3 @@ def get_horse_by_id(horse_id: str):
     if horse:
         return InternalSellHorse(**horse)
     return None
-

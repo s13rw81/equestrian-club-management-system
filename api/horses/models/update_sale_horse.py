@@ -1,15 +1,19 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
+
+
+class UploadedBy(BaseModel):
+    uploaded_by_id: Optional[str] = Field(None, example="1234")
+    uploaded_by_type: Optional[str] = Field(None, example="user")
 
 
 class HorseSellUpdate(BaseModel):
     name: Optional[str] = Field(None, example="Bobby")
-    type: Optional[str] = Field(None, example="Gelding")
-    description: Optional[str] = Field(None, example="""Bobby is well-behaved and has excellent ring qualities.""")
-    year: Optional[int] = Field(None, example=2017)
-    height_cm: Optional[int] = Field(None, example=170)
-    price_sar: Optional[int] = Field(None, example=75000)
-    image_url: Optional[str] = Field(None, example="http://example.com/image.jpg")
-    uploaded_by_id: Optional[str] = Field(None, example="1234")
-    uploaded_by_type: Optional[str] = Field(None, example="user")
-
+    year_of_birth: Optional[int] = Field(None, example=2017)
+    breed: Optional[str] = Field(None, example="Thoroughbred")
+    size: Optional[int] = Field(None, example=150000)
+    gender: Optional[str] = Field(None, example="Gelding")
+    description: Optional[str] = Field(None, example="Bobby is well-behaved and has excellent ring qualities.")
+    price_sar: Optional[int] = Field(None, example=50000)
+    images: Optional[List[str]] = Field(None, example=["http://example.com/image1.jpg", "http://example.com/image2.jpg"])
+    uploaded_by: Optional[UploadedBy] = Field(None)

@@ -6,7 +6,7 @@ class Provider(BaseModel):
     provider_type: str = Field(..., example="user")
 
 
-class HorseSellingItem(BaseModel):
+class HorseRentingItem(BaseModel):
     id: str = Field(..., example="abcd1234")  # Updated to 'id'
     horse_id: str = Field(..., example="horse5678")
     provider: Provider

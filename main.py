@@ -9,11 +9,13 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
 
 from api.auth import user_auth_router
-from api.logistics import transfer_api_router, trucks_api_router
+from api.logistics import transfer_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
 from api.rbac_demo import demo_rbac_router
 from api.horses.horse_selling_service_api import horse_selling_service_api_router
+from api.horses.horse_renting_service_api import horse_renting_service_api_router
+from api.horses.horse_rent_api import horse_rent_api_router
 from api.horses.horses_sale_api import horse_sell_api_router
 from config import HOST, PORT, DEBUG
 from fastapi import FastAPI, Request, status
@@ -36,11 +38,10 @@ app.include_router(user_auth_router)
 app.include_router(validators_api_router)
 app.include_router(demo_rbac_router)
 app.include_router(transfer_api_router)
-
-app.include_router(trucks_api_router)
-
 app.include_router(horse_sell_api_router)
+app.include_router(horse_rent_api_router)
 app.include_router(horse_selling_service_api_router)
+app.include_router(horse_renting_service_api_router)
 app.include_router(logistics_company_api_router)
 
 @app.exception_handler(Exception)

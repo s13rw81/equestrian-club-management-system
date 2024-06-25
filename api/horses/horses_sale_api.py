@@ -1,8 +1,10 @@
 from fastapi import HTTPException, APIRouter, status
 from typing import List
-from models.horse.horse_sell_internal import InternalSellHorse
+from models.horse.horse_sell_internal import InternalSellHorse, UploadedBy
 from models.horse.horse_update_sell_internal import InternalUpdateSellHorse
-from models.horse.horse_selling_service_internal import HorseSellingServiceInternal
+from models.horse.horse_selling_service_internal import (
+    HorseSellingServiceInternal, Provider
+)
 from .models.create_sale_horse import HorseSellCreate
 from .models.update_sale_horse import HorseSellUpdate
 from data.dbapis.horses.horse_selling_service_queries import create_horse_selling_service
@@ -36,45 +38,49 @@ async def read_horse(horse_id: str):
 
 @horse_sell_api_router.post("/", response_model=InternalSellHorse, status_code=201)
 async def create_horse_endpoint(horse: HorseSellCreate):
+    # Ensure uploaded_by is an instance of UploadedBy
+    uploaded_by_instance = UploadedBy(
+        uploaded_by_id=horse.uploaded_by.uploaded_by_id,
+        uploaded_by_type=horse.uploaded_by.uploaded_by_type
+    )
+
     new_horse = InternalSellHorse(
         name=horse.name,
-        type=horse.type,
+        year_of_birth=horse.year_of_birth,
+        breed=horse.breed,
+        size=horse.size,
+        gender=horse.gender,
         description=horse.description,
-        year=horse.year,
-        height_cm=horse.height_cm,
-        price_sar=horse.price_sar,
-        image_url=horse.image_url,
-        uploaded_by_id=horse.uploaded_by_id,
-        uploaded_by_type=horse.uploaded_by_type
+        images=horse.images,
+        uploaded_by=uploaded_by_instance,
+        price_sar=horse.price_sar
     )
+
     result = create_horse(new_horse)
     if not result:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="could not save the horse in the database"
+            detail="Could not save the horse in the database"
         )
-    new_horse.id = result  # Assign the ID to the horse instance
+    new_horse.id = result
 
-
-        # Create a record in the horse_sell_services collection
     new_horse_selling_service = HorseSellingServiceInternal(
         horse_id=new_horse.id,
         name=new_horse.name,
-        type=new_horse.type,
+        year_of_birth=new_horse.year_of_birth,
+        breed=new_horse.breed,
+        size=new_horse.size,
+        gender=new_horse.gender,
         description=new_horse.description,
-        year=new_horse.year,
-        height_cm=new_horse.height_cm,
-        price_sar=new_horse.price_sar,
-        image_url=new_horse.image_url,
-        uploaded_by_id=new_horse.uploaded_by_id,
-        uploaded_by_type=new_horse.uploaded_by_type
+        images=new_horse.images,
+        provider=Provider(
+            provider_id=new_horse.uploaded_by.uploaded_by_id,
+            provider_type=new_horse.uploaded_by.uploaded_by_type
+        ),
+        price_sar=horse.price_sar
     )
-    service_result = create_horse_selling_service(new_horse_selling_service)
-    if service_result:
-        return new_horse
-    raise HTTPException(status_code=500, detail="could not save the horse in the database")
-
-
+    create_horse_selling_service(new_horse_selling_service)
+    return new_horse
 @horse_sell_api_router.put("/{horse_id}",
                            response_model=InternalUpdateSellHorse)
 async def update_horse_endpoint(horse_id: str, horse: HorseSellUpdate):

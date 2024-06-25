@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
 onboarding_api_router = APIRouter(
-    prefix = "/onboarding",
+    prefix = "/onboard",
     tags = ["onboarding"]
 )

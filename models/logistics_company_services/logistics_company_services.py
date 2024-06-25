@@ -14,8 +14,8 @@ class Provider(BaseModel):
     provider_type: str  # later would be a user.enums.Enum
 
 
-class ClubToClubServiceInternal(BaseModel):
-    service_id: Optional[PyObjectId] = Field(None, alias="_id")
+class BaseLogisticsServiceInternal(BaseModel):
+    service_id: PyObjectId = Field(None, alias="_id")
     provider: Provider
     trucks: Optional[List[PyObjectId]] = []
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
@@ -27,25 +27,10 @@ class ClubToClubServiceInternal(BaseModel):
         return enum.value
 
 
-class UserTransferServiceInternal(BaseModel):
-    provider: Provider
-    trucks: Optional[List[PyObjectId]] = []
-    created_at: datetime = Field(default_factory=get_current_utc_datetime)
-    updated_at: datetime = Field(default_factory=get_current_utc_datetime)
-    is_available: ServiceAvailability
-
-    @field_serializer("is_available")
-    def enum_serializer(self, enum):
-        return enum.value
+class ClubToClubServiceInternal(BaseLogisticsServiceInternal): ...
 
 
-class UserTransferServiceWithInsuranceInternal(BaseModel):
-    provider: Provider
-    trucks: Optional[List[PyObjectId]] = []
-    created_at: datetime = Field(default_factory=get_current_utc_datetime)
-    updated_at: datetime = Field(default_factory=get_current_utc_datetime)
-    is_available: ServiceAvailability
+class UserTransferServiceInternal(BaseLogisticsServiceInternal): ...
 
-    @field_serializer("is_available")
-    def enum_serializer(self, enum):
-        return enum.value
+
+class LuggageTransferServiceInternal(BaseLogisticsServiceInternal): ...

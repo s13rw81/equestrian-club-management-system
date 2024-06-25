@@ -22,7 +22,7 @@ CONNECTION_STRING = (
     if ESCAPED_DATABASE_USERNAME != ""
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
-CONNECTION_STRING = "mongodb://localhost:27017"
+
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 

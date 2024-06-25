@@ -10,11 +10,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi import status
 from logging_config import log
 from logic.auth import get_current_user
-from models.clubs.clubs_external import ClubExternal
 from models.clubs.clubs_internal import ClubInternal
 from models.user import UserInternal
 from models.user.user_external import UserExternal
-from utils.date_time import get_current_utc_datetime
 
 clubs_api_router = APIRouter(
     prefix = "/clubs",
@@ -41,7 +39,7 @@ async def create_club(create_new_club: CreateClubRequest,
 
 
 @clubs_api_router.get("/")
-async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]) -> Optional[List[ClubExternal]]:
+async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]) -> Optional[List[ClubInternal]]:
     # TODO: [phase ii] pagination
     # TODO: [phase ii] add filtering
     user_ext = UserExternal(**user.model_dump())
@@ -52,7 +50,7 @@ async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]
 
 
 @clubs_api_router.get("/{club_id}")
-async def get_club_by_id(user: Annotated[UserInternal, Depends(get_current_user)], club_id: str) -> ClubExternal | None:
+async def get_club_by_id(user: Annotated[UserInternal, Depends(get_current_user)], club_id: str) -> ClubInternal | None:
     """
     :param user:
     :param club_id: id of the club to be fetched

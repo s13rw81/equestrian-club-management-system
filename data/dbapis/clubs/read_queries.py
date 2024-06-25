@@ -5,12 +5,11 @@ from bson.objectid import ObjectId
 from data.db import get_clubs_collection
 from logging_config import log
 from models.clubs import ClubInternal
-from models.clubs.clubs_external import ClubExternal
 
 club_collection = get_clubs_collection()
 
 
-def get_all_clubs_logic() -> Optional[List[Optional[ClubExternal]]]:
+def get_all_clubs_logic() -> Optional[List[Optional[ClubInternal]]]:
     """
         get all the clubs instances
         :returns: all of clubs as list of dicts
@@ -27,7 +26,7 @@ def get_all_clubs_logic() -> Optional[List[Optional[ClubExternal]]]:
     return clubs
 
 
-def get_club_by_id_logic(club_id: str) -> ClubExternal | None:
+def get_club_by_id_logic(club_id: str) -> ClubInternal | None:
     """
     :param club_id: id of the club to be fetched
     :return: instance of ClubInternal, details of the club

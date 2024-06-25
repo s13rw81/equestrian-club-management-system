@@ -83,17 +83,17 @@ def get_horses_selling_collection():
     log.info("inside get_horses_selling_collection")
     return get_database()["horses_selling_collection"]
 
+  
+def get_horses_selling_service_collection():
+    log.info("inside get_horses_selling_service_collection")
+    return get_database()["horses_selling_service_collection"]
 
+  
 def get_horses_renting_collection():
     log.info("inside get_horses_selling_collection")
     return get_database()["horses_selling_collection"]
 
-
-def get_horses_collection():
-    log.info("inside get_horses_collection()")
-    return get_database()["horses"]
-
-
+  
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

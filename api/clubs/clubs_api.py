@@ -1,16 +1,15 @@
 from typing import Annotated, Optional, List
 
-from api.clubs.models import CreateClubRequest
 from api.clubs.models.update_club_model import UpdateClubRequest
 from data.dbapis.clubs.delete_queries import delete_club_by_id_logic
 from data.dbapis.clubs.read_queries import get_all_clubs_logic, get_club_by_id_logic
 from data.dbapis.clubs.update_queries import update_club_by_id_logic
-from data.dbapis.clubs.write_queries import save_club
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi import status
 from logging_config import log
 from logic.auth import get_current_user
-from models.clubs.clubs_internal import ClubInternal
+from models.clubs import ClubExternal
+from models.clubs import ClubInternal
 from models.user import UserInternal
 from models.user.user_external import UserExternal
 
@@ -20,26 +19,8 @@ clubs_api_router = APIRouter(
 )
 
 
-@clubs_api_router.post("/onboard")
-async def create_club(create_new_club: CreateClubRequest,
-                      user: Annotated[UserInternal, Depends(get_current_user)]) -> dict:
-    """
-    :param user: user invoking the api
-    :param create_new_club: instace of CreateClub dto
-    :return: instance of str, id of new club created
-    """
-    # TODO: [phase ii] check if user has permission to add club
-    log.info(f"creating club, user: {user}")
-    user_ext = UserExternal(**user.model_dump())
-    # Convert the request model to the DB model
-    new_club_internal = ClubInternal(**create_new_club.dict(), admins = [user_ext])
-    result = save_club(new_club_internal)
-    msg = f"new club created with id: {result} by user: {user_ext}"
-    return {'status_code': 201, 'details': msg, 'data': result}
-
-
 @clubs_api_router.get("/")
-async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]) -> Optional[List[ClubInternal]]:
+async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]) -> Optional[List[ClubExternal]]:
     # TODO: [phase ii] pagination
     # TODO: [phase ii] add filtering
     user_ext = UserExternal(**user.model_dump())
@@ -50,7 +31,7 @@ async def get_all_clubs(user: Annotated[UserInternal, Depends(get_current_user)]
 
 
 @clubs_api_router.get("/{club_id}")
-async def get_club_by_id(user: Annotated[UserInternal, Depends(get_current_user)], club_id: str) -> ClubInternal | None:
+async def get_club_by_id(user: Annotated[UserInternal, Depends(get_current_user)], club_id: str) -> ClubExternal | None:
     """
     :param user:
     :param club_id: id of the club to be fetched
@@ -87,7 +68,7 @@ async def update_club_by_id(club_id: str, user: Annotated[UserExternal, Depends(
     if not existing_club:
         raise HTTPException(status_code = 404, detail = "Club not found")
 
-    #TODO: add check to allow only admins to update club details
+    # TODO: add check to allow only admins to update club details
     # if existing_club.created_by.email_address != user.email_address:
     #     raise HTTPException(status_code = 403, detail = "User does not have permission to update this club")
 
@@ -100,7 +81,7 @@ async def update_club_by_id(club_id: str, user: Annotated[UserExternal, Depends(
         contact = update_club.contact if update_club.contact else existing_club.contact,
         admins = update_club.admins if update_club.admins else existing_club.admins
     )
-    result = update_club_by_id_logic(club_id=club_id, updated_club = updated_club_details)
+    result = update_club_by_id_logic(club_id = club_id, updated_club = updated_club_details)
 
     if not result:
         raise HTTPException(status_code = 404, detail = "Club not found or not updated")
@@ -135,4 +116,3 @@ async def delete_club(club_id: str, user: Annotated[UserInternal, Depends(get_cu
             return {'status_code': 200, 'details': msg, 'data': result}
 
     return {'status_code': 403, 'detail': 'User does not have permission to delete this club'}
-

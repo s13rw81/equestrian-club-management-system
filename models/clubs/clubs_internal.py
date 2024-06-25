@@ -1,30 +1,20 @@
 import re
 from datetime import datetime
 from functools import lru_cache
-from typing import List, Optional, Any
+from typing import List, Optional
 
 from bson import ObjectId
+from data.db import PyObjectId
 from models.generic_models.generic_address_model import Address
 from models.generic_models.generic_contacts_model import Contact
 from models.ratings.club_ratings_internal import ClubRatingsInternal
-# from models.user import StrObjectId
 from models.user.user_external import UserExternal
 from pydantic import BaseModel, Field, field_validator
 from utils.date_time import get_current_utc_datetime
 
 
-class StrObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v: Any, x) -> str:
-        return str(ObjectId(v))
-
-
 class ClubInternal(BaseModel):
-    id: Optional[StrObjectId] = Field(alias = '_id', default = None)
+    id: Optional[PyObjectId] = Field(alias = '_id', default = None)
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
     price: Optional[float] = Field(..., gt = 0)

@@ -8,6 +8,7 @@ class InternalUpdateSellHorse(BaseModel):
     description: Optional[str]
     year: Optional[int]
     height_cm: Optional[int]
-    club_name: Optional[str]
     price_sar: Optional[int]
     image_url: Optional[str]
+    uploaded_by_id: Optional[str]
+    uploaded_by_type: Optional[str]

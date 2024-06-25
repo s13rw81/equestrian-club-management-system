@@ -11,7 +11,7 @@ from models.user.user_external import UserExternal
 from api.onboarding.onboarding_router import onboarding_api_router
 
 
-@onboarding_api_router.post("/onboard")
+@onboarding_api_router.post("/club")
 async def create_club(create_new_club: CreateClubRequest,
                       user: Annotated[UserInternal, Depends(get_current_user)]) -> dict:
     """

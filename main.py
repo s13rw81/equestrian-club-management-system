@@ -1,6 +1,8 @@
 import uuid
 
 import uvicorn
+from api.clubs.clubs_api import clubs_api_router
+from api.onboarding import onboarding_api_router
 from fastapi import FastAPI, Request, status
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import HTTPException
@@ -18,11 +20,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.exception_handlers import http_exception_handler
 from api.horses.horses_sale_api import horse_sell_api_router
-from api.logistics import (
-    logistics_company_api_router,
-    transfer_api_router,
-    trucks_api_router,
-)
+from api.logistics import logistics_company_api_router, transfer_api_router
 from api.rbac_demo import demo_rbac_router
 from api.user import user_api_router
 from api.validators import validators_api_router
@@ -31,12 +29,16 @@ from logging_config import log
 
 app = FastAPI()
 
+app.include_router(onboarding_api_router)
+app.include_router(clubs_api_router)
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)
 app.include_router(demo_rbac_router)
 app.include_router(transfer_api_router)
+
 app.include_router(trucks_api_router)
+
 app.include_router(horse_sell_api_router)
 app.include_router(horse_selling_service_api_router)
 app.include_router(logistics_company_api_router)

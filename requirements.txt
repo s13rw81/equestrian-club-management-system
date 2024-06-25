@@ -4,6 +4,3 @@ pymongo
 pytz
 passlib[bcrypt]
 aiofiles
-
-pydantic
-jose

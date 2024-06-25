@@ -1,3 +1,5 @@
+from typing import Dict
+
 from data.dbapis.user.write_queries import update_user
 from external_services.otp_service import send_otp_email, send_otp_phone
 from fastapi import status
@@ -21,13 +23,13 @@ def send_sign_up_otp(user: UserInternal) -> bool:
 
     log.info(f"inside send_sign_up_otp(user={user})")
 
-    sent_otp = (send_otp_email(email_address=user.email_address)
+    sent_otp = (send_otp_email(email_address = user.email_address)
                 if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
-                else send_otp_phone(phone_number=user.phone_number))
+                else send_otp_phone(phone_number = user.phone_number))
 
-    update_user_data = UpdateUserInternal(sign_up_verification_otp=SignUpVerificationOTP(otp=sent_otp))
+    update_user_data = UpdateUserInternal(sign_up_verification_otp = SignUpVerificationOTP(otp = sent_otp))
 
-    result = update_user(update_user_data=update_user_data, user=user)
+    result = update_user(update_user_data = update_user_data, user = user)
 
     return result
 
@@ -49,20 +51,20 @@ def verify_sign_up_otp(user: UserInternal, user_provided_otp: str) -> bool:
     if not user.sign_up_verification_otp:
         log.info("the user hasn't generated OTP, please generate OTP first")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="please generate OTP first"
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = "please generate OTP first"
         )
 
     if user.sign_up_verification_otp.otp != user_provided_otp:
         log.info("the OTPs did not match, raising exception...")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="invalid OTP"
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = "invalid OTP"
         )
 
-    update_user_data = UpdateUserInternal(otp_verified=True)
+    update_user_data = UpdateUserInternal(otp_verified = True)
 
-    result = update_user(update_user_data=update_user_data, user=user)
+    result = update_user(update_user_data = update_user_data, user = user)
 
     return result
 
@@ -70,22 +72,25 @@ def verify_sign_up_otp(user: UserInternal, user_provided_otp: str) -> bool:
 def send_reset_password_otp(user: UserInternal) -> bool:
     log.info(f"inside send_reset_password_otp(user={user})")
 
-    sent_otp = (send_otp_email(email_address=user.email_address)
+    sent_otp = (send_otp_email(email_address = user.email_address)
                 if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
-                else send_otp_phone(phone_number=user.phone_number))
+                else send_otp_phone(phone_number = user.phone_number))
 
-    update_user_data = UpdateUserInternal(password_reset_verification_otp=PasswordResetVerificationOTP(otp=sent_otp))
+    update_user_data = UpdateUserInternal(
+        password_reset_verification_otp = PasswordResetVerificationOTP(otp = sent_otp))
 
-    result = update_user(update_user_data=update_user_data, user=user)
+    result = update_user(update_user_data = update_user_data, user = user)
 
     return result
 
 
-def verify_password_reset_otp(user: UserInternal, user_provided_otp: str, new_password: str) -> bool:
+def verify_password_reset_otp(user: UserInternal, user_provided_otp: str, new_password: str,
+                              update_password: bool = False) -> bool | dict[str, str | int]:
     """
         matches user provided OTP with password reset otp for user,
         if its a match, updatehashed password for user
 
+        :param update_password:
         :param user: UserInternal
         :param user_provided_otp: the user provided OTP
         :param new_password: new plain text password
@@ -98,11 +103,14 @@ def verify_password_reset_otp(user: UserInternal, user_provided_otp: str, new_pa
     if user.password_reset_verification_otp.otp != user_provided_otp:
         emsg = f"user provided OTP {user_provided_otp} and password reset OTP sent to user do not match."
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=emsg
+            status_code = status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail = emsg
         )
-
     log.info(f'USER FOUND: {user}, user provided TOP and user OTP matched.')
-    new_hashed_password = generate_password_hash(new_password)
-    update_user_data = UpdateUserInternal(hashed_password=new_hashed_password)
-    return update_user(update_user_data, user)
+    if update_password is True:
+        log.info(f'update_password is {update_password}, changing users password and setting new password')
+        new_hashed_password = generate_password_hash(new_password)
+        update_user_data = UpdateUserInternal(hashed_password = new_hashed_password)
+        return update_user(update_user_data, user)
+    else:
+        return {'status_code': 200, 'details': 'OTP matched.'}

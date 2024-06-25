@@ -1,4 +1,4 @@
-from typing import List, Annotated
+from typing import Annotated
 
 from api.clubs.clubs_api import clubs_api_router
 from bson import ObjectId
@@ -11,6 +11,7 @@ from logic.auth import get_current_user
 from models.user import UserInternal
 from models.user.user_external import UserExternal
 from pydantic import BaseModel
+from starlette import status
 from utils.async_upload_image import async_upload_image
 from utils.date_time import get_current_utc_datetime
 
@@ -44,6 +45,13 @@ async def upload_images(user: Annotated[UserInternal, Depends(get_current_user)]
 
     # Update the club with the new image paths
     updated_club = get_club_by_id_logic(club_id)
+    if not updated_club:
+        emsg = f'club with id : {club_id} not found.'
+        log.error(emsg)
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = emsg
+        )
     if updated_club.image_urls is None:
         updated_club.image_urls = image_paths
     else:

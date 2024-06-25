@@ -33,15 +33,16 @@ from models.logistics_company_services import (
 from models.logistics_company_services.enums.service_enums import ServiceAvailability
 from models.truck.trucks import TruckInternal
 
-from .models import AddTruck  # UploadTruckImages,
 from .models import (
     AddClubToClubService,
+    AddTruck,
     AddTruckResponse,
     ResponseAddClubToClubService,
     ResponseGetClubToClubService,
     ResponseTruckDetails,
     UpdateClubToClubService,
     UpdateTruckDetails,
+    UploadTruckImages,
     ViewTruckResponse,
 )
 
@@ -132,37 +133,37 @@ def get_truck(truck_id: str, request: Request) -> ResponseTruckDetails:
     return truck_details
 
 
-# @logistics_company_api_router.post("/trucks/{truck_id}/images")
-# def upload_truck_images(
-#     truck_id: str,
-#     request: Request,
-#     truck_descriptions: UploadTruckImages,
-#     files: List[UploadFile] = File(...),
-# ):
+@logistics_company_api_router.post("/trucks/{truck_id}/images")
+def upload_truck_images(
+    truck_id: str,
+    request: Request,
+    truck_descriptions: UploadTruckImages,
+    files: List[UploadFile] = File(...),
+):
 
-#     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
+    log.info(f"{request.url.path} invoked : truck_id {truck_id}")
 
-#     if len(truck_descriptions.description) != len(files):
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="truck images and descriptions are required",
-#         )
+    if len(truck_descriptions.description) != len(files):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="truck images and descriptions are required",
+        )
 
-#     file_paths = write_images(truck_id=truck_id, files=files)
+    file_paths = write_images(truck_id=truck_id, files=files)
 
-#     if not file_paths:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail="unable to save image at this time",
-#         )
+    if not file_paths:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to save image at this time",
+        )
 
-#     update_truck_images(
-#         truck_id=truck_id,
-#         file_paths=file_paths,
-#         description=truck_descriptions.description,
-#     )
+    update_truck_images(
+        truck_id=truck_id,
+        file_paths=file_paths,
+        description=truck_descriptions.description,
+    )
 
-#     return {"message": "Images uploaded successfully"}
+    return {"message": "Images uploaded successfully"}
 
 
 @logistics_company_api_router.put("/trucks/update-truck/{truck_id}")

@@ -13,18 +13,8 @@ from pydantic import BaseModel, Field, field_validator
 from utils.date_time import get_current_utc_datetime
 
 
-class StrObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v: Any, x) -> str:
-        return str(ObjectId(v))
-
-
 class ClubInternal(BaseModel):
-    id: Optional[StrObjectId] = Field(alias = '_id', default = None)
+    id: Optional[str] = Field(alias = '_id', default = None)
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
     price: Optional[float] = Field(..., gt = 0)

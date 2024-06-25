@@ -40,5 +40,5 @@ jobs:
             sudo docker rm khayyal-backend | true &&
             sudo docker image rm khayyal-backend | true &&
             sudo docker load -i /home/khayyal-backend/docker-image-tarballs/khayyal-backend.tar &&
-            sudo docker run -d -p 8000:80 --name khayyal-backend --mount type=bind,source=/home/khayyal-backend/secrets.json,target=/app/secrets.json --mount type=bind,source=/home/khayyal-backend/logs,target=/app/logs khayyal-backend
+            sudo docker run -d -p 8000:80 --name khayyal-backend --mount type=bind,source=/home/khayyal-backend/secrets.json,target=/app/secrets.json --mount type=bind,source=/home/khayyal-backend/logs,target=/app/logs --mount type=bind,source=/home/khayyal-backend/user_uploaded_images,target=/app/user-uploaded-images khayyal-backend
           EOF

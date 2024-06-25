@@ -1,6 +1,7 @@
 import uuid
 
 import uvicorn
+from api.clubs.clubs_api import clubs_api_router
 from fastapi import FastAPI, Request, status
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import HTTPException
@@ -19,6 +20,7 @@ from logging_config import log
 
 app = FastAPI()
 
+app.include_router(clubs_api_router)
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)

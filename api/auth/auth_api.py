@@ -114,18 +114,20 @@ async def reset_password(email_address: Optional[str] = None, phone_number: Opti
 
     retval = send_reset_password_otp(user=user)
     if retval:
-        log.info('password reset otp sent')
-        return {"status": "OK", "detail": 'reset password OTP sent to user.'}
+        msg = 'password reset otp sent'
+        log.info(msg)
+        return {"status": "OK", "detail": msg}
     else:
-        log.error('error when sending password reset otp')
+        emsg = 'error when sending password reset otp'
+        log.error(emsg)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="could not send otp"
+            detail=emsg
         )
 
 
-@user_auth_router.post("/reset-password-verify")
-async def reset_password_verify(request: ResetPasswordVerify):
+@user_auth_router.post("/reset-password-verify-otp")
+async def reset_password_verify_otp(request: ResetPasswordVerify):
     log.info(f"updating password for : {request}")  # TODO: check how this looks in the actual log file
     email_address = request.email_address
     phone_number = request.phone_number
@@ -158,6 +160,45 @@ async def reset_password_verify(request: ResetPasswordVerify):
             detail=emsg
         )
     result = verify_password_reset_otp(user=user, user_provided_otp=user_provided_otp, new_password=new_password)
+
+    if result:
+        return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}
+
+
+@user_auth_router.put("/reset-password-update-password")
+async def reset_password_update_password(request: ResetPasswordVerify):
+    log.info(f"updating password for : {request}")  # TODO: check how this looks in the actual log file
+    email_address = request.email_address
+    phone_number = request.phone_number
+    new_password = request.new_password
+    user_provided_otp = request.otp
+
+    # TODO: refactor this check
+    if email_address and phone_number:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="either email or phone should be passed not both"
+        )
+
+    if not (email_address or phone_number):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="either email or phone must be passed"
+        )
+    if email_address:
+        user = get_user_by_email(email=email_address)
+
+    if phone_number:
+        user = get_user_by_phone_number(phone_number=phone_number)
+
+    if not user:
+        emsg = f'no user found with email_address : {email_address} or phone_number : {phone_number}'
+        log.error(emsg)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=emsg
+        )
+    result = verify_password_reset_otp(user=user, user_provided_otp=user_provided_otp, new_password=new_password, update_password = True)
 
     if result:
         return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}

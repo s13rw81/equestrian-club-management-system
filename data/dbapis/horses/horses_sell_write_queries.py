@@ -1,6 +1,5 @@
-from data.db import get_horses_selling_collection
+from data.db import get_horses_selling_collection, get_horses_selling_service_collection
 from pymongo.collection import Collection
-from api.horses.models.create_sale_horse import HorseInDB
 from models.horse.horse_update_sell_internal import InternalUpdateSellHorse
 from api.horses.models.update_sale_horse import HorseSellUpdate
 from pymongo import ReturnDocument

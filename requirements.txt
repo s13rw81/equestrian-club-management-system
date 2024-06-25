@@ -1,6 +1,7 @@
-fastapi
+fastapi~=0.111.0
 uvicorn[standard]
 pymongo
 pytz
 passlib[bcrypt]
+python-jose[cryptography]
 aiofiles

@@ -16,6 +16,5 @@ class InternalSellHorse(BaseModel):
     size: int
     gender: str
     description: str
-    price_sar: int
     images: List[str]
     uploaded_by: UploadedBy

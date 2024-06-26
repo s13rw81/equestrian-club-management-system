@@ -14,6 +14,5 @@ class HorseSellUpdate(BaseModel):
     size: Optional[int] = Field(None, example=150000)
     gender: Optional[str] = Field(None, example="Gelding")
     description: Optional[str] = Field(None, example="Bobby is well-behaved and has excellent ring qualities.")
-    price_sar: Optional[int] = Field(None, example=50000)
     images: Optional[List[str]] = Field(None, example=["http://example.com/image1.jpg", "http://example.com/image2.jpg"])
     uploaded_by: Optional[UploadedBy] = Field(None)

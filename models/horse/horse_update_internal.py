@@ -15,5 +15,4 @@ class InternalUpdateSellHorse(BaseModel):
     gender: Optional[str]
     description: Optional[str]
     price_sar: Optional[int]
-    images: Optional[List[str]]
     uploaded_by: Optional[UploadedBy]

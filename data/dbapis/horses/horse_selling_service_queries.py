@@ -1,4 +1,4 @@
-from data.db import get_horses_selling_collection, get_horses_selling_service_collection
+from data.db import get_horses_collection, get_horses_selling_service_collection
 from pymongo.collection import Collection
 from models.horse.horse_selling_service_internal import HorseSellingServiceInternal
 

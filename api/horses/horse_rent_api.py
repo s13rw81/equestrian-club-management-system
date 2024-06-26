@@ -1,14 +1,14 @@
 from fastapi import HTTPException, APIRouter, status
 from typing import List
-from models.horse.horse_sell_internal import InternalSellHorse, UploadedBy
+from models.horse.horse_internal import InternalSellHorse, UploadedBy
 
 from models.horse.horse_renting_service_internal import (
     HorseRentingServiceInternal, Provider
 )
-from .models.create_sale_horse import HorseSellCreate
+from .models.create_horse import HorseSellCreate
 from data.dbapis.horses.horse_renting_service_queries import create_horse_renting_service
 
-from data.dbapis.horses.horses_sell_write_queries import create_horse
+from data.dbapis.horses.horses_write_queries import create_horse
 
 horse_rent_api_router = APIRouter(
     prefix="/user/horses/enlist-for-rent",
@@ -32,7 +32,6 @@ async def create_horse_endpoint(horse: HorseSellCreate):
         description=horse.description,
         images=horse.images,
         uploaded_by=uploaded_by_instance,
-        price_sar=horse.price_sar
     )
 
     result = create_horse(new_horse)

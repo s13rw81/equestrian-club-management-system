@@ -125,7 +125,7 @@ it from an `async` function with the `await` keyword.
 
 This is the standard procedure for handling images across the database. We do not
 have access restriction on the images as of now. If restricting access to the images
-become a requirement necessary changes in the functions would be made to accommodate the
+becomes a requirement, necessary changes in the functions will be made to accommodate the
 functionalities.
 
 ## Notes on Deployment

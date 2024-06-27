@@ -28,7 +28,7 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 
 def get_database():
     log.info("inside get_database()")
-    client = MongoClient(CONNECTION_STRING, maxPoolSize = DATABASE_MAX_POOL_SIZE)
+    client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
     log.info("returning from get_database()")
     return client[DATABASE_NAME]
 
@@ -84,6 +84,21 @@ def get_horses_collection():
     return get_database()["horses_collection"]
 
 
+def get_riding_lesson_bookings_collection():
+    log.info("inside get_clubs_collection()")
+    return get_database()["riding_lesson_bookings"]
+
+
+def get_riding_lesson_collection():
+    log.info("inside get_riding_lesson_collection()")
+    return get_database()["riding_lesson_service"]
+
+
+def get_horses_selling_collection():
+    log.info("inside get_horses_selling_collection")
+    return get_database()["horses_selling_collection"]
+
+
 def get_horses_selling_service_collection():
     log.info("inside get_horses_selling_service_collection")
     return get_database()["horses_selling_service_collection"]
@@ -92,6 +107,21 @@ def get_horses_selling_service_collection():
 def get_horses_renting_service_collection():
     log.info("inside get_horses_renting_service_collection")
     return get_database()["horses_renting_service_collection"]
+
+
+def get_horses_renting_collection():
+    log.info("inside get_horses_selling_collection")
+    return get_database()["horses_selling_collection"]
+
+
+def get_uploaded_images_collection():
+    log.info("inside get_uploaded_images_collection")
+    return get_database()["uploaded_images_collection"]
+
+
+def get_upload_images_demo_collection():
+    log.info("inside get_upload_images_demo()")
+    return get_database()["upload_images_demo"]
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

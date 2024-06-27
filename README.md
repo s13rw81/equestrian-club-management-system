@@ -7,7 +7,7 @@ There is a set of `util` function to help in handling image uploads.
 All of these are located in [utils/image_management.py](utils/image_management.py)
 
 Specifically,
-- [`save_image()`](#save_image): given a `UploadFile` object it saves the image asynchronously
+- [save_image](#usage): given a `UploadFile` object it saves the image asynchronously
 in the filesystem and creates a record in the database. It 
 returns an `image_id` to access the image later.
 
@@ -22,8 +22,6 @@ it deletes the file from the file system was well was removes the record from
 the database.
 
 ### Usage
-
-
 
 A few demo routes are implemented in the [api/image_management/image_management_api.py](api/image_management/image_management_api.py)
 to help you understand its usage.

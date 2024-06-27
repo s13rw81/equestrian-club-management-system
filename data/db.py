@@ -2,6 +2,9 @@ from typing import Annotated
 from urllib.parse import quote_plus
 
 from bson.objectid import ObjectId
+from pydantic import BeforeValidator
+from pymongo import MongoClient
+
 from config import (
     DATABASE_MAX_POOL_SIZE,
     DATABASE_NAME,
@@ -11,8 +14,6 @@ from config import (
     DATABASE_USER,
 )
 from logging_config import log
-from pydantic import BeforeValidator
-from pymongo import MongoClient
 
 ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
 ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
@@ -22,13 +23,12 @@ CONNECTION_STRING = (
     if ESCAPED_DATABASE_USERNAME != ""
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
-
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
 def get_database():
     log.info("inside get_database()")
-    client = MongoClient(CONNECTION_STRING, maxPoolSize = DATABASE_MAX_POOL_SIZE)
+    client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
     log.info("returning from get_database()")
     return client[DATABASE_NAME]
 
@@ -83,17 +83,17 @@ def get_horses_selling_collection():
     log.info("inside get_horses_selling_collection")
     return get_database()["horses_selling_collection"]
 
-  
+
 def get_horses_selling_service_collection():
     log.info("inside get_horses_selling_service_collection")
     return get_database()["horses_selling_service_collection"]
 
-  
+
 def get_horses_renting_collection():
     log.info("inside get_horses_selling_collection")
     return get_database()["horses_selling_collection"]
 
-  
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

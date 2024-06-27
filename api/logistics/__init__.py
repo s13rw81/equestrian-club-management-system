@@ -1,2 +1,3 @@
 from .logistics_company_api import logistics_company_api_router
+from .logistics_services_booking_api import services_router
 from .transfer_api import transfer_api_router

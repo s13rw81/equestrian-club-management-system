@@ -1,8 +1,6 @@
 from datetime import datetime
-from typing import Optional
 
-from bson import ObjectId
-from pydantic import BaseModel, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 from pydantic_extra_types.coordinate import Latitude, Longitude
 
 from data.db import PyObjectId
@@ -23,7 +21,7 @@ class Consumer(BaseModel):
 
 # this is for transfer of horses between clubs
 class ClubToClubServiceBookingInternal(BaseModel):
-    booking_id: PyObjectId = Field(None, alias="_id")
+    booking_id: PyObjectId = Field(default=None, alias="_id")
     consumer: Consumer
     service_id: str
     horse_id: str
@@ -45,3 +43,5 @@ class ClubToClubServiceBookingInternal(BaseModel):
             return
 
         return enum.value
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)

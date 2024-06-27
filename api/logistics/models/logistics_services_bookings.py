@@ -34,7 +34,6 @@ class ResponseClubToClubServices(BaseModel):
 
 
 class ClubToClubServiceBooking(BaseModel):
-    booking_id: PyObjectId = Field(None, alias="_id")
     service_id: str
     consumer_id: str
     horse_id: str

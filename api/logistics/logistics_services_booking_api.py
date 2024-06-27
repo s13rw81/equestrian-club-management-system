@@ -157,7 +157,10 @@ def update_club_to_club_booking(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@services_router.get("/get-club-to-club-service-bookings")
+@services_router.get(
+    "/get-club-to-club-service-bookings",
+    response_model_by_alias=False,
+)
 def get_club_to_club_service_bookings(
     consumer_id: str, request: Request
 ) -> List[ClubToClubServiceBookingInternal]:
@@ -167,9 +170,13 @@ def get_club_to_club_service_bookings(
     return [ClubToClubServiceBookingInternal(**booking) for booking in bookings]
 
 
-@services_router.get("/get-club-to-club-service-booking/{booking_id}")
+@services_router.get(
+    "/get-club-to-club-service-booking/{booking_id}",
+    response_model_by_alias=False,
+)
 def get_club_to_club_service_booking(
-    consumer_id: str, booking_id: str
+    consumer_id: str,
+    booking_id: str,
 ) -> ClubToClubServiceBookingInternal:
     return get_club_to_club_service_booking_by_booking_id_db(
         consumer_id=consumer_id, booking_id=booking_id

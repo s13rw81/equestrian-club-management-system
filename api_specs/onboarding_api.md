@@ -10,13 +10,13 @@ primarily from the admin app after creation of the user. This includes,
 Once the user is created using the `using` the auth apis the user 
 will call this apis to onboard itself as a `logistic-company`.
 
-### The Process
+#### The Process
 - the user signs up using the `users/signup` route
 - the newly onboarded user, in turn, calls the `auth/generate-signup-otp` route
 - the user verifies the otp using the `auth/verify-signup-otp` route
 - the user calls the `onboarding/create-logistic-company` route to onboard itself as a `logistic-company`
 
-### Request Body
+#### Request Body
 
 ```json
 {
@@ -27,17 +27,17 @@ will call this apis to onboard itself as a `logistic-company`.
 }
 ```
 
-### Request Validations
+#### Request Validations
 1. A `logistic-company` with the same `email_address` must not exist
 2. The user's `otp_verified` must be `true`
 
 **Note**: Use `pydantic` validators for the validations
 
-### Authentication and RBAC
+#### Authentication and RBAC
 1. This would be an authenticated route
 2. The user must have the role `UserRoles.USER`
 
-### The Flow
+#### The Flow
 1. A new document would be created in the `logistic_companies` collection.
 The document in the collection will be similar to the following:
     ```json
@@ -57,7 +57,7 @@ The document in the collection will be similar to the following:
 
 **Note**: Use transactions for the database operations.
 
-### The Response
+#### The Response
 
 If all the validations pass the request would also succeed. If anything
 else goes wrong the pipeline exception handler to catch the error.

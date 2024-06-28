@@ -8,3 +8,4 @@ aiofiles
 python-multipart
 httpx
 pytest
+pytest-dependency

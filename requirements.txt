@@ -6,3 +6,5 @@ passlib[bcrypt]
 python-jose[cryptography]
 aiofiles
 python-multipart
+httpx
+pytest

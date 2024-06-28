@@ -43,7 +43,7 @@ will call this apis to onboard itself as a `logistic-company`.
 ### The Flow
 1. A new document would be created in the `logistic_companies` collection.
 The document in the collection will be similar to the following:
-    ```
+    ```json
     {
       "_id": ObjectId("12345"),
       "email_address": "someemail@domain.com",

@@ -10,6 +10,9 @@ primarily from the admin app after creation of the user. This includes,
 Once the user is created using the `using` the auth apis the user 
 will call this apis to onboard itself as a `logistic-company`.
 
+### HTTP Method
+`POST`
+
 ### The Process
 - the user signs up using the `users/signup` route
 - the newly onboarded user, in turn, calls the `auth/generate-signup-otp` route

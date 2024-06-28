@@ -24,8 +24,6 @@ the database.
 
 ### Usage
 
-
-
 A few demo routes are implemented in the [api/image_management/image_management_api.py](api/image_management/image_management_api.py)
 to help you understand its usage.
 

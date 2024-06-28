@@ -7,8 +7,11 @@ primarily from the admin app after creation of the user. This includes,
 - trainer
 
 ### 1. `onboarding/create-logistic-company`
-Once the user is created using the `using` the auth apis the user 
-will call this apis to onboard itself as a `logistic-company`.
+Once the user is created using the `auth` apis the user 
+will call this api to onboard itself as a `logistic-company`.
+
+### HTTP Method
+`POST`
 
 #### The Process
 - the user signs up using the `users/signup` route
@@ -55,7 +58,7 @@ The document in the collection will be similar to the following:
     ```
 2. The role of the user would be updated to `UserRoles.LOGISTIC_COMPANY`
 
-**Note**: Use transactions for the database operations.
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
 
 #### The Response
 

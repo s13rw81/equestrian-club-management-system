@@ -58,7 +58,7 @@ The document in the collection will be similar to the following:
     ```
 2. The role of the user would be updated to `UserRoles.LOGISTIC_COMPANY`
 
-**Note**: Use transactions for the database operations.
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
 
 ### The Response
 

@@ -1,3 +1,4 @@
+from models.user import UserRoles
 from pydantic import BaseModel, field_validator, Field, model_validator
 from typing import Optional
 from typing_extensions import Self
@@ -14,6 +15,7 @@ class SignUpUser(BaseModel):
     riding_stage: RidingStage
     horse_ownership_status: HorseOwnership
     equestrian_discipline: EquestrianDiscipline
+    user_role: UserRoles = UserRoles.USER
 
     @field_validator("email_address")
     @classmethod

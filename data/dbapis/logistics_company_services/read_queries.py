@@ -1,3 +1,5 @@
+from pymongo.collection import Collection
+
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.company import Company
@@ -225,3 +227,25 @@ def get_luggage_transfer_service_by_service_id(
     )
 
     return service_details
+
+
+def get_all_services(
+    collection: Collection,
+):
+    """return all the services for the given collection
+
+    Args:
+        collection (Collection)
+    """
+    log.info(f"get_all_services() invoked")
+    return collection.find()
+
+
+def get_all_club_to_club_services():
+    """returns all the club to club services for all logistics company
+
+    Returns:
+        logistics company services for club to club transfer
+    """
+    log.info(f"get_all_club_to_club_services() invoked")
+    return get_all_services(collection=club_to_club_service_collection)

@@ -7,8 +7,8 @@ primarily from the admin app after creation of the user. This includes,
 - trainer
 
 ### 1. `onboarding/create-logistic-company`
-Once the user is created using the `using` the auth apis the user 
-will call this apis to onboard itself as a `logistic-company`.
+Once the user is created using the `auth` apis the user 
+will call this api to onboard itself as a `logistic-company`.
 
 ### HTTP Method
 `POST`

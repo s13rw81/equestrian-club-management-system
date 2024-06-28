@@ -19,6 +19,17 @@ class Consumer(BaseModel):
     consumer_type: str = "CLUB"
 
 
+class Horse(BaseModel):
+    horse_name: str
+    age: int
+    health_info: str
+
+
+class Groomer(BaseModel):
+    groomer_name: str
+    contact_number: str
+
+
 # this is for transfer of horses between clubs
 class ClubToClubServiceBookingInternal(BaseModel):
     consumer: Consumer
@@ -33,6 +44,29 @@ class ClubToClubServiceBookingInternal(BaseModel):
     truck_id: str
     pickup_time: datetime
     booking_status: BookingStatus
+    created_at: datetime = Field(default_factory=get_current_utc_datetime)
+    updated_at: datetime = Field(default_factory=get_current_utc_datetime)
+
+    @field_serializer("booking_status")
+    def enum_serializer(self, enum):
+        if not enum:
+            return
+
+        return enum.value
+
+
+class UserTransferServiceBookingInternal(BaseModel):
+    consumer: Consumer
+    service_id: str
+    logistics_company_id: str
+    truck_id: str
+    source_location: Location
+    destination_location: Location
+    current_location: Location
+    pickup_time: datetime
+    booking_status: BookingStatus
+    horse_info: Horse
+    groomer_info: Groomer
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
 

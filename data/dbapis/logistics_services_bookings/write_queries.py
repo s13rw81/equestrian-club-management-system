@@ -1,19 +1,16 @@
-from api.logistics.models import UpdateClubToClubServiceBooking
+from pymongo.collection import Collection
+
+from api.logistics.models import (
+    UpdateClubToClubServiceBooking,
+    UpdateUserTransferServiceBooking,
+)
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
-from models.logistics_service_bookings import ClubToClubServiceBookingInternal
-
-booking_collection_mapping = {
-    "club_to_club": get_collection(
-        collection_name="logistics_service_club_to_club_booking"
-    ),
-    "user_transfer": get_collection(
-        collection_name="logistics_service_user_transfer_booking"
-    ),
-    "luggage_transfer": get_collection("logistics_service_luggage_transfer_booking"),
-}
-
-from pymongo.collection import Collection
+from models.logistics_service_bookings import (
+    ClubToClubServiceBookingInternal,
+    UserTransferServiceBookingInternal,
+)
+from utils.logistics_utils import LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING
 
 
 def save_booking(
@@ -50,8 +47,8 @@ def save_club_to_club_service_booking_db(
     """
     log.info(f"save_club_to_club_service_booking_db() invoked")
 
-    club_to_club_service_booking_collection = booking_collection_mapping.get(
-        "club_to_club"
+    club_to_club_service_booking_collection = (
+        LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("club_to_club")
     )
     return save_booking(
         booking=booking, collection=club_to_club_service_booking_collection
@@ -76,7 +73,57 @@ def update_club_to_club_service_booking_db(
     filter = {"_id": convert_to_object_id(booking_id)}
     update = {k: v for k, v in booking.model_dump().items() if v != None and k != "_id"}
 
-    collection = booking_collection_mapping.get("club_to_club")
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("club_to_club")
+
+    if not update:
+        return False
+
+    update_response = collection.update_one(filter=filter, update={"$set": update})
+
+    log.info(
+        f"matched_count={update_response.matched_count}, modified_count={update_response.modified_count}"
+    )
+
+    return update_response.modified_count == 1
+
+
+def save_user_transfer_service_booking_db(
+    booking: UserTransferServiceBookingInternal,
+) -> str:
+    """saves a user transfer service booking in the database
+
+    Args:
+        booking (UserTransferServiceBookingInternal): booking details
+    """
+    log.info(f"save_user_transfer_service_booking_db() invoked")
+
+    user_transfer_service_booking_collection = (
+        LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+    )
+    return save_booking(
+        booking=booking, collection=user_transfer_service_booking_collection
+    )
+
+
+def update_user_transfer_service_booking_db(
+    booking_id: str,
+    booking: UpdateUserTransferServiceBooking,
+) -> bool:
+    """update the user transfer service booking based on booking id
+
+    Args:
+        booking_id: str
+        booking (UpdateUserTransferServiceBooking)
+    """
+
+    log.info(
+        f"update_user_transfer_service_booking_db() invoked booking_id {booking_id} booking {booking}"
+    )
+
+    filter = {"_id": convert_to_object_id(booking_id)}
+    update = {k: v for k, v in booking.model_dump().items() if v != None and k != "_id"}
+
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
 
     if not update:
         return False

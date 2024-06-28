@@ -10,15 +10,16 @@ from models.logistics_company_services.logistics_company_services import (
     LuggageTransferServiceInternal,
     UserTransferServiceInternal,
 )
+from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING
 
-club_to_club_service_collection = get_collection(
-    collection_name="logistics_service_club_to_club"
+club_to_club_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
+    "club_to_club"
 )
-user_transfer_service_collection = get_collection(
-    collection_name="logistics_service_user"
+user_transfer_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
+    "user_transfer"
 )
-luggage_transfer_service_collection = get_collection(
-    collection_name="logistics_service_luggage"
+luggage_transfer_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
+    "logistics_service_luggage"
 )
 
 

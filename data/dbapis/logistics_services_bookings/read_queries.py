@@ -67,3 +67,69 @@ def get_club_to_club_service_booking_by_booking_id_db(
     log.info(f"get_club_to_club_service_booking_by_booking_id_db() returning {booking}")
 
     return booking
+
+
+def get_user_transfer_service_booking_by_booking_id(
+    consumer_id: str,
+    booking_id: str,
+) -> dict:
+    """return the user transfer service booking for a particular booking id
+
+    Args:
+        consumer_id (str)
+        booking_id (str)
+
+    """
+
+    log.info(
+        f"get_user_transfer_service_booking_by_booking_id() invoked consumer_id {consumer_id} booking_id {booking_id}"
+    )
+
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+
+    booking = get_booking(
+        collection=collection, booking_id=booking_id, consumer_id=consumer_id
+    )
+
+    log.info(f"get_user_transfer_service_booking_by_booking_id() returning {booking}")
+
+    return booking
+
+
+def get_all_user_transfer_service_bookings_db(consumer_id: str):
+    """returns all the user transfer service booking for the user
+
+    Returns:
+        list of all bookings
+    """
+    log.info(f"get_all_user_transfer_service_bookings_db() invoked")
+
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+    return get_all_bookings(consumer_id=consumer_id, collection=collection)
+
+
+def get_user_transfer_service_booking_by_booking_id(
+    consumer_id: str,
+    booking_id: str,
+) -> dict:
+    """return the user transfer service booking for a particular booking id
+
+    Args:
+        consumer_id (str)
+        booking_id (str)
+
+    """
+
+    log.info(
+        f"get_user_transfer_service_booking_by_booking_id() invoked consumer_id {consumer_id} booking_id {booking_id}"
+    )
+
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+
+    booking = get_booking(
+        collection=collection, booking_id=booking_id, consumer_id=consumer_id
+    )
+
+    log.info(f"get_user_transfer_service_booking_by_booking_id() returning {booking}")
+
+    return booking

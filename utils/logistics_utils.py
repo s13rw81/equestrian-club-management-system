@@ -11,8 +11,8 @@ class LogisticsService(Enum):
 
 LOGISTICS_SERVICE_COLLECTION_MAPPING = {
     "club_to_club": get_collection("logistics_service_club_to_club"),
-    "user_transfer": get_collection("logistics_service_user"),
-    "luggage_transfer": get_collection("logistics_service_luggage"),
+    "user_transfer": get_collection("logistics_service_user_transfer"),
+    "luggage_transfer": get_collection("logistics_service_luggage_transfer"),
 }
 
 LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING = {

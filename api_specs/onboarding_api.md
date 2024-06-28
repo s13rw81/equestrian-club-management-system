@@ -21,7 +21,7 @@ will call this apis to onboard itself as a `logistic-company`.
 
 ### Request Body
 
-```json
+```
 {
   "email_address": "someemail@domain.com",
   "phone_no": "+911111111111",

@@ -21,7 +21,7 @@ Users will use this route to enlist new horses that is available for selling.
 - The differences between a `user` and a `club` are the following:
     1. firstly, the`user_role` of an `user` is set to `USER`, for a club it's `CLUB`.
     2. Secondly, a `club` has a `club` entity associated with it. The
-       corresponding `club` entity can be found from the `clubs` collection.
+       corresponding `club` entity can be found from the `club` collection.
 
 #### Request Body
 

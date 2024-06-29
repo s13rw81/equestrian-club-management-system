@@ -8,7 +8,7 @@ All of these are located in [utils/image_management.py](utils/image_management.p
 
 Specifically,
 
-- [`save_image()`](#save_image): given a `UploadFile` object it saves the image asynchronously
+- [`save_image()`](#save_image) [ss](#notes-on-handling-images): given a `UploadFile` object it saves the image asynchronously
 in the filesystem and creates a record in the database. It 
 returns an `image_id` to access the image later.
 

@@ -6,3 +6,4 @@ class UserRoles(Enum):
     CLUB = "CLUB"
     TRAINER = "TRAINER"
     ADMIN = "ADMIN"
+    LOGISTIC_COMPANY = "LOGISTIC_COMPANY"

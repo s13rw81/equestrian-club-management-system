@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, Request
 from utils.image_management import save_image, generate_image_url, delete_image
-from data.db import get_upload_images_demo_collection, convert_to_object_id
+from data.db import get_upload_images_demo_collection
 
 upload_images_demo_router = APIRouter(
     prefix="/upload-images-demo",

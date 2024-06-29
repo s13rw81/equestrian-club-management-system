@@ -10,7 +10,7 @@ primarily from the admin app after creation of the user. This includes,
 Once the user is created using the `auth` apis the user 
 will call this api to onboard itself as a `logistic-company`.
 
-### HTTP Method
+#### HTTP Method
 `POST`
 
 #### The Process
@@ -41,8 +41,8 @@ will call this api to onboard itself as a `logistic-company`.
 2. The user must have the role `UserRoles.USER`
 
 #### The Flow
-1. A new document would be created in the `logistic_companies` collection.
-The document in the collection will be similar to the following:
+1. A new document will be created in the `logistic_companies` collection.
+The schema of the document will be similar to the following:
     ```json
     {
       "_id": ObjectId("12345"),
@@ -60,6 +60,10 @@ The document in the collection will be similar to the following:
 
 **Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
 
+#### Error Handling
+
+Raise a `HTTPException` if anything goes wrong.
+
 #### The Response
 
 If all the validations pass the request would also succeed. If anything
@@ -68,6 +72,6 @@ else goes wrong the pipeline exception handler to catch the error.
 Typically, the request would succeed and return,
 
 ```json
-{"logistic_company_id":  "the id of the newly created company"}
+{"logistic_company_id":  "the id of the newly created logistic_company"}
 ```
 

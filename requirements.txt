@@ -5,3 +5,4 @@ pytz
 passlib[bcrypt]
 python-jose[cryptography]
 aiofiles
+python-multipart

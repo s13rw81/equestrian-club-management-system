@@ -3,7 +3,7 @@ import os
 from logging_config import log
 
 # env
-ENV = os.environ.get("ENVIRONMENT", "PROD")
+ENV = os.environ.get("ENVIRONMENT", "DEV")
 log.info(f"running in {ENV} environment.")
 
 # read secrets.json

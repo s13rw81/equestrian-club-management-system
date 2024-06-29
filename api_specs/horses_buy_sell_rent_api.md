@@ -180,7 +180,7 @@ everything went well.
 
 ### 3. `user/horses/get-horses-for-sell`
 
-Users will use this route to enlist new horses that is available for selling.
+Users will use this route to get the horses that are on sale or was listed for sale by the user himself.
 
 #### HTTP Method
 

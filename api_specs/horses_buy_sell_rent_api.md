@@ -83,7 +83,7 @@ Users will use this route to enlist new horses that is available for selling.
 
 - Use transactions for the database operations. **(Ignore this requirement until transaction management system is
   implemented.)**
-- As of now, only `USER` will use this route. So, don't worry about 'CLUB' too much.
+- As of now, only `USER` will use this route. So, don't worry about `CLUB` too much.
 
 #### Exception Handling:
 
@@ -180,7 +180,7 @@ everything went well.
 
 ### 3. `user/horses/get-horses-for-sell`
 
-Users will use this route to get the horses that are on sale or was listed for sale by the user himself.
+Users will use this route to get the horses that are on sale or were listed for sale by the user himself.
 
 #### HTTP Method
 
@@ -211,13 +211,15 @@ Users will use this route to get the horses that are on sale or was listed for s
    added the `user` or to return listings added by others.
 2. If the query parameter `own_listing=true` return the listings of the user.
    Otherwise, return the listing of others.
-3. Query the `horse_selling_service` collection. Use `mongodb aggregate pipeline`
+3. While returning the listing of others make sure to exclude items that were
+   created by the user himself.
+5. Query the `horse_selling_service` collection. Use `mongodb aggregate pipeline`
    and `lookup` to join the collection with the `horses` collection. Return the data
    to the user.
 
 **Notes**:
 
-- As of now, only `USER` will use this route. So, don't worry about 'CLUB' too much.
+- As of now, only `USER` will use this route. So, don't worry about `CLUB` too much.
 
 #### Exception Handling:
 

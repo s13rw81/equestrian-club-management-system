@@ -55,6 +55,7 @@ async def root(request: Request):
     log.info(
         f"method: {request.method}, headers: {request.headers}, client: {request.client}"
     )
+    return {"status": "Hello World"}
     return RedirectResponse(url="/docs")
 
 

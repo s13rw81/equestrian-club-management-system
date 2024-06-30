@@ -13,6 +13,9 @@ class Company(BaseModel):
     id: Optional[PyObjectId] = Field(alias='_id', default=None)
     company_name: str
     description: Optional[str] = None
+    email: Optional[str]
+    phone_no: Optional[str]
+    is_khayyal_verified: Optional[bool] = False
     contact: Optional[Contact] = None
     address: Optional[Address] = None
     trucks: List[TruckInternal] = []

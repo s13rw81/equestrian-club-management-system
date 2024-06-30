@@ -7,6 +7,8 @@ from pydantic import BaseModel
 
 class CreatelogisticsCompanyRequest(BaseModel):
     company_name: str
+    email: str
+    phone_no: str
     description: Optional[str] = None
     contact: Optional[Contact] = None
     address: Optional[Address] = None

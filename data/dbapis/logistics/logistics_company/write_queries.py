@@ -16,16 +16,14 @@ def save_logistics_company(new_logistics_company: Company) -> str:
     log.info(f"save_logistics_company invoked: {new_logistics_company}")
 
     # Check if a logistics_company with the same name and city already exists
-    existing_club = logistics_company_collection.find_one(
-        {"company_name": new_logistics_company.company_name, "address.city": new_logistics_company.address.city})
-
+    existing_club = logistics_company_collection.find_one({"email": new_logistics_company.email})
 
     if existing_club is not None:
-        emsg = f"Logistics Company with name {new_logistics_company.name} and city {new_logistics_company.address.city} already exists."
+        emsg = f"Logistics Company with email {new_logistics_company.email} already exists."
         log.info(emsg)
         raise HTTPException(
-            status_code=status.HTTP_303_SEE_OTHER,
-            detail=emsg
+            status_code = status.HTTP_303_SEE_OTHER,
+            detail = emsg
         )
 
     logistics_company_id = (logistics_company_collection.insert_one(new_logistics_company.model_dump())).inserted_id

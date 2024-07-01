@@ -1,25 +1,22 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Annotated
+from typing import Annotated
 from logging_config import log
 from logic.auth import get_current_user
 from models.horse.horse_internal import InternalSellHorse, UploadedBy
-from models.horse.horse_update_internal import InternalUpdateSellHorse
-from models.horse.horse_selling_service_internal import HorseSellingServiceInternal, Provider
-from .models.create_horse import HorseCreate, HorseSaleResponse
-from .models.update_horse import HorseSellUpdate
-from data.dbapis.horses.horse_selling_service_queries import create_horse_selling_service
-from data.dbapis.horses.horses_read_queries import get_all_horses, get_horse_by_id
-from data.dbapis.horses.horses_write_queries import create_horse, update_horse, delete_horse
+from models.horse.horse_renting_service_internal import HorseRentingServiceInternal, Provider
+from .models.create_horse import HorseCreate, HorseRentResponse
+from data.dbapis.horses.horse_renting_service_queries import create_horse_renting_service
+from data.dbapis.horses.horses_write_queries import create_horse
 from models.user import UserInternal, UserRoles
 from models.user.user_external import UserExternal
 from role_based_access_control import RoleBasedAccessControl
 
-horse_sell_api_router = APIRouter(
-    prefix="/user/horses/enlist-for-sell",
-    tags=["sell_horses"]
+horse_rent_api_router = APIRouter(
+    prefix="/user/horses/enlist-for-rent",
+    tags=["rent_horses"]
 )
 
-@horse_sell_api_router.post("/", response_model=HorseSaleResponse, status_code=201)
+@horse_rent_api_router.post("/", response_model=HorseRentResponse, status_code=201)
 async def create_horse_endpoint(
     horse: HorseCreate,
     user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.ADMIN}))]
@@ -51,7 +48,7 @@ async def create_horse_endpoint(
         )
     new_horse.id = result
 
-    new_horse_selling_service = HorseSellingServiceInternal(
+    new_horse_selling_service = HorseRentingServiceInternal(
         horse_id=new_horse.id,
         name=new_horse.name,
         year_of_birth=new_horse.year_of_birth,
@@ -65,21 +62,8 @@ async def create_horse_endpoint(
         ),
         price_sar=horse.price_sar
     )
-    create_horse_selling_service(new_horse_selling_service)
+    create_horse_renting_service(new_horse_selling_service)
 
-    return HorseSaleResponse(
-        horse_selling_service_id=new_horse.id
+    return HorseRentResponse(
+        horse_renting_service_id=new_horse.id
     )
-
-@horse_sell_api_router.put("/{horse_id}", response_model=InternalUpdateSellHorse)
-async def update_horse_endpoint(horse_id: str, horse: HorseSellUpdate):
-    updated_horse = update_horse(horse_id, horse.dict(exclude_unset=True))
-    if updated_horse:
-        return updated_horse
-    raise HTTPException(status_code=404, detail="Horse not found")
-
-@horse_sell_api_router.delete("/{horse_id}", status_code=204)
-async def delete_horse_endpoint(horse_id: str):
-    if delete_horse(horse_id):
-        return {"Message": "Deleted Sucessfully"}
-    raise HTTPException(status_code=404, detail="Horse not found")

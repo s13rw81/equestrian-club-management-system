@@ -1,20 +1,20 @@
+from bson import ObjectId
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from bson import ObjectId
 
 
-from models.logistics_company_services.logistics_company_services import Provider
+class UploadedBy(BaseModel):
+    uploaded_by_id: str
+    uploaded_by_type: str
 
 
-class HorseSellingServiceInternal(BaseModel):
+class InternalSellHorse(BaseModel):
     id: Optional[str] = Field(default_factory=lambda: str(ObjectId()), alias="_id")
-    horse_id: str
     name: str
     year_of_birth: int
     breed: str
     size: int
     gender: str
     description: str
-    provider: Provider
-    price_sar: int
-
+    # images: List[str]
+    uploaded_by: UploadedBy

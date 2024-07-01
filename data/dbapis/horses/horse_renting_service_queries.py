@@ -1,16 +1,18 @@
-from data.db import get_horses_collection, get_horses_selling_service_collection
+from data.db import get_horses_renting_service_collection
 from pymongo.collection import Collection
-from models.horse.horse_selling_service_internal import HorseSellingServiceInternal
+from models.horse.horse_renting_service_internal import HorseRentingServiceInternal
 
-collection: Collection = get_horses_selling_service_collection()
+from data.db import get_database
+
+collection: Collection = get_horses_renting_service_collection()
 
 
-def create_horse_selling_service(horse_selling_service: HorseSellingServiceInternal):
-    result = collection.insert_one(horse_selling_service.dict(by_alias=True))
+def create_horse_renting_service(horse_renting_service: HorseRentingServiceInternal):
+    result = collection.insert_one(horse_renting_service.dict(by_alias=True))
     return str(result.inserted_id)
 
 
-def get_horse_by_id(horse_id: str):
+def get_renting_horse_by_id(horse_id: str):
     pipeline = [
         {"$match": {"horse_id": horse_id}},
         {"$project": {
@@ -25,3 +27,5 @@ def get_horse_by_id(horse_id: str):
     ]
     horse = list(collection.aggregate(pipeline))
     return horse[0] if horse else None
+
+

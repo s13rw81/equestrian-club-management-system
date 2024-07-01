@@ -29,8 +29,8 @@ from logging_config import log
 
 app = FastAPI()
 
-app.include_router(riding_lesson_services_api_router)
 app.include_router(onboarding_api_router)
+app.include_router(riding_lesson_services_api_router)
 app.include_router(clubs_api_router)
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
@@ -64,6 +64,7 @@ async def root(request: Request):
     log.info(
         f"method: {request.method}, headers: {request.headers}, client: {request.client}"
     )
+    return {"status": "Hello World"}
     return RedirectResponse(url="/docs")
 
 

@@ -2,12 +2,19 @@ from datetime import datetime
 from typing import Optional
 
 from bson import ObjectId
-from data.db import PyObjectId
-from pydantic import BaseModel, field_serializer, model_validator, Field
+from pydantic import BaseModel, Field, field_serializer, model_validator
 from typing_extensions import Self
+
+from data.db import PyObjectId
 from utils.date_time import get_current_utc_datetime
 
-from .enums import EquestrianDiscipline, HorseOwnership, RidingStage, SignUpCredentialType, UserRoles
+from .enums import (
+    EquestrianDiscipline,
+    HorseOwnership,
+    RidingStage,
+    SignUpCredentialType,
+    UserRoles,
+)
 
 
 class SignUpVerificationOTP(BaseModel):
@@ -21,7 +28,7 @@ class PasswordResetVerificationOTP(BaseModel):
 
 
 class UserInternal(BaseModel):
-    id: Optional[PyObjectId] = Field(alias = '_id', default = None)
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
     full_name: str
     email_address: Optional[str] = None
     phone_number: Optional[str] = None
@@ -45,7 +52,7 @@ class UserInternal(BaseModel):
         "riding_stage",
         "horse_ownership_status",
         "equestrian_discipline",
-        "sign_up_credential_type"
+        "sign_up_credential_type",
     )
     def enum_serializer(self, enum):
         if not enum:
@@ -53,7 +60,7 @@ class UserInternal(BaseModel):
 
         return enum.value
 
-    @model_validator(mode = "after")
+    @model_validator(mode="after")
     def populate_signup_credential_type_if_not_exists(self) -> Self:
         if self.sign_up_credential_type:
             return self

@@ -2,6 +2,9 @@ from typing import Annotated
 from urllib.parse import quote_plus
 
 from bson.objectid import ObjectId
+from pydantic import BeforeValidator
+from pymongo import MongoClient
+
 from config import (
     DATABASE_MAX_POOL_SIZE,
     DATABASE_NAME,
@@ -11,8 +14,6 @@ from config import (
     DATABASE_USER,
 )
 from logging_config import log
-from pydantic import BeforeValidator
-from pymongo import MongoClient
 
 ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
 ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
@@ -22,7 +23,6 @@ CONNECTION_STRING = (
     if ESCAPED_DATABASE_USERNAME != ""
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
-
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
@@ -119,14 +119,10 @@ def get_horses_renting_collection():
     return get_database()["horses_selling_collection"]
 
 
-def get_uploaded_images_collection():
-    log.info("inside get_uploaded_images_collection")
-    return get_database()["uploaded_images_collection"]
+def get_uploaded_images_collection(): ...
 
 
-def get_upload_images_demo_collection():
-    log.info("inside get_upload_images_demo()")
-    return get_database()["upload_images_demo"]
+def get_upload_images_demo_collection(): ...
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

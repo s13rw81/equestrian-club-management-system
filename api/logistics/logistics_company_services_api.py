@@ -1,6 +1,6 @@
-from typing import List
+from typing import Annotated
 
-from fastapi import APIRouter, File, Request, UploadFile, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import Response
 
@@ -21,17 +21,7 @@ from data.dbapis.logistics_company_services.write_queries import (
     update_luggage_transfer_service_db,
     update_user_transfer_service_db,
 )
-from data.dbapis.truck.read_queries import (
-    get_truck_details_by_id_db,
-    get_trucks_by_logistics_company_id,
-)
-from data.dbapis.truck.write_queries import (
-    add_truck_db,
-    update_truck_availability,
-    update_truck_images,
-)
 from logging_config import log
-from logic.logistics.write_truck_images import write_images
 from models.logistics_company_services import (
     ClubToClubServiceInternal,
     LuggageTransferServiceInternal,
@@ -39,13 +29,13 @@ from models.logistics_company_services import (
     UserTransferServiceInternal,
 )
 from models.logistics_company_services.enums.service_enums import ServiceAvailability
-from models.truck.trucks import TruckInternal
+from models.user import UserInternal
+from models.user.enums import UserRoles
+from role_based_access_control import RoleBasedAccessControl
 
 from .models import (
     AddClubToClubService,
     AddLuggageTransferService,
-    AddTruck,
-    AddTruckResponse,
     AddUserTransferService,
     ResponseAddClubToClubService,
     ResponseAddLuggageTransferService,
@@ -53,152 +43,26 @@ from .models import (
     ResponseGetClubToClubService,
     ResponseGetLuggageTransferService,
     ResponseGetUserTransferService,
-    ResponseTruckDetails,
     UpdateClubToClubService,
     UpdateLuggageTransferService,
-    UpdateTruckDetails,
     UpdateUserTransferService,
-    UploadTruckImages,
-    ViewTruckResponse,
 )
 
-logistics_company_api_router = APIRouter(
-    prefix="/logistic-company",
-    tags=["logistic-company"],
-)
+manage_service_router = APIRouter(prefix="/services", tags=["logistics-company"])
 
 
-@logistics_company_api_router.post("/trucks/add-truck")
-def add_truck(truck_details: AddTruck, request: Request) -> AddTruckResponse:
-
-    log.info(f"{request.url.path} invoked : truck_details {truck_details}")
-
-    truck = TruckInternal(
-        registration_number=truck_details.registration_number,
-        truck_type=truck_details.truck_type,
-        capacity=truck_details.capacity,
-        special_features=truck_details.special_features,
-        gps_equipped=truck_details.gps_equipped,
-        air_conditioning=truck_details.air_conditioning,
-        logistics_company_id=truck_details.logistics_company_id,
-        name=truck_details.name,
-        services=truck_details.services,
-    )
-
-    log.info(f"truck {truck}")
-
-    updated, truck_id = add_truck_db(truck=truck)
-
-    if not updated:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="unable to save truck.",
-        )
-
-    response = AddTruckResponse(
-        success=updated, truck_id=truck_id, message="Truck successfully added"
-    )
-
-    log.info(f"{request.url.path} returning {response}")
-
-    return response
-
-
-@logistics_company_api_router.get(
-    "/trucks/get-trucks/{logistics_company_id}", response_model_by_alias=False
-)
-def get_trucks(logistics_company_id: str, request: Request) -> List[ViewTruckResponse]:
-    log.info(
-        f"{request.url.path} invoked : logistics_company_id {logistics_company_id}"
-    )
-
-    trucks_list = get_trucks_by_logistics_company_id(
-        logistics_company_id=logistics_company_id,
-        fields=[
-            "name",
-            "availability",
-            "logistics_company_id",
-            "capacity",
-            "registration_number",
-        ],
-    )
-
-    return trucks_list
-
-
-@logistics_company_api_router.get(
-    "/trucks/get-truck/{truck_id}", response_model_by_alias=False
-)
-def get_truck(truck_id: str, request: Request) -> ResponseTruckDetails:
-    log.info(f"{request.url.path} invoked : truck_id {truck_id}")
-
-    truck_details = get_truck_details_by_id_db(
-        truck_id=truck_id,
-        fields=[
-            "name",
-            "truck_type",
-            "availability",
-            "images",
-            "logistics_company_id",
-            "registration_number",
-        ],
-    )
-
-    log.info(f"{request.url.path} returning : {truck_details}")
-
-    return truck_details
-
-
-@logistics_company_api_router.post("/trucks/{truck_id}/images")
-def upload_truck_images(
-    truck_id: str,
-    request: Request,
-    truck_descriptions: UploadTruckImages,
-    files: List[UploadFile] = File(...),
-):
-
-    log.info(f"{request.url.path} invoked : truck_id {truck_id}")
-
-    if len(truck_descriptions.description) != len(files):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="truck images and descriptions are required",
-        )
-
-    file_paths = write_images(truck_id=truck_id, files=files)
-
-    if not file_paths:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="unable to save image at this time",
-        )
-
-    update_truck_images(
-        truck_id=truck_id,
-        file_paths=file_paths,
-        description=truck_descriptions.description,
-    )
-
-    return {"message": "Images uploaded successfully"}
-
-
-@logistics_company_api_router.put("/trucks/update-truck/{truck_id}")
-def update_truck(update_details: UpdateTruckDetails, request: Request):
-
-    log.info(f"{request.url.path} invoked : update_details {update_details}")
-
-    update_truck_availability(
-        truck_id=update_details.truck_id, availability=update_details.availability.value
-    )
-
-    return {"message": "Truck availability updated successfully"}
-
-
-@logistics_company_api_router.get(
-    "/services/get-club-to-club-service/{logistics_company_id}"
-)
+@manage_service_router.get("/get-club-to-club-service/{logistics_company_id}")
 def get_club_to_club_transfer_service(
-    logistics_company_id: str, request: Request
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseGetClubToClubService:
 
     log.info(f"{request.url.path} invoked")
@@ -226,9 +90,18 @@ def get_club_to_club_transfer_service(
     return response
 
 
-@logistics_company_api_router.post("/services/add-club-to-club-service")
+@manage_service_router.post("/add-club-to-club-service")
 def add_club_to_club_transfer_service(
-    club_to_club_service_details: AddClubToClubService, request: Request
+    club_to_club_service_details: AddClubToClubService,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseAddClubToClubService:
 
     log.info(f"{request.url.path} invoked : {club_to_club_service_details}")
@@ -253,7 +126,7 @@ def add_club_to_club_transfer_service(
 
     provider = Provider(
         provider_id=club_to_club_service_details.logistics_company_id,
-        provider_type="LOGISTICS",
+        provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     club_to_club_service = ClubToClubServiceInternal(
         provider=provider, is_available=ServiceAvailability.AVAILABLE
@@ -273,9 +146,19 @@ def add_club_to_club_transfer_service(
     return response
 
 
-@logistics_company_api_router.put("/services/update-club-to-club-service/{service_id}")
+@manage_service_router.put("/update-club-to-club-service/{service_id}")
 def update_club_to_club_transfer_service(
-    service_id: str, service_update_details: UpdateClubToClubService, request: Request
+    service_id: str,
+    service_update_details: UpdateClubToClubService,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked : {service_update_details}")
@@ -301,11 +184,18 @@ def update_club_to_club_transfer_service(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@logistics_company_api_router.get(
-    "/services/get-user-transfer-service/{logistics_company_id}"
-)
+@manage_service_router.get("/get-user-transfer-service/{logistics_company_id}")
 def get_user_transfer_service(
-    logistics_company_id: str, request: Request
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseGetUserTransferService:
     log.info(f"{request.url.path} invoked")
 
@@ -332,10 +222,18 @@ def get_user_transfer_service(
     return response
 
 
-@logistics_company_api_router.post("/service/add-user-transfer-service")
+@manage_service_router.post("/add-user-transfer-service")
 def add_user_transfer_service(
     user_service_details: AddUserTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseAddUserTransferService:
     log.info(f"{request.url.path} invoked : {user_service_details}")
 
@@ -359,7 +257,7 @@ def add_user_transfer_service(
 
     provider = Provider(
         provider_id=user_service_details.logistics_company_id,
-        provider_type="LOGISTICS",
+        provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     user_transfer_service = UserTransferServiceInternal(
         provider=provider, is_available=ServiceAvailability.AVAILABLE
@@ -379,11 +277,19 @@ def add_user_transfer_service(
     return response
 
 
-@logistics_company_api_router.put("/services/update-user-transfer-service")
+@manage_service_router.put("/update-user-transfer-service")
 def update_user_transfer_service(
     service_id: str,
     service_update_details: UpdateUserTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked : {service_update_details}")
@@ -409,11 +315,18 @@ def update_user_transfer_service(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@logistics_company_api_router.get(
-    "/services/get-luggage-transfer-service/{logistics_company_id}"
-)
+@manage_service_router.get("/get-luggage-transfer-service/{logistics_company_id}")
 def get_luggage_transfer_service(
-    logistics_company_id: str, request: Request
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseGetLuggageTransferService:
     log.info(f"{request.url.path} invoked")
 
@@ -440,12 +353,18 @@ def get_luggage_transfer_service(
     return response
 
 
-@logistics_company_api_router.post(
-    "/service/add-user-luggage-transfer-service-with-insurance"
-)
+@manage_service_router.post("/add-luggage-transfer-service")
 def add_luggage_transfer_service(
     luggage_transfer_service_details: AddLuggageTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseAddLuggageTransferService:
     log.info(f"{request.url.path} invoked : {luggage_transfer_service_details}")
 
@@ -469,7 +388,7 @@ def add_luggage_transfer_service(
 
     provider = Provider(
         provider_id=luggage_transfer_service_details.logistics_company_id,
-        provider_type="LOGISTICS",
+        provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     luggage_transfer_service = LuggageTransferServiceInternal(
         provider=provider, is_available=ServiceAvailability.AVAILABLE
@@ -489,13 +408,19 @@ def add_luggage_transfer_service(
     return response
 
 
-@logistics_company_api_router.put(
-    "/services/update-user-luggage-transfer-service-with-insurance"
-)
+@manage_service_router.put("/update-luggage-transfer-service")
 def update_luggage_transfer_service(
     service_id: str,
     service_update_details: UpdateLuggageTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked : {service_update_details}")

@@ -1,2 +1,1 @@
-from .logistics_company_api import logistics_company_api_router
-from .transfer_api import transfer_api_router
+from .routers import logistics_admin_router, logistics_user_router

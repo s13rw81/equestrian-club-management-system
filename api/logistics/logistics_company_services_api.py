@@ -186,7 +186,16 @@ def update_club_to_club_transfer_service(
 
 @manage_service_router.get("/get-user-transfer-service/{logistics_company_id}")
 def get_user_transfer_service(
-    logistics_company_id: str, request: Request
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseGetUserTransferService:
     log.info(f"{request.url.path} invoked")
 
@@ -217,6 +226,14 @@ def get_user_transfer_service(
 def add_user_transfer_service(
     user_service_details: AddUserTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseAddUserTransferService:
     log.info(f"{request.url.path} invoked : {user_service_details}")
 
@@ -240,7 +257,7 @@ def add_user_transfer_service(
 
     provider = Provider(
         provider_id=user_service_details.logistics_company_id,
-        provider_type="LOGISTICS",
+        provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     user_transfer_service = UserTransferServiceInternal(
         provider=provider, is_available=ServiceAvailability.AVAILABLE
@@ -265,6 +282,14 @@ def update_user_transfer_service(
     service_id: str,
     service_update_details: UpdateUserTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked : {service_update_details}")

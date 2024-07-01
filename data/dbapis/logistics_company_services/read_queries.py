@@ -6,7 +6,7 @@ from models.company import Company
 from models.logistics_company_services.logistics_company_services import (
     ClubToClubServiceInternalWithID,
     LuggageTransferServiceInternal,
-    UserTransferServiceInternal,
+    UserTransferServiceInternalWithID,
 )
 from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING, LogisticsService
 
@@ -126,14 +126,14 @@ def get_club_to_club_service_by_service_id(
 
 def get_user_transfer_service_by_logistics_company_id(
     logistics_company_id: str,
-) -> UserTransferServiceInternal:
+) -> UserTransferServiceInternalWithID:
     """return the user horse transfer service details by logistics company id
 
     Args:
         logistics_company_id (str)
 
     Returns:
-        UserTransferServiceInternal
+        UserTransferServiceInternalWithID
     """
 
     service_details = user_transfer_service_collection.find_one(
@@ -141,7 +141,7 @@ def get_user_transfer_service_by_logistics_company_id(
     )
 
     if service_details:
-        service_details = UserTransferServiceInternal(**service_details)
+        service_details = UserTransferServiceInternalWithID(**service_details)
 
     log.info(
         f"get_user_transfer_service_by_logistics_company_id() returning : {service_details}"
@@ -152,14 +152,14 @@ def get_user_transfer_service_by_logistics_company_id(
 
 def get_user_transfer_service_by_service_id(
     service_id: str,
-) -> UserTransferServiceInternal:
+) -> UserTransferServiceInternalWithID:
     """return user transfer service details by service id
 
     Args:
         service_id (str)
 
     Returns:
-        UserTransferServiceInternal
+        UserTransferServiceInternalWithID
     """
     log.info(
         f"get_user_transfer_service_by_service_id() invoked : service_id {service_id}"
@@ -170,7 +170,7 @@ def get_user_transfer_service_by_service_id(
     )
 
     if service_details:
-        service_details = UserTransferServiceInternal(**service_details)
+        service_details = UserTransferServiceInternalWithID(**service_details)
 
     log.info(f"get_user_transfer_service_by_service_id() returning : {service_details}")
 

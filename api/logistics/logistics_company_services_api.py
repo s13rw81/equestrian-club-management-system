@@ -317,7 +317,16 @@ def update_user_transfer_service(
 
 @manage_service_router.get("/get-luggage-transfer-service/{logistics_company_id}")
 def get_luggage_transfer_service(
-    logistics_company_id: str, request: Request
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseGetLuggageTransferService:
     log.info(f"{request.url.path} invoked")
 
@@ -348,6 +357,14 @@ def get_luggage_transfer_service(
 def add_luggage_transfer_service(
     luggage_transfer_service_details: AddLuggageTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseAddLuggageTransferService:
     log.info(f"{request.url.path} invoked : {luggage_transfer_service_details}")
 
@@ -371,7 +388,7 @@ def add_luggage_transfer_service(
 
     provider = Provider(
         provider_id=luggage_transfer_service_details.logistics_company_id,
-        provider_type="LOGISTICS",
+        provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     luggage_transfer_service = LuggageTransferServiceInternal(
         provider=provider, is_available=ServiceAvailability.AVAILABLE
@@ -396,6 +413,14 @@ def update_luggage_transfer_service(
     service_id: str,
     service_update_details: UpdateLuggageTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked : {service_update_details}")

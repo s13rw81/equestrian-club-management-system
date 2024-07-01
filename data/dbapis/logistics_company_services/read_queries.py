@@ -5,7 +5,7 @@ from logging_config import log
 from models.company import Company
 from models.logistics_company_services.logistics_company_services import (
     ClubToClubServiceInternalWithID,
-    LuggageTransferServiceInternal,
+    LuggageTransferServiceInternalWithID,
     UserTransferServiceInternalWithID,
 )
 from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING, LogisticsService
@@ -179,14 +179,14 @@ def get_user_transfer_service_by_service_id(
 
 def get_luggage_transfer_service_by_logistics_company_id(
     logistics_company_id: str,
-) -> LuggageTransferServiceInternal:
+) -> LuggageTransferServiceInternalWithID:
     """return the luggage transfer service details by logistics company id
 
     Args:
         logistics_company_id (str)
 
     Returns:
-        LuggageTransferServiceInternal
+        LuggageTransferServiceInternalWithID
     """
 
     service_details = luggage_transfer_service_collection.find_one(
@@ -194,7 +194,7 @@ def get_luggage_transfer_service_by_logistics_company_id(
     )
 
     if service_details:
-        service_details = LuggageTransferServiceInternal(**service_details)
+        service_details = LuggageTransferServiceInternalWithID(**service_details)
 
     log.info(
         f"get_luggage_transfer_service_by_logistics_company_id() returning : {service_details}"
@@ -205,14 +205,14 @@ def get_luggage_transfer_service_by_logistics_company_id(
 
 def get_luggage_transfer_service_by_service_id(
     service_id: str,
-) -> LuggageTransferServiceInternal:
+) -> LuggageTransferServiceInternalWithID:
     """return luggage transfer service details by service id
 
     Args:
         service_id (str)
 
     Returns:
-        LuggageTransferServiceInternal
+        LuggageTransferServiceInternalWithID
     """
     log.info(
         f"get_luggage_transfer_service_by_service_id() invoked : service_id {service_id}"
@@ -223,7 +223,7 @@ def get_luggage_transfer_service_by_service_id(
     )
 
     if service_details:
-        service_details = LuggageTransferServiceInternal(**service_details)
+        service_details = LuggageTransferServiceInternalWithID(**service_details)
 
     log.info(
         f"get_luggage_transfer_service_by_service_id() returning : {service_details}"

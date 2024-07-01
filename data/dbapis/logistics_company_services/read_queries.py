@@ -10,7 +10,7 @@ from models.logistics_company_services.logistics_company_services import (
 )
 from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING, LogisticsService
 
-logistics_company_collection = get_collection(collection_name="company")
+logistics_company_collection = get_collection(collection_name="logistics_company")
 
 club_to_club_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
     LogisticsService.CLUB_TO_CLUB.value

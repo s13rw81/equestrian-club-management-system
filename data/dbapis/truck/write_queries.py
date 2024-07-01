@@ -5,18 +5,7 @@ from logging_config import log
 from models.truck import TruckInternal
 
 truck_collection = get_collection(collection_name="trucks")
-company_collection = get_collection(collection_name="company")
-club_to_club_service_collection = get_collection("logistics_service_club_to_club")
-user_transfer_service_collection = get_collection("logistics_service_user_transfer")
-user_transfer_with_insurance_service_collection = get_collection(
-    "logistics_service_user_transfer_with_insurance"
-)
-
-SERVICE_COLLECTION_MAPPING = {
-    "club_to_club": club_to_club_service_collection,
-    "user_transfer": user_transfer_service_collection,
-    "user_transfer_with_insurance": user_transfer_with_insurance_service_collection,
-}
+company_collection = get_collection(collection_name="logistics_company")
 
 
 # TODO: Convert the below function to a transaction

@@ -100,6 +100,12 @@ def verify_password_reset_otp(user: UserInternal, user_provided_otp: str, new_pa
 
     log.info(f"verify_password_reset_otp(user={user}, user_provided_otp={user_provided_otp})")
 
+    if not user.password_reset_verification_otp:
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail='password reset otp not generated for user.'
+        )
+
     if user.password_reset_verification_otp.otp != user_provided_otp:
         emsg = f"user provided OTP {user_provided_otp} and password reset OTP sent to user do not match."
         raise HTTPException(

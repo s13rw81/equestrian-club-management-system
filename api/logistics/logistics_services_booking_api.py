@@ -1,6 +1,6 @@
-from typing import List
+from typing import Annotated, List
 
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from data.dbapis.logistics_company_services.read_queries import (
     get_all_club_to_club_services,
@@ -36,6 +36,9 @@ from models.logistics_service_bookings import (
 )
 from models.logistics_service_bookings.enums import BookingStatus
 from models.truck.enums import TruckAvailability
+from models.user import UserInternal
+from models.user.enums import UserRoles
+from role_based_access_control import RoleBasedAccessControl
 from utils.logistics_utils import LogisticsService
 
 from .models import (
@@ -68,7 +71,21 @@ service_booking_router = APIRouter(prefix="/services", tags=["logistics-user"])
 @service_booking_router.get(
     "/get-club-to-club-services", response_model=List[ResponseClubToClubServices]
 )
-def get_club_to_club_services(request: Request):
+def get_club_to_club_services(
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.LOGISTIC_COMPANY,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
+):
     log.info(f"{request.url.path} invoked")
 
     club_to_club_services = get_all_club_to_club_services()
@@ -84,6 +101,17 @@ def book_club_to_club_services(
     service_id: str,
     booking_details: BookClubToClubService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ) -> ResponseBookClubToClubServiceBooking:
     log.info(f"{request.url.path} invoked booking_details {booking_details}")
 
@@ -101,7 +129,7 @@ def book_club_to_club_services(
     booking_status = BookingStatus.CREATED
 
     booking = ClubToClubServiceBookingInternal(
-        consumer=Consumer(consumer_id=booking_details.consumer_id),
+        consumer=Consumer(consumer_id=user.id, consumer_type=user.user_role),
         horse_id=booking_details.horse_id,
         source_club_id=booking_details.source_club_id,
         destination_club_id=booking_details.destination_club_id,
@@ -141,10 +169,20 @@ def book_club_to_club_services(
 
 @service_booking_router.put("/update-club-to-club-service-booking/{booking_id}")
 def update_club_to_club_booking(
-    consumer_id: str,
     booking_id: str,
     booking_update_details: UpdateClubToClubServiceBooking,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ):
     log.info(
         f"{request.url.path} invoked booking_update_details {booking_update_details}"
@@ -160,7 +198,7 @@ def update_club_to_club_booking(
         )
 
     booking_details = get_club_to_club_service_booking_by_booking_id_db(
-        consumer_id=consumer_id, booking_id=booking_id
+        consumer_id=user.id, booking_id=booking_id
     )
 
     if not booking_details:
@@ -194,12 +232,25 @@ def update_club_to_club_booking(
     "/get-club-to-club-service-bookings",
     response_model=List[ResponseClubToClubServiceBooking],
 )
-def get_club_to_club_service_bookings(consumer_id: str, request: Request):
+def get_club_to_club_service_bookings(
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
+):
 
     log.info(f"{request.url.path} invoked")
 
     club_to_club_bookings = get_all_club_to_club_service_bookings_db(
-        consumer_id=consumer_id
+        consumer_id=user.id
     )
     response = [
         ClubToClubServiceBooking(**booking) for booking in club_to_club_bookings
@@ -215,13 +266,25 @@ def get_club_to_club_service_bookings(consumer_id: str, request: Request):
     response_model=ResponseClubToClubServiceBooking,
 )
 def get_club_to_club_service_booking(
-    consumer_id: str, booking_id: str, request: Request
+    booking_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked")
 
     booking = get_club_to_club_service_booking_by_booking_id_db(
-        consumer_id=consumer_id, booking_id=booking_id
+        consumer_id=user.id, booking_id=booking_id
     )
     if not booking:
         raise HTTPException(
@@ -239,7 +302,20 @@ def get_club_to_club_service_booking(
 @service_booking_router.get(
     "/get-user-transfer-services", response_model=List[ResponseUserTransferServices]
 )
-def get_user_transfer_services(request: Request):
+def get_user_transfer_services(
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
+):
     log.info(f"{request.url.path} invoked")
 
     user_transfer_services = get_all_user_transfer_services()
@@ -255,6 +331,17 @@ def book_user_transfer_service(
     service_id: str,
     booking_details: BookUserTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ) -> ResponseBookUserTransferService:
     log.info(f"{request.url.path} invoked booking_details {booking_details}")
 
@@ -272,9 +359,7 @@ def book_user_transfer_service(
     booking_status = BookingStatus.CREATED
 
     booking = UserTransferServiceBookingInternal(
-        consumer=Consumer(
-            consumer_id=booking_details.consumer_id, consumer_type="USER"
-        ),
+        consumer=Consumer(consumer_id=user.id, consumer_type=user.user_role),
         service_id=service_id,
         logistics_company_id=booking_details.logistics_company_id,
         truck_id=booking_details.truck_id,
@@ -313,10 +398,20 @@ def book_user_transfer_service(
 
 @service_booking_router.put("/update-user-transfer-service-booking/{booking_id}")
 def update_user_transfer_service_booking(
-    consumer_id: str,
     booking_id: str,
     booking_update_details: UpdateUserTransferServiceBooking,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ):
     log.info(
         f"{request.url.path} invoked booking_update_details {booking_update_details}"
@@ -332,7 +427,7 @@ def update_user_transfer_service_booking(
         )
 
     booking_details = get_user_transfer_service_booking_by_booking_id(
-        consumer_id=consumer_id, booking_id=booking_id
+        consumer_id=user.id, booking_id=booking_id
     )
     if not booking_details:
         raise HTTPException(
@@ -365,12 +460,25 @@ def update_user_transfer_service_booking(
     "/get-user-transfer-service-bookings",
     response_model=List[ResponseUserTransferServiceBooking],
 )
-def get_user_transfer_service_bookings(consumer_id: str, request: Request):
+def get_user_transfer_service_bookings(
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
+):
 
     log.info(f"{request.url.path} invoked")
 
     user_transfer_bookings = get_all_user_transfer_service_bookings_db(
-        consumer_id=consumer_id
+        consumer_id=user.id
     )
     response = [
         UserTransferServiceBooking(**booking) for booking in user_transfer_bookings
@@ -386,15 +494,25 @@ def get_user_transfer_service_bookings(consumer_id: str, request: Request):
     response_model=ResponseUserTransferServiceBooking,
 )
 def get_user_transfer_service_booking(
-    consumer_id: str,
     booking_id: str,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked")
 
     booking = get_user_transfer_service_booking_by_booking_id(
-        consumer_id=consumer_id, booking_id=booking_id
+        consumer_id=user.id, booking_id=booking_id
     )
     if not booking:
         raise HTTPException(
@@ -413,7 +531,20 @@ def get_user_transfer_service_booking(
     "/get-luggage-transfer-services",
     response_model=List[ResponseLuggageTransferService],
 )
-def get_luggage_transfer_services(request: Request):
+def get_luggage_transfer_services(
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
+):
     log.info(f"{request.url.path} invoked")
 
     luggage_transfer_services = get_all_luggage_transfer_services()
@@ -431,6 +562,17 @@ def book_luggage_transfer_service(
     service_id: str,
     booking_details: BookLuggageTransferService,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ) -> ResponseBookLuggageTransferService:
     log.info(f"{request.url.path} invoked booking_details {booking_details}")
 
@@ -448,9 +590,7 @@ def book_luggage_transfer_service(
     booking_status = BookingStatus.CREATED
 
     booking = LuggageTransferServiceBookingInternal(
-        consumer=Consumer(
-            consumer_id=booking_details.consumer_id, consumer_type="USER"
-        ),
+        consumer=Consumer(consumer_id=user.id, consumer_type=user.user_role),
         service_id=service_id,
         logistics_company_id=booking_details.logistics_company_id,
         truck_id=booking_details.truck_id,
@@ -489,10 +629,20 @@ def book_luggage_transfer_service(
 
 @service_booking_router.put("/update-luggage-transfer-service-booking/{booking_id}")
 def update_luggage_transfer_service_booking(
-    consumer_id: str,
     booking_id: str,
     booking_update_details: UpdateLuggageTransferServiceBooking,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ):
     log.info(
         f"{request.url.path} invoked booking_update_details {booking_update_details}"
@@ -508,7 +658,7 @@ def update_luggage_transfer_service_booking(
         )
 
     booking_details = get_luggage_transfer_service_by_booking_id(
-        consumer_id=consumer_id, booking_id=booking_id
+        consumer_id=user.id, booking_id=booking_id
     )
 
     if not booking_details:
@@ -542,12 +692,25 @@ def update_luggage_transfer_service_booking(
     "/get-luggage-transfer-service-bookings",
     response_model=List[ResponseLuggageTransferServiceBooking],
 )
-def get_luggage_transfer_service_bookings(consumer_id: str, request: Request):
+def get_luggage_transfer_service_bookings(
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
+):
 
     log.info(f"{request.url.path} invoked")
 
     luggage_transfer_bookings = get_all_luggage_transfer_service_bookings_db(
-        consumer_id=consumer_id
+        consumer_id=user.id
     )
     response = [
         LuggageTransferServiceBooking(**booking)
@@ -564,15 +727,25 @@ def get_luggage_transfer_service_bookings(consumer_id: str, request: Request):
     response_model=ResponseLuggageTransferServiceBooking,
 )
 def get_luggage_transfer_service_booking(
-    consumer_id: str,
     booking_id: str,
     request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={
+                    UserRoles.ADMIN,
+                    UserRoles.USER,
+                }
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked")
 
     booking = get_luggage_transfer_service_by_booking_id(
-        consumer_id=consumer_id, booking_id=booking_id
+        consumer_id=user.id, booking_id=booking_id
     )
     if not booking:
         raise HTTPException(

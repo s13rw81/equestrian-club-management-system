@@ -57,7 +57,6 @@ class ResponseClubToClubServices(ResponseBaseLogisticsServices): ...
 
 
 class BookClubToClubService(BaseModel):
-    consumer_id: str
     horse_id: str
     source_club_id: str
     destination_club_id: str
@@ -172,7 +171,6 @@ class ResponseUserTransferServices(ResponseBaseLogisticsServices): ...
 
 
 class BookUserTransferService(BaseModel):
-    consumer_id: str
     logistics_company_id: str
     truck_id: str
     destination_location: Location
@@ -211,8 +209,8 @@ class UpdateUserTransferServiceBooking(BaseModel):
     source_location: Location = None
     destination_location: Location = None
     booking_status: BookingStatus = None
-    horse_info: Horse
-    groomer_info: Groomer
+    horse_info: Horse = None
+    groomer_info: Groomer = None
 
     @field_validator("pickup_time")
     @classmethod
@@ -272,7 +270,6 @@ class ResponseLuggageTransferService(ResponseBaseLogisticsServices): ...
 
 
 class BookLuggageTransferService(BaseModel):
-    consumer_id: str
     destination_location: Location
     source_location: Location
     logistics_company_id: str

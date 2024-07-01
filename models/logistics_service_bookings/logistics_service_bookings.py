@@ -4,6 +4,7 @@ from typing import List
 from pydantic import BaseModel, Field, field_serializer
 from pydantic_extra_types.coordinate import Latitude, Longitude
 
+from models.user import UserRoles
 from utils.date_time import get_current_utc_datetime
 
 from .enums import BookingStatus
@@ -16,7 +17,14 @@ class Location(BaseModel):
 
 class Consumer(BaseModel):
     consumer_id: str
-    consumer_type: str = "CLUB"
+    consumer_type: UserRoles
+
+    @field_serializer("consumer_type")
+    def enum_serializer(self, enum):
+        if not enum:
+            return
+
+        return enum.value
 
 
 class Horse(BaseModel):

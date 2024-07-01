@@ -4,7 +4,7 @@ from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.company import Company
 from models.logistics_company_services.logistics_company_services import (
-    ClubToClubServiceInternal,
+    ClubToClubServiceInternalWithID,
     LuggageTransferServiceInternal,
     UserTransferServiceInternal,
 )
@@ -36,7 +36,7 @@ def get_logistics_company_by_id(logistics_company_id: str) -> Company:
     try:
         company_details = logistics_company_collection.find_one(
             {"_id": convert_to_object_id(logistics_company_id)},
-            projection={"company_name": 1, "admin_id": 1},
+            projection={"company_name": 1, "admin_id": 1, "email": 1},
         )
     except Exception as e:
         log.error(f"Exception : get_logistics_company_by_id {str(e)}")
@@ -45,6 +45,7 @@ def get_logistics_company_by_id(logistics_company_id: str) -> Company:
     log.info(f" company_details {company_details}")
 
     if company_details:
+        company_details["phone_no"] = ""
         company_details = Company(**company_details)
 
     log.info(f"get_logistics_company_by_id() returning : {company_details}")
@@ -54,14 +55,14 @@ def get_logistics_company_by_id(logistics_company_id: str) -> Company:
 
 def club_to_club_service_by_logistics_company_id(
     logistics_company_id: str,
-) -> ClubToClubServiceInternal:
+) -> ClubToClubServiceInternalWithID:
     """return club to club service details for the provided logistics_company_id
 
     Args:
         logistics_company_id (str)
 
     Returns:
-        ClubToClubServiceInternal
+        ClubToClubServiceInternalWithID
     """
 
     log.info(
@@ -81,7 +82,7 @@ def club_to_club_service_by_logistics_company_id(
     log.info(f"service_details {service_details}")
 
     if service_details:
-        service_details = ClubToClubServiceInternal(**service_details)
+        service_details = ClubToClubServiceInternalWithID(**service_details)
 
     log.info(
         f"club_to_club_service_by_logistics_company_id() returning : {service_details}"
@@ -92,14 +93,14 @@ def club_to_club_service_by_logistics_company_id(
 
 def get_club_to_club_service_by_service_id(
     service_id: str,
-) -> ClubToClubServiceInternal:
+) -> ClubToClubServiceInternalWithID:
     """return club to club service details by service id
 
     Args:
         service_id (str)
 
     Returns:
-        ClubToClubServiceInternal
+        ClubToClubServiceInternalWithID
     """
     log.info(
         f"get_club_to_club_service_by_service_id() invoked : service_id {service_id}"
@@ -114,7 +115,7 @@ def get_club_to_club_service_by_service_id(
         service_details = None
 
     if service_details:
-        service_details = ClubToClubServiceInternal(**service_details)
+        service_details = ClubToClubServiceInternalWithID(**service_details)
 
     log.info(
         f"club_to_club_service_by_logistics_company_id() returning : {service_details}"
@@ -204,7 +205,7 @@ def get_luggage_transfer_service_by_logistics_company_id(
 
 def get_luggage_transfer_service_by_service_id(
     service_id: str,
-) -> ClubToClubServiceInternal:
+) -> LuggageTransferServiceInternal:
     """return luggage transfer service details by service id
 
     Args:

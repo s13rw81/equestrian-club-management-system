@@ -1,6 +1,6 @@
-from typing import List
+from typing import Annotated
 
-from fastapi import APIRouter, File, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.responses import Response
 
@@ -29,6 +29,9 @@ from models.logistics_company_services import (
     UserTransferServiceInternal,
 )
 from models.logistics_company_services.enums.service_enums import ServiceAvailability
+from models.user import UserInternal
+from models.user.enums import UserRoles
+from role_based_access_control import RoleBasedAccessControl
 
 from .models import (
     AddClubToClubService,
@@ -50,7 +53,16 @@ manage_service_router = APIRouter(prefix="/services", tags=["logistics-company"]
 
 @manage_service_router.get("/get-club-to-club-service/{logistics_company_id}")
 def get_club_to_club_transfer_service(
-    logistics_company_id: str, request: Request
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseGetClubToClubService:
 
     log.info(f"{request.url.path} invoked")
@@ -80,7 +92,16 @@ def get_club_to_club_transfer_service(
 
 @manage_service_router.post("/add-club-to-club-service")
 def add_club_to_club_transfer_service(
-    club_to_club_service_details: AddClubToClubService, request: Request
+    club_to_club_service_details: AddClubToClubService,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ) -> ResponseAddClubToClubService:
 
     log.info(f"{request.url.path} invoked : {club_to_club_service_details}")
@@ -105,7 +126,7 @@ def add_club_to_club_transfer_service(
 
     provider = Provider(
         provider_id=club_to_club_service_details.logistics_company_id,
-        provider_type="LOGISTICS",
+        provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     club_to_club_service = ClubToClubServiceInternal(
         provider=provider, is_available=ServiceAvailability.AVAILABLE
@@ -127,7 +148,17 @@ def add_club_to_club_transfer_service(
 
 @manage_service_router.put("/update-club-to-club-service/{service_id}")
 def update_club_to_club_transfer_service(
-    service_id: str, service_update_details: UpdateClubToClubService, request: Request
+    service_id: str,
+    service_update_details: UpdateClubToClubService,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
 ):
 
     log.info(f"{request.url.path} invoked : {service_update_details}")

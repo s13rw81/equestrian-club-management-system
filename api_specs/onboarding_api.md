@@ -121,6 +121,7 @@ async def upload_image_demo(images: list[UploadFile]):
 2. The `image_id`s returned by the image handling mechanism would be saved in the same
    `logistic_companies` collection in the document associated with the `logistic_company` of the user.
    The `logistic_company` will be figured out based on the user who calls the route.
+   
    The key for saving the images would be `images`.
     ```json
     {
@@ -144,8 +145,55 @@ everything went well.
 }
 ```
 
+#### 3. `onboarding/logistic-company`
 
-### 3. `onboarding/create-club`
+After the user onboards himself as a `logistic-company`, he calls this route to get details about his `logistic-company`.
+
+#### HTTP Method
+`GET`
+
+#### The Process
+1. The user onboards himself as a `logistic-company`.
+2. After the successful onboarding, the user calls this route to get details about his
+   `logistic-company`.
+
+#### Authentication and RBAC
+1. This will be an authenticated route.
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have access to this route.
+
+#### The Flow
+1. The user will call this route.
+2. This route will return the `logistic-company` associated with the user.
+
+#### Error Handling
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+If everything goes well, return a response with a schema similar to the follwing,
+
+```json
+{
+  "id": "the id of the logistic_company",
+  "email_address": "someemail@domain.com",
+  "phone_no": "+911111111111",
+  "name": "name of the logistic-company",
+  "description": "a description of the company",
+  "is_khayyal_verified": false,
+  "image_urls": [
+    "logistic_companies.images[0]",
+    "logistic_companies.images[1]
+  ]
+}
+```
+
+**Notes:**
+1. The `image_urls` key will contain a list of generated image urls using the
+   image handling mechanism. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+   
+
+### 4. `onboarding/create-club`
 Once the user is created using the `auth` apis, the user 
 will call this api to onboard itself as a `club`.
 
@@ -216,7 +264,7 @@ Typically, the request would succeed and return,
 {"club_id":  "the id of the newly created club"}
 ```
 
-### 4. `onboarding/club/upload-images`
+### 5. `onboarding/club/upload-images`
 
 After onboarding as a `club`, the user will use this route to upload images
 of the `club`.
@@ -285,3 +333,51 @@ everything went well.
 }
 ```
 
+#### 6. `onboarding/club`
+
+After the user onboards himself as a `club`, he calls this route to get details about his `club`.
+
+#### HTTP Method
+`GET`
+
+#### The Process
+1. The user onboards himself as a `club`.
+2. After the successful onboarding, the user calls this route to get details about his
+   `club`.
+
+#### Authentication and RBAC
+1. This will be an authenticated route.
+2. Only users with `user_role`: `CLUB` will have access to this route.
+
+#### The Flow
+1. The user will call this route.
+2. This route will return the `club` associated with the user.
+
+#### Error Handling
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+If everything goes well, return a response with a schema similar to the follwing,
+
+```json
+{
+  "id": "the id of the club",
+  "email_address": "someemail@domain.com",
+  "address": "the address of the club"
+  "phone_no": "+911111111111",
+  "name": "name of the club",
+  "description": "a description of the club",
+  "is_khayyal_verified": false,
+  "image_urls": [
+    "club.images[0]",
+    "club.images[1]",
+    "club.images[3]"
+  ]
+}
+```
+
+**Notes:**
+1. The `image_urls` key will contain a list of generated image urls using the
+   image handling mechanism. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.

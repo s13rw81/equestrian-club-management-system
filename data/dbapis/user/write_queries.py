@@ -25,7 +25,7 @@ def save_user(user: UserInternal) -> str:
     return retval
 
 
-def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> bool:
+def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> dict:
     """
         updates the user as per the data provided in the edit_user dict
 
@@ -51,4 +51,7 @@ def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> boo
 
     log.info(f"matched_count={result.matched_count}, modified_count={result.modified_count}")
 
-    return result.modified_count == 1
+    if result.modified_count == 1:
+        return {'status_code': 200, 'detail': 'password reset successful.'}
+    else:
+        return {'status_code': 500, 'detail': 'password reset failed.'}

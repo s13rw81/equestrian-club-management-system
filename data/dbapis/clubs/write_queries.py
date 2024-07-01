@@ -32,31 +32,3 @@ def save_club(new_club: ClubInternal) -> str:
     log.info(f"new club created with id: {retval}")
     return retval
 
-#
-# def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> bool:
-#     """
-#         updates the user as per the data provided in the edit_user dict
-#
-#         :param update_user_data: UpdateUserInternal
-#         :param user: str
-#
-#         :returns: True if successfully updated false otherwise
-#
-#     """
-#
-#     log.info(f"inside update_user(update_user_data={update_user_data}, user={user})")
-#
-#     update_user_dict = update_user_data.model_dump(exclude_none=True)
-#
-#     update_filter = ({"email_address": user.email_address}
-#                      if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
-#                      else {"phone_number": user.phone_number})
-#
-#     result = users_collection.update_one(
-#         update_filter,
-#         {"$set": update_user_dict, "$currentDate": {"lastModified": True}}
-#     )
-#
-#     log.info(f"matched_count={result.matched_count}, modified_count={result.modified_count}")
-#
-#     return result.modified_count == 1

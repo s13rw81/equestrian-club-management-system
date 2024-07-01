@@ -1,8 +1,7 @@
-from typing import List
+from typing import Annotated, List
 
-from fastapi import APIRouter, File, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 from fastapi.exceptions import HTTPException
-from fastapi.responses import Response
 
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
@@ -16,21 +15,37 @@ from data.dbapis.truck.write_queries import (
 from logging_config import log
 from logic.logistics.write_truck_images import write_images
 from models.truck.trucks import TruckInternal
+from models.user import UserInternal
+from models.user.enums import UserRoles
+from role_based_access_control import RoleBasedAccessControl
 
 from .models import (
     AddTruck,
     AddTruckResponse,
     ResponseTruckDetails,
+    ResponseViewTruck,
+    TruckDetails,
     UpdateTruckDetails,
     UploadTruckImages,
-    ViewTruckResponse,
+    ViewTruck,
 )
 
 trucks_router = APIRouter(prefix="/trucks", tags=["logistics-company"])
 
 
 @trucks_router.post("/add-truck")
-def add_truck(truck_details: AddTruck, request: Request) -> AddTruckResponse:
+def add_truck(
+    truck_details: AddTruck,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
+) -> AddTruckResponse:
 
     log.info(f"{request.url.path} invoked : truck_details {truck_details}")
 
@@ -65,8 +80,21 @@ def add_truck(truck_details: AddTruck, request: Request) -> AddTruckResponse:
     return response
 
 
-@trucks_router.get("/get-trucks/{logistics_company_id}", response_model_by_alias=False)
-def get_trucks(logistics_company_id: str, request: Request) -> List[ViewTruckResponse]:
+@trucks_router.get(
+    "/get-trucks/{logistics_company_id}", response_model=List[ResponseViewTruck]
+)
+def get_trucks(
+    logistics_company_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
+):
     log.info(
         f"{request.url.path} invoked : logistics_company_id {logistics_company_id}"
     )
@@ -82,14 +110,29 @@ def get_trucks(logistics_company_id: str, request: Request) -> List[ViewTruckRes
         ],
     )
 
-    return trucks_list
+    trucks = [ViewTruck(**truck) for truck in trucks_list]
+
+    log.info(f"{request.url.path} returning {trucks}")
+
+    return trucks
 
 
-@trucks_router.get("/get-truck/{truck_id}", response_model_by_alias=False)
-def get_truck(truck_id: str, request: Request) -> ResponseTruckDetails:
+@trucks_router.get("/get-truck/{truck_id}", response_model=ResponseTruckDetails)
+def get_truck(
+    truck_id: str,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
+):
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
 
-    truck_details = get_truck_details_by_id_db(
+    truck = get_truck_details_by_id_db(
         truck_id=truck_id,
         fields=[
             "name",
@@ -101,6 +144,13 @@ def get_truck(truck_id: str, request: Request) -> ResponseTruckDetails:
         ],
     )
 
+    if not truck:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="invalid truck id provided"
+        )
+
+    truck_details = TruckDetails(**truck)
+
     log.info(f"{request.url.path} returning : {truck_details}")
 
     return truck_details
@@ -111,6 +161,14 @@ def upload_truck_images(
     truck_id: str,
     request: Request,
     truck_descriptions: UploadTruckImages,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
     files: List[UploadFile] = File(...),
 ):
 
@@ -140,12 +198,24 @@ def upload_truck_images(
 
 
 @trucks_router.put("/update-truck/{truck_id}")
-def update_truck(update_details: UpdateTruckDetails, request: Request):
+def update_truck(
+    truck_id: str,
+    update_details: UpdateTruckDetails,
+    request: Request,
+    user: Annotated[
+        UserInternal,
+        Depends(
+            RoleBasedAccessControl(
+                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
+            )
+        ),
+    ],
+):
 
     log.info(f"{request.url.path} invoked : update_details {update_details}")
 
     update_truck_availability(
-        truck_id=update_details.truck_id, availability=update_details.availability.value
+        truck_id=truck_id, availability=update_details.availability.value
     )
 
     return {"message": "Truck availability updated successfully"}

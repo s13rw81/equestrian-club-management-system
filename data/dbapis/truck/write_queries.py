@@ -3,6 +3,7 @@ from typing import List
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.truck import TruckInternal
+from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING
 
 truck_collection = get_collection(collection_name="trucks")
 company_collection = get_collection(collection_name="logistics_company")
@@ -72,7 +73,7 @@ def add_truck_db(truck: TruckInternal) -> bool:
         for service in truck.services:
             log.info(f"service {service}")
 
-            collection = SERVICE_COLLECTION_MAPPING.get(service.value)
+            collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(service.value)
             collection.update_one(filter=filter, update=update_service)
 
         return

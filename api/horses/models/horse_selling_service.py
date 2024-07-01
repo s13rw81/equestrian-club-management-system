@@ -1,9 +1,5 @@
 from pydantic import BaseModel, Field
-
-
-class Provider(BaseModel):
-    provider_id: str = Field(..., example="1234")
-    provider_type: str = Field(..., example="user")
+from models.logistics_company_services.logistics_company_services import Provider
 
 
 class HorseSellingItem(BaseModel):

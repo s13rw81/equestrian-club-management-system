@@ -56,7 +56,6 @@ app.include_router(logistics_company_api_router)
 app.include_router(images_router)
 app.include_router(upload_images_demo_router)
 
-
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc):
     exception_id = uuid.uuid4().hex

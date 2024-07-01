@@ -15,4 +15,4 @@ class HorseSellUpdate(BaseModel):
     gender: Optional[str] = Field(None, example="Gelding")
     description: Optional[str] = Field(None, example="Bobby is well-behaved and has excellent ring qualities.")
     images: Optional[List[str]] = Field(None, example=["http://example.com/image1.jpg", "http://example.com/image2.jpg"])
-    uploaded_by: Optional[UploadedBy] = Field(None)
+    # uploaded_by: Optional[UploadedBy] = Field(None)

@@ -2,6 +2,8 @@ from data.db import get_horses_renting_service_collection
 from pymongo.collection import Collection
 from models.horse.horse_renting_service_internal import HorseRentingServiceInternal
 
+from data.db import get_database
+
 collection: Collection = get_horses_renting_service_collection()
 
 
@@ -25,3 +27,5 @@ def get_renting_horse_by_id(horse_id: str):
     ]
     horse = list(collection.aggregate(pipeline))
     return horse[0] if horse else None
+
+

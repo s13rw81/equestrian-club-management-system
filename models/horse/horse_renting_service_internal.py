@@ -1,11 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from bson import ObjectId
-
-
-class Provider(BaseModel):
-    provider_id: str
-    provider_type: str
+from models.logistics_company_services.logistics_company_services import Provider
 
 
 class HorseRentingServiceInternal(BaseModel):
@@ -17,6 +13,6 @@ class HorseRentingServiceInternal(BaseModel):
     size: int
     gender: str
     description: str
-    images: List[str]
     provider: Provider
     price_sar: int
+

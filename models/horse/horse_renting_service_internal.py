@@ -1,12 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from bson import ObjectId
-
-
 from models.logistics_company_services.logistics_company_services import Provider
 
 
-class HorseSellingServiceInternal(BaseModel):
+class HorseRentingServiceInternal(BaseModel):
     id: Optional[str] = Field(default_factory=lambda: str(ObjectId()), alias="_id")
     horse_id: str
     name: str

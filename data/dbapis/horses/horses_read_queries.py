@@ -1,7 +1,7 @@
-from data.db import get_horses_selling_collection
+from data.db import get_horses_collection
 from pymongo.collection import Collection
-from models.horse.horse_sell_internal import InternalSellHorse
-collection: Collection = get_horses_selling_collection()
+from models.horse.horse_internal import InternalSellHorse
+collection: Collection = get_horses_collection()
 
 
 def get_all_horses():
@@ -16,4 +16,3 @@ def get_horse_by_id(horse_id: str):
     if horse:
         return InternalSellHorse(**horse)
     return None
-

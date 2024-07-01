@@ -4,8 +4,8 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
 
 from data.db import PyObjectId
-from models.logistics_company_services.enums.service_enums import ServiceType
 from models.truck.enums.availability import TruckAvailability
+from utils.logistics_utils import LogisticsService
 
 
 class AddTruck(BaseModel):
@@ -17,7 +17,7 @@ class AddTruck(BaseModel):
     air_conditioning: bool
     logistics_company_id: Optional[PyObjectId] = Field(alias="logistics_company_id")
     name: str = ""
-    services: List[ServiceType]
+    services: List[LogisticsService]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -32,8 +32,17 @@ class AddTruckResponse(BaseModel):
     message: str
 
 
-class ViewTruckResponse(BaseModel):
-    id: PyObjectId = Field(alias="_id")
+class ViewTruck(BaseModel):
+    truck_id: PyObjectId = Field(None, alias="_id")
+    name: str
+    availability: str
+    capacity: int
+    logistics_company_id: str
+    registration_number: str
+
+
+class ResponseViewTruck(BaseModel):
+    truck_id: str
     name: str
     availability: str
     capacity: int
@@ -46,8 +55,18 @@ class TruckImages(BaseModel):
     description: str = Field(max_length=200)
 
 
+class TruckDetails(BaseModel):
+    truck_id: PyObjectId = Field(alias="_id")
+    name: str
+    truck_type: str
+    availability: str
+    images: List[TruckImages]
+    logistics_company_id: str
+    registration_number: str
+
+
 class ResponseTruckDetails(BaseModel):
-    id: PyObjectId = Field(alias="_id")
+    truck_id: str
     name: str
     truck_type: str
     availability: str
@@ -57,7 +76,6 @@ class ResponseTruckDetails(BaseModel):
 
 
 class UpdateTruckDetails(BaseModel):
-    truck_id: str
     availability: TruckAvailability
 
     @field_serializer("availability")

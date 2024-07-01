@@ -162,7 +162,7 @@ async def reset_password_verify_otp(request: ResetPasswordVerify):
     result = verify_password_reset_otp(user=user, user_provided_otp=user_provided_otp, new_password=new_password)
 
     if result:
-        return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}
+        return result
 
 
 @user_auth_router.put("/reset-password-update-password")

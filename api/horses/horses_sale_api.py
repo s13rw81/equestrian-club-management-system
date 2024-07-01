@@ -65,21 +65,23 @@ async def create_horse_endpoint(
         ),
         price_sar=horse.price_sar
     )
-    create_horse_selling_service(new_horse_selling_service)
+    selling_service_id = create_horse_selling_service(new_horse_selling_service)
 
     return HorseSaleResponse(
-        horse_selling_service_id=new_horse.id
+        horse_id=new_horse.id,
+        horse_selling_service_id=selling_service_id
     )
 
-@horse_sell_api_router.put("/{horse_id}", response_model=InternalUpdateSellHorse)
-async def update_horse_endpoint(horse_id: str, horse: HorseSellUpdate):
-    updated_horse = update_horse(horse_id, horse.dict(exclude_unset=True))
-    if updated_horse:
-        return updated_horse
-    raise HTTPException(status_code=404, detail="Horse not found")
+# might require in future
+# @horse_sell_api_router.put("/{horse_id}", response_model=InternalUpdateSellHorse)
+# async def update_horse_endpoint(horse_id: str, horse: HorseSellUpdate):
+#     updated_horse = update_horse(horse_id, horse.dict(exclude_unset=True))
+#     if updated_horse:
+#         return updated_horse
+#     raise HTTPException(status_code=404, detail="Horse not found")
 
-@horse_sell_api_router.delete("/{horse_id}", status_code=204)
-async def delete_horse_endpoint(horse_id: str):
-    if delete_horse(horse_id):
-        return {"Message": "Deleted Sucessfully"}
-    raise HTTPException(status_code=404, detail="Horse not found")
+# @horse_sell_api_router.delete("/{horse_id}", status_code=204)
+# async def delete_horse_endpoint(horse_id: str):
+#     if delete_horse(horse_id):
+#         return {"Message": "Deleted Sucessfully"}
+#     raise HTTPException(status_code=404, detail="Horse not found")

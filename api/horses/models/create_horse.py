@@ -15,11 +15,32 @@ class HorseCreate(BaseModel):
     gender: str = Field(..., example="Gelding")
     description: str = Field(..., example="A horse for the future.")
     price_sar: int = Field(..., example=50000)
-    # images: List[str] = Field(..., example=["http://example.com/image1.jpg", "http://example.com/image2.jpg"])
-    # uploaded_by: UploadedBy = Field(...)
+    image_urls: Optional[List[str]] = None
 
 class HorseRentResponse(BaseModel):
     horse_renting_service_id: str
 
 class HorseSaleResponse(BaseModel):
+    horse_id: str
     horse_selling_service_id: str
+
+
+
+class SellerInformation(BaseModel):
+    name: str
+    email_address: str
+    phone_no: str
+    location: str
+
+class HorseSellingItem(BaseModel):
+    horse_selling_service_id: str
+    horse_id: str
+    name: str
+    year_of_birth: int
+    breed: str
+    size: str
+    gender: str
+    description: str
+    image_urls: List[str]
+    price: float
+    seller_information: SellerInformation

@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from data.dbapis.logistics_company_services.read_queries import (
     get_all_club_to_club_services,
+    get_all_luggage_transfer_services,
     get_all_user_transfer_services,
 )
 from data.dbapis.logistics_services_bookings.read_queries import (
@@ -38,10 +39,12 @@ from .models import (
     BookUserTransferService,
     ClubToClubServiceBooking,
     ClubToClubServices,
+    LuggageTransferService,
     ResponseBookClubToClubServiceBooking,
     ResponseBookUserTransferService,
     ResponseClubToClubServiceBooking,
     ResponseClubToClubServices,
+    ResponseLuggageTransferService,
     ResponseUserTransferServiceBooking,
     ResponseUserTransferServices,
     UpdateClubToClubServiceBooking,
@@ -399,3 +402,18 @@ def get_user_transfer_service_booking(
     log.info(f"{request.url.path} returning {club_to_club_booking}")
 
     return club_to_club_booking
+
+
+@services_router.get(
+    "/get-luggage-transfer-services",
+    response_model=List[ResponseLuggageTransferService],
+)
+def get_luggage_transfer_services(request: Request):
+    log.info(f"{request.url.path} invoked")
+
+    user_transfer_services = get_all_luggage_transfer_services()
+    response = [LuggageTransferService(**service) for service in user_transfer_services]
+
+    log.info(f"{request.url.path} returning {response}")
+
+    return response

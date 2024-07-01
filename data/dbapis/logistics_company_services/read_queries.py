@@ -261,3 +261,9 @@ def get_all_user_transfer_services():
     """
     log.info(f"get_all_user_transfer_services() invoked")
     return get_all_services(collection=user_transfer_service_collection)
+
+
+def get_all_luggage_transfer_services():
+    """returns all the luggage transfer services for all logistics company"""
+    log.info("get_all_luggage_transfer_services() invoked")
+    return get_all_services(collection=luggage_transfer_service_collection)

@@ -262,3 +262,9 @@ class ResponseUserTransferServiceBooking(BaseModel):
 
 class UserTransferServiceBooking(UserTransferServiceBookingInternal):
     booking_id: PyObjectId = Field(None, alias="_id")
+
+
+class LuggageTransferService(BaseLogisticsServices): ...
+
+
+class ResponseLuggageTransferService(ResponseBaseLogisticsServices): ...

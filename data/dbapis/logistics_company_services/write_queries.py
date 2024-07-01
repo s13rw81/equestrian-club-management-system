@@ -19,7 +19,7 @@ user_transfer_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
     "user_transfer"
 )
 luggage_transfer_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
-    "logistics_service_luggage"
+    "luggage_transfer"
 )
 
 

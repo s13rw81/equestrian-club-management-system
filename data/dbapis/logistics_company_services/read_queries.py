@@ -8,18 +8,18 @@ from models.logistics_company_services.logistics_company_services import (
     LuggageTransferServiceInternal,
     UserTransferServiceInternal,
 )
-from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING
+from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING, LogisticsService
 
 logistics_company_collection = get_collection(collection_name="company")
 
 club_to_club_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
-    "club_to_club"
+    LogisticsService.CLUB_TO_CLUB.value
 )
 user_transfer_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
-    "user_transfer"
+    LogisticsService.USER_TRANSFER.value
 )
 luggage_transfer_service_collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(
-    "luggage_transfer"
+    LogisticsService.LUGGAGE_TRANSFER.value
 )
 
 

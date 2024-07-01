@@ -2,7 +2,10 @@ from pymongo.collection import Collection
 
 from data.db import convert_to_object_id
 from logging_config import log
-from utils.logistics_utils import LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING
+from utils.logistics_utils import (
+    LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING,
+    LogisticsService,
+)
 
 
 def get_booking(collection: Collection, booking_id: str, consumer_id: str):
@@ -38,7 +41,9 @@ def get_all_club_to_club_service_bookings_db(consumer_id: str):
     """
     log.info(f"get_all_club_to_club_service_bookings_db() invoked")
 
-    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("club_to_club")
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.CLUB_TO_CLUB.value
+    )
     return get_all_bookings(consumer_id=consumer_id, collection=collection)
 
 
@@ -58,7 +63,9 @@ def get_club_to_club_service_booking_by_booking_id_db(
         f"get_club_to_club_service_booking_by_booking_id_db() invoked consumer_id {consumer_id} booking_id {booking_id}"
     )
 
-    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("club_to_club")
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.CLUB_TO_CLUB.value
+    )
 
     booking = get_booking(
         collection=collection, booking_id=booking_id, consumer_id=consumer_id
@@ -85,7 +92,9 @@ def get_user_transfer_service_booking_by_booking_id(
         f"get_user_transfer_service_booking_by_booking_id() invoked consumer_id {consumer_id} booking_id {booking_id}"
     )
 
-    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.USER_TRANSFER.value
+    )
 
     booking = get_booking(
         collection=collection, booking_id=booking_id, consumer_id=consumer_id
@@ -104,7 +113,9 @@ def get_all_user_transfer_service_bookings_db(consumer_id: str):
     """
     log.info(f"get_all_user_transfer_service_bookings_db() invoked")
 
-    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.USER_TRANSFER.value
+    )
     return get_all_bookings(consumer_id=consumer_id, collection=collection)
 
 
@@ -124,7 +135,9 @@ def get_user_transfer_service_booking_by_booking_id(
         f"get_user_transfer_service_booking_by_booking_id() invoked consumer_id {consumer_id} booking_id {booking_id}"
     )
 
-    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get("user_transfer")
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.USER_TRANSFER.value
+    )
 
     booking = get_booking(
         collection=collection, booking_id=booking_id, consumer_id=consumer_id
@@ -133,3 +146,46 @@ def get_user_transfer_service_booking_by_booking_id(
     log.info(f"get_user_transfer_service_booking_by_booking_id() returning {booking}")
 
     return booking
+
+
+def get_luggage_transfer_service_by_booking_id(
+    consumer_id: str,
+    booking_id: str,
+) -> dict:
+    """return the luggage transfer service booking for a particular booking id
+
+    Args:
+        consumer_id (str)
+        booking_id (str)
+
+    """
+
+    log.info(
+        f"get_luggage_transfer_service_by_booking_id() invoked consumer_id {consumer_id} booking_id {booking_id}"
+    )
+
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.LUGGAGE_TRANSFER.value
+    )
+
+    booking = get_booking(
+        collection=collection, booking_id=booking_id, consumer_id=consumer_id
+    )
+
+    log.info(f"get_luggage_transfer_service_by_booking_id() returning {booking}")
+
+    return booking
+
+
+def get_all_luggage_transfer_service_bookings_db(consumer_id: str):
+    """returns all the luggage transfer service booking for the user
+
+    Returns:
+        list of all bookings
+    """
+    log.info(f"get_all_luggage_transfer_service_bookings_db() invoked")
+
+    collection = LOGISTICS_SERVICE_BOOKINGS_COLLECTION_MAPPING.get(
+        LogisticsService.LUGGAGE_TRANSFER.value
+    )
+    return get_all_bookings(consumer_id=consumer_id, collection=collection)

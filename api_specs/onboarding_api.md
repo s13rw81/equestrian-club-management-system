@@ -145,7 +145,7 @@ everything went well.
 }
 ```
 
-#### 3. `onboarding/logistic-company`
+### 3. `onboarding/get-logistic-company`
 
 After the user onboards himself as a `logistic-company`, he calls this route to get details about his `logistic-company`.
 
@@ -333,7 +333,7 @@ everything went well.
 }
 ```
 
-#### 6. `onboarding/club`
+### 6. `onboarding/get-club`
 
 After the user onboards himself as a `club`, he calls this route to get details about his `club`.
 

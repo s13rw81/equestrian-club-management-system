@@ -6,6 +6,7 @@ from fastapi.exceptions import HTTPException
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
     get_trucks_by_logistics_company_id,
+    is_truck_registered,
 )
 from data.dbapis.truck.write_queries import (
     add_truck_db,
@@ -13,6 +14,7 @@ from data.dbapis.truck.write_queries import (
     update_truck_images,
 )
 from logging_config import log
+from logic.logistics.logistics_company_verified import is_logistics_company_verified
 from logic.logistics.write_truck_images import write_images
 from models.truck.trucks import TruckInternal
 from models.user import UserInternal
@@ -49,6 +51,22 @@ def add_truck(
 
     log.info(f"{request.url.path} invoked : truck_details {truck_details}")
 
+    truck_registered = is_truck_registered(
+        registration_number=truck_details.registration_number
+    )
+    if truck_registered:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"truck with the registration number {truck_details.registration_number} is already registered",
+        )
+
+    logistics_company_id = is_logistics_company_verified(user_id=user.id)
+    if not logistics_company_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="logistics company is not verified by khayyal admin",
+        )
+
     truck = TruckInternal(
         registration_number=truck_details.registration_number,
         truck_type=truck_details.truck_type,
@@ -56,7 +74,7 @@ def add_truck(
         special_features=truck_details.special_features,
         gps_equipped=truck_details.gps_equipped,
         air_conditioning=truck_details.air_conditioning,
-        logistics_company_id=truck_details.logistics_company_id,
+        logistics_company_id=logistics_company_id,
         name=truck_details.name,
         services=truck_details.services,
     )
@@ -71,9 +89,7 @@ def add_truck(
             detail="unable to save truck.",
         )
 
-    response = AddTruckResponse(
-        success=updated, truck_id=truck_id, message="Truck successfully added"
-    )
+    response = AddTruckResponse(truck_id=truck_id)
 
     log.info(f"{request.url.path} returning {response}")
 

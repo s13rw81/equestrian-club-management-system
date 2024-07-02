@@ -15,8 +15,7 @@ class AddTruck(BaseModel):
     special_features: str = Field(max_length=200)
     gps_equipped: bool
     air_conditioning: bool
-    logistics_company_id: Optional[PyObjectId] = Field(alias="logistics_company_id")
-    name: str = ""
+    name: str
     services: List[LogisticsService]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -27,9 +26,7 @@ class AddTruck(BaseModel):
 
 
 class AddTruckResponse(BaseModel):
-    success: bool
     truck_id: str
-    message: str
 
 
 class ViewTruck(BaseModel):

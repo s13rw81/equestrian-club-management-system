@@ -83,7 +83,7 @@ def get_horses_collection():
     log.info("inside get_horses_collection")
     return get_database()["horses_collection"]
 
- 
+
 def get_logistics_company_collection():
     log.info("inside get_clubs_collection()")
     return get_database()["logistics_company"]
@@ -119,10 +119,14 @@ def get_horses_renting_collection():
     return get_database()["horses_selling_collection"]
 
 
-def get_uploaded_images_collection(): ...
+def get_uploaded_images_collection():
+    log.info("inside get_uploaded_images_collection")
+    return get_database()["uploaded_images_collection"]
 
 
-def get_upload_images_demo_collection(): ...
+def get_upload_images_demo_collection():
+    log.info("inside get_upload_images_demo()")
+    return get_database()["upload_images_demo"]
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

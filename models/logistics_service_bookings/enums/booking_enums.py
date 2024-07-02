@@ -2,7 +2,7 @@ from enum import Enum
 
 
 # TODO : update all transfer status
-class TransferStatus(Enum):
+class BookingStatus(Enum):
     CREATED = "created"
     CANCELLED = "cancelled"
     PICK_UP_CONFIRMED = "pick_up_confirmed"
@@ -10,7 +10,7 @@ class TransferStatus(Enum):
     COMPLETED = "completed"
 
 
-class TransferStatusPriority(Enum):
+class BookingStatusPriority(Enum):
     CREATED = 1
     CANCELLED = 2
     PICK_UP_CONFIRMED = 3

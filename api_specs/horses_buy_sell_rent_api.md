@@ -108,15 +108,15 @@ the user will use this route to upload images of the horse.
 
 `POST`
 
-#### Path Parameters
-
-1. `horse_selling_service_id`: This would be the `_id` of the `horse_selling_service`
-   . This parameter would match the `horse_selling_service._id` in the database.
-
 #### The Process
 
 1. The user will provide a list of images to be uploaded
    and associated with the `horse_selling_service`.
+
+#### Path Parameters
+
+1. `horse_selling_service_id`: This would be the `_id` of the `horse_selling_service`
+   . This parameter would match the `horse_selling_service._id` in the database.
 
 #### Request Body
 

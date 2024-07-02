@@ -15,7 +15,6 @@ class Provider(BaseModel):
 
 
 class BaseLogisticsServiceInternal(BaseModel):
-    service_id: PyObjectId = Field(None, alias="_id")
     provider: Provider
     trucks: Optional[List[PyObjectId]] = []
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
@@ -30,7 +29,19 @@ class BaseLogisticsServiceInternal(BaseModel):
 class ClubToClubServiceInternal(BaseLogisticsServiceInternal): ...
 
 
+class ClubToClubServiceInternalWithID(BaseLogisticsServiceInternal):
+    service_id: PyObjectId = Field(None, alias="_id")
+
+
 class UserTransferServiceInternal(BaseLogisticsServiceInternal): ...
 
 
+class UserTransferServiceInternalWithID(BaseLogisticsServiceInternal):
+    service_id: PyObjectId = Field(None, alias="_id")
+
+
 class LuggageTransferServiceInternal(BaseLogisticsServiceInternal): ...
+
+
+class LuggageTransferServiceInternalWithID(BaseLogisticsServiceInternal):
+    service_id: PyObjectId = Field(None, alias="_id")

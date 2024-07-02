@@ -4,8 +4,8 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from data.db import PyObjectId
-from models.logistics_company_services.enums.service_enums import ServiceType
 from utils.date_time import get_current_utc_datetime
+from utils.logistics_utils import LogisticsService
 
 from .enums import TruckAvailability
 
@@ -28,7 +28,7 @@ class TruckInternal(BaseModel):
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
     images: List[TruckImages] = []
-    services: List[ServiceType]
+    services: List[LogisticsService]
 
     @field_serializer("services")
     def enum_serializer(self, services):

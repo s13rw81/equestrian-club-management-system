@@ -102,7 +102,7 @@ async def upload_truck_images(truck_id: int, images: list[UploadFile]):
 
 #### Request Validations
 1. The `truck` associated with the provided `truck_id` in path parameter, must be owned
-   by the `logistic_company` of the `user`. That is, the `truck.logistics_company_id` must correspnd with the
+   by the `logistic_company` of the `user`. That is, the `truck.logistics_company_id` must correspond with the
    `logistic_company._id` associated with the user.
 
 #### Authentication and RBAC

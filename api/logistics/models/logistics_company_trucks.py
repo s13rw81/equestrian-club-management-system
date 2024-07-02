@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from data.db import PyObjectId
 from models.truck.enums.availability import TruckAvailability
@@ -78,14 +78,3 @@ class UpdateTruckDetails(BaseModel):
     @field_serializer("availability")
     def enum_serializer(self, enum):
         return enum.value
-
-
-class UploadTruckImages(BaseModel):
-    description: List[str]
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_to_json(cls, value):
-        if isinstance(value, str):
-            return cls(**json.loads(value))
-        return value

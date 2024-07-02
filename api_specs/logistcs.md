@@ -142,4 +142,55 @@ everything went well.
 ```
 
 
+### 3. `/logistic-company/trucks/update-truck/{truck_id}`
 
+#### HTTP Method
+`PUT`
+
+#### The Process
+1. Logistic companies will use this route to update the trucks.
+
+#### Path Parameters
+1. `truck_id`: The `_id` of the `truck` that the user wants to update.
+
+
+#### Request Body
+```json
+{
+  "registration_number": "reg no",
+  "truck_type": "the type of the truck",
+  "capacity": "100MT",
+  "special_features": "AC",
+  "gps_equipped": true,
+  "air_conditioning": true,
+  "name": "the name of the truck"
+}
+```
+**Notes**:
+1. All the fields are optional in the request body. The provided fields will be updated. 
+
+#### Request Validations
+1. The `logistic_company` of the `user` must be the owner of the truck.
+2. In case the registration number is being updated, a `truck` with the new registration number
+   must not exist in the database.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission to acess this route.
+
+#### The Flow:
+1. Update the corresponding `truck` document of `trucks` collection with the newly provided fields.
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return a generic response.
+
+```json
+  {
+    "status": "OK"
+  }
+```

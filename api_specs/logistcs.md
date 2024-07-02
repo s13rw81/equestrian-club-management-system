@@ -25,7 +25,7 @@ This set of apis will be used for `logistics`.
 }
 ```
 #### Request Validations
-1. The `logistic_company` associated with the `user` must be verified by the khayyal-admin. That means
+1. The `logistic_company` associated with the `user` must have been verified by the khayyal-admin. That means
    `logistic_company.is_khayyal_verified` must be `true`.
 2. A `truck` with the same registration number must not exist in the database.
 

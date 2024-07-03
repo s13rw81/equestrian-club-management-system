@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from data.db import PyObjectId
 from models.truck.enums.availability import TruckAvailability
@@ -15,8 +15,7 @@ class AddTruck(BaseModel):
     special_features: str = Field(max_length=200)
     gps_equipped: bool
     air_conditioning: bool
-    logistics_company_id: Optional[PyObjectId] = Field(alias="logistics_company_id")
-    name: str = ""
+    name: str
     services: List[LogisticsService]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -27,9 +26,7 @@ class AddTruck(BaseModel):
 
 
 class AddTruckResponse(BaseModel):
-    success: bool
     truck_id: str
-    message: str
 
 
 class ViewTruck(BaseModel):
@@ -81,14 +78,3 @@ class UpdateTruckDetails(BaseModel):
     @field_serializer("availability")
     def enum_serializer(self, enum):
         return enum.value
-
-
-class UploadTruckImages(BaseModel):
-    description: List[str]
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_to_json(cls, value):
-        if isinstance(value, str):
-            return cls(**json.loads(value))
-        return value

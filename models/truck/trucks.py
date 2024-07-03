@@ -22,8 +22,8 @@ class TruckInternal(BaseModel):
     gps_equipped: bool
     special_features: str = Field(max_length=200)
     air_conditioning: bool
-    logistics_company_id: Optional[PyObjectId] = Field(alias="logistics_company_id")
-    name: str = ""
+    logistics_company_id: Optional[PyObjectId]
+    name: str
     availability: TruckAvailability = TruckAvailability.UN_AVAILABLE.value
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)

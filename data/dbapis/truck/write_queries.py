@@ -109,25 +109,17 @@ def add_truck_db(truck: TruckInternal) -> bool:
     return updated, truck_id
 
 
-def update_truck_images(
-    truck_id: str, file_paths: List[str], description: List[str]
-) -> bool:
-    """given a list of file_paths and a list of image descriptions update the same to truck
-    collection
+def update_truck_images(truck_id: str, image_ids: List[str]) -> bool:
+    """given a list of image id update the same to truckcollection
 
     Args:
         truck_id (str)
-        file_paths (List[str])
-        description (List[str])
+        image_ids (List[str])
     """
 
     log.info(f"update_truck_images() invoked : truck_id {truck_id}")
 
-    image_data = [
-        {"image_key": image_key, "description": description}
-        for image_key, description in zip(file_paths, description)
-    ]
-    update = {"$set": {"images": image_data}}
+    update = {"$set": {"images": image_ids}}
 
     filter = {"_id": convert_to_object_id(truck_id)}
     updated = truck_collection.update_one(filter=filter, update=update)

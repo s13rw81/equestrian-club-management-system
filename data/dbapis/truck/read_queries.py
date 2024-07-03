@@ -111,3 +111,20 @@ def get_available_trucks_db(
     log.info(f"get_available_trucks_db() returning : {available_trucks}")
 
     return available_trucks
+
+
+def is_truck_registered(registration_number: str) -> bool:
+    """based on the registration number returns if the truck is registered with
+    khayyal
+
+    Args:
+        registration_number (str)
+
+    Returns:
+        bool
+    """
+
+    filter = {"registration_number": registration_number}
+    registration_count = truck_collection.count_documents(filter=filter, limit=1)
+
+    return True if registration_count > 0 else False

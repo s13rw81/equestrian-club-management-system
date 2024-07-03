@@ -3,9 +3,13 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, File, Request, UploadFile, status
 from fastapi.exceptions import HTTPException
 
+from data.dbapis.logistics.logistics_company.read_queries import (
+    get_logistics_company_by_user_id,
+)
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
     get_trucks_by_logistics_company_id,
+    is_truck_registered,
 )
 from data.dbapis.truck.write_queries import (
     add_truck_db,
@@ -13,11 +17,13 @@ from data.dbapis.truck.write_queries import (
     update_truck_images,
 )
 from logging_config import log
+from logic.logistics.logistics_company_verified import is_logistics_company_verified
 from logic.logistics.write_truck_images import write_images
 from models.truck.trucks import TruckInternal
 from models.user import UserInternal
 from models.user.enums import UserRoles
 from role_based_access_control import RoleBasedAccessControl
+from utils.image_management import save_image
 
 from .models import (
     AddTruck,
@@ -26,7 +32,6 @@ from .models import (
     ResponseViewTruck,
     TruckDetails,
     UpdateTruckDetails,
-    UploadTruckImages,
     ViewTruck,
 )
 
@@ -49,6 +54,22 @@ def add_truck(
 
     log.info(f"{request.url.path} invoked : truck_details {truck_details}")
 
+    truck_registered = is_truck_registered(
+        registration_number=truck_details.registration_number
+    )
+    if truck_registered:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"truck with the registration number {truck_details.registration_number} is already registered",
+        )
+
+    logistics_company_id = is_logistics_company_verified(user_id=user.id)
+    if not logistics_company_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="logistics company is not verified by khayyal admin",
+        )
+
     truck = TruckInternal(
         registration_number=truck_details.registration_number,
         truck_type=truck_details.truck_type,
@@ -56,7 +77,7 @@ def add_truck(
         special_features=truck_details.special_features,
         gps_equipped=truck_details.gps_equipped,
         air_conditioning=truck_details.air_conditioning,
-        logistics_company_id=truck_details.logistics_company_id,
+        logistics_company_id=logistics_company_id,
         name=truck_details.name,
         services=truck_details.services,
     )
@@ -71,9 +92,7 @@ def add_truck(
             detail="unable to save truck.",
         )
 
-    response = AddTruckResponse(
-        success=updated, truck_id=truck_id, message="Truck successfully added"
-    )
+    response = AddTruckResponse(truck_id=truck_id)
 
     log.info(f"{request.url.path} returning {response}")
 
@@ -156,11 +175,10 @@ def get_truck(
     return truck_details
 
 
-@trucks_router.post("/{truck_id}/images")
-def upload_truck_images(
+@trucks_router.post("/upload-truck-images/{truck_id}/images")
+async def upload_truck_images(
     truck_id: str,
     request: Request,
-    truck_descriptions: UploadTruckImages,
     user: Annotated[
         UserInternal,
         Depends(
@@ -169,32 +187,47 @@ def upload_truck_images(
             )
         ),
     ],
-    files: List[UploadFile] = File(...),
+    files: List[UploadFile],
 ):
 
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
 
-    if len(truck_descriptions.description) != len(files):
+    logistics_company_id = get_logistics_company_by_user_id(user_id=user.id)
+    if not logistics_company_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="truck images and descriptions are required",
+            detail="invalid logistics company id provided",
         )
 
-    file_paths = write_images(truck_id=truck_id, files=files)
+    trucks_owned_by_logistics_company = get_trucks_by_logistics_company_id(
+        logistics_company_id=str(logistics_company_id.get("_id")),
+        fields=["registration_number"],
+    )
 
-    if not file_paths:
+    for truck in trucks_owned_by_logistics_company:
+        logistics_truck_id = str(truck.get("_id"))
+        if truck_id == logistics_truck_id:
+            break
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="truck is not owned by users logistics company",
+        )
+
+    image_ids = []
+    for file in files:
+        image_id = await save_image(image_file=file)
+        image_ids.append(image_id)
+
+    if not image_ids:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="unable to save image at this time",
         )
 
-    update_truck_images(
-        truck_id=truck_id,
-        file_paths=file_paths,
-        description=truck_descriptions.description,
-    )
+    update_truck_images(truck_id=truck_id, image_ids=image_ids)
 
-    return {"message": "Images uploaded successfully"}
+    return {"status": "ok"}
 
 
 @trucks_router.put("/update-truck/{truck_id}")

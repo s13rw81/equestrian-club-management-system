@@ -279,3 +279,60 @@ as the following.
 
 This route will need `pagination` and `filtering`. Don't worry about
 it until the codebase wide `pagination-system` is implemented.
+
+
+### 3. `/user/horses/update-sell-listing/{horse_selling_service_id}`
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+1. `users` and `clubs` will use this route to update their sell listings.
+
+#### Path Parameters
+1. `horse_selling_service_id`: The `_id` of the `horse_selling_service` that the user wants to update.
+
+
+#### Request Body
+```json
+{
+  "name": "A name of the horse",
+  "year_of_birth": "2069",
+  "breed": "top class horse breed",
+  "size": "size of the horse",
+  "gender": "male",
+  "description": "a description of the horse",
+  "price": "1000 SAR"
+}
+```
+**Notes**:
+1. All the fields are optional in the request body. The provided fields will be updated. 
+
+#### Request Validations
+1. The `provider.provider_id` of the `horse_selling_service` must match
+   with `user._id` or `club._id` depending on the type of the `provider`.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` or `CLUB` will have the permission to acess this route.
+
+#### The Flow:
+1. Update the fields of the relevent documents of the corresponding collections
+   i.e. `horse_selling_service` and `horses`. 
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return a generic response.
+
+```json
+  {
+    "status": "OK"
+  }
+```
+
+
+

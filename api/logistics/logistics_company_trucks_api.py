@@ -24,6 +24,7 @@ from utils.image_management import save_image
 
 from .api_validators.logistics_company_trucks import (
     AddTruckValidator,
+    GetTrucksValidator,
     GetTruckValidator,
     UploadTruckImagesValidator,
 )
@@ -80,7 +81,7 @@ def add_truck(
 
 
 @trucks_router.get("/get-truck", response_model=List[ResponseViewTruck])
-def get_trucks(request: Request, payload: Annotated[GetTruckValidator, Depends()]):
+def get_trucks(request: Request, payload: Annotated[GetTrucksValidator, Depends()]):
 
     logistics_company_id = payload.logistics_company_id
 
@@ -101,30 +102,15 @@ def get_trucks(request: Request, payload: Annotated[GetTruckValidator, Depends()
 
 @trucks_router.get("/get-truck/{truck_id}", response_model=ResponseTruckDetails)
 def get_truck(
-    truck_id: str,
+    payload: Annotated[GetTruckValidator, Depends()],
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
 ):
+
+    truck_id = payload.truck_id
+
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
 
-    truck = get_truck_details_by_id_db(
-        truck_id=truck_id,
-        fields=[
-            "name",
-            "truck_type",
-            "availability",
-            "images",
-            "logistics_company_id",
-            "registration_number",
-        ],
-    )
+    truck = get_truck_details_by_id_db(truck_id=truck_id)
 
     if not truck:
         raise HTTPException(

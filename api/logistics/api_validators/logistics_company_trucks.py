@@ -30,13 +30,6 @@ class BaseTruckValidator:
         )
         self.logistics_company_id = str(self.logistics_company_details.get("_id"))
 
-        if not self.is_logistics_company_verified(
-            logistics_company_details=self.logistics_company_details
-        ):
-            raise BaseTruckValidator.http_exception(
-                "logistics company is not verified by khayyal admin"
-            )
-
     @staticmethod
     def truck_owned_by_logistics_company(truck_id: str, trucks_list: List[str]) -> bool:
         """return if the truck_id is present in the trucks_list
@@ -50,19 +43,18 @@ class BaseTruckValidator:
         """
         return truck_id in trucks_list
 
-    @staticmethod
-    def is_logistics_company_verified(logistics_company_details: bool) -> bool:
-        """based on logistics_company_details return if the logistics_company is verified
-        Args:
-            logistics_company_details (bool)
-        """
-        return logistics_company_details.get("is_khayyal_verified", False)
-
 
 class AddTruckValidator(BaseTruckValidator):
     def __init__(self, user: user_dependency, add_truck: AddTruck) -> None:
         super().__init__(user)
         self.add_truck = add_truck
+
+        if not self.is_logistics_company_verified(
+            logistics_company_details=self.logistics_company_details
+        ):
+            raise BaseTruckValidator.http_exception(
+                "logistics company is not verified by khayyal admin"
+            )
 
         if self.is_truck_already_registered(
             registration_number=self.add_truck.registration_number
@@ -70,6 +62,14 @@ class AddTruckValidator(BaseTruckValidator):
             raise BaseTruckValidator.http_exception(
                 f"truck with the registration number {self.add_truck.registration_number} is already registered"
             )
+
+    @staticmethod
+    def is_logistics_company_verified(logistics_company_details: bool) -> bool:
+        """based on logistics_company_details return if the logistics_company is verified
+        Args:
+            logistics_company_details (bool)
+        """
+        return logistics_company_details.get("is_khayyal_verified", False)
 
     @staticmethod
     def is_truck_already_registered(registration_number: str) -> bool:
@@ -97,6 +97,19 @@ class UploadTruckImagesValidator(BaseTruckValidator):
             )
 
 
-class GetTruckValidator(BaseTruckValidator):
+class GetTrucksValidator(BaseTruckValidator):
     def __init__(self, user: user_dependency) -> None:
         super().__init__(user)
+
+
+class GetTruckValidator(BaseTruckValidator):
+    def __init__(self, user: user_dependency, truck_id: str) -> None:
+        super().__init__(user)
+        self.truck_id = truck_id
+
+        if not self.truck_owned_by_logistics_company(
+            self.truck_id, self.logistics_company_details.get("trucks")
+        ):
+            raise BaseTruckValidator.http_exception(
+                "truck is not owned by users logistics company"
+            )

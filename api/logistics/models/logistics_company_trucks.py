@@ -37,29 +37,12 @@ class ResponseViewTruck(TruckInternal):
     truck_id: str
 
 
-class TruckImages(BaseModel):
-    image_key: str
-    description: str = Field(max_length=200)
-
-
-class TruckDetails(BaseModel):
+class TruckDetails(TruckInternal):
     truck_id: PyObjectId = Field(alias="_id")
-    name: str
-    truck_type: str
-    availability: str
-    images: List[TruckImages]
-    logistics_company_id: str
-    registration_number: str
 
 
-class ResponseTruckDetails(BaseModel):
+class ResponseTruckDetails(TruckInternal):
     truck_id: str
-    name: str
-    truck_type: str
-    availability: str
-    images: List[TruckImages]
-    logistics_company_id: str
-    registration_number: str
 
 
 class UpdateTruckDetails(BaseModel):

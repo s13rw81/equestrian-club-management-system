@@ -119,7 +119,9 @@ def get_horses_renting_collection():
     return get_database()["horses_selling_collection"]
 
 
-def get_uploaded_images_collection(): ...
+def get_uploaded_images_collection():
+    log.info("inside get_uploaded_images_collection")
+    return get_database()["uploaded_images_collection"]
 
 
 def get_upload_images_demo_collection(): ...

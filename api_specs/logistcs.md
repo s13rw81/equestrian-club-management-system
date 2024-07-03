@@ -194,3 +194,128 @@ On success of the prescribed operations return a generic response.
     "status": "OK"
   }
 ```
+
+### 4. `/logistic-company/trucks/get-truck`
+
+Users of type `logistic-company` will use this route to get all the `trucks` that are 
+uploaded by them.
+
+#### HTTP Method
+
+`GET`
+
+#### The Process
+
+- After the user onboards itself as a `logistic-company`, it will add `trucks`.
+- The user will use this route to get the trucks that are added by him.
+
+#### Authentication and RBAC
+
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission
+   to access this route.
+
+#### The Flow
+
+1. First, get the `logistic_company` associated with the user.
+2. Find all the `trucks` that the `logistic_company` is owner of.
+3. Return all the `trucks`. 
+
+
+#### Exception Handling:
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+
+On completion of all the operations, return a list of all the data with a similar schema
+as the following.
+
+```json
+[
+   {
+      "_id": ObjectId("12345"),
+      "logistics_company_id": "the id of the associated logistic company",
+      "registration_number": "reg no",
+      "truck_type": "the type of the truck",
+      "capacity": "100MT",
+      "special_features": "AC",
+      "gps_equipped": true,
+      "air_conditioning": true,
+      "name": "the name of the truck"
+   }
+]
+```
+
+**Notes**:
+
+1. Since the query is only from a single collection, usage of `mongodb-aggregation-framework` is
+   not necessary. However, you can still choose to use it, it will be easier to extend it down the line.
+2. Ensure only the `trucks` associated with the `logistic_company` is returned.
+
+#### Pagination:
+
+This route will need `pagination` and `filtering`. Don't worry about
+it until the codebase wide `pagination-system` is implemented.
+
+### 5. `/logistic-company/trucks/get-truck/{truck_id}`
+
+Users of type `logistic-company` will use this route to get a particular truck
+that is uploaded by it.
+
+#### HTTP Method
+
+`GET`
+
+#### The Process
+
+- After the user onboards itself as a `logistic-company`, it will add `trucks`.
+- The user will use this route to get a particular `truck`.
+
+#### Path Parameter
+1. `truck_id`: The `_id` of the truck the `user` wants detail about. 
+
+#### Authentication and RBAC
+
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission
+   to access this route.
+
+#### The Flow
+
+1. First, get the `logistic_company` associated with the user.
+2. Return the `truck` associated with the `truck_id` only if the owner of the
+   `truck` is the `logistic_company`.
+
+
+#### Exception Handling:
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+
+Return the `truck` with a schema similar to the following:
+
+```json
+{
+   "_id": ObjectId("12345"),
+   "logistics_company_id": "the id of the associated logistic company",
+   "registration_number": "reg no",
+   "truck_type": "the type of the truck",
+   "capacity": "100MT",
+   "special_features": "AC",
+   "gps_equipped": true,
+   "air_conditioning": true,
+   "name": "the name of the truck"
+}
+```
+
+**Notes**:
+
+1. Since the query is only from a single collection, usage of `mongodb-aggregation-framework` is
+   not necessary. However, you can still choose to use it, it will be easier to extend it down the line.
+2. Ensure the requested `truck` is owned by the `logistic-company`.
+
+
+
+

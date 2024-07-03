@@ -28,7 +28,7 @@ class BaseTruckValidator:
         self.logistics_company_details = get_logistics_company_by_user_id(
             user_id=user.id
         )
-        self.logistics_company_id = self.logistics_company_details.get("_id")
+        self.logistics_company_id = str(self.logistics_company_details.get("_id"))
 
         if not self.is_logistics_company_verified(
             logistics_company_details=self.logistics_company_details
@@ -95,3 +95,8 @@ class UploadTruckImagesValidator(BaseTruckValidator):
             raise BaseTruckValidator.http_exception(
                 "truck is not owned by users logistics company"
             )
+
+
+class GetTruckValidator(BaseTruckValidator):
+    def __init__(self, user: user_dependency) -> None:
+        super().__init__(user)

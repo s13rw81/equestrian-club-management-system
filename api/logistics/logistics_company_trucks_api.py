@@ -1,6 +1,6 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, File, Request, UploadFile, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
 
 from data.dbapis.logistics.logistics_company.read_queries import (
@@ -16,8 +16,6 @@ from data.dbapis.truck.write_queries import (
     update_truck_images,
 )
 from logging_config import log
-from logic.logistics.logistics_company_verified import is_logistics_company_verified
-from logic.logistics.write_truck_images import write_images
 from models.truck.trucks import TruckInternal
 from models.user import UserInternal
 from models.user.enums import UserRoles
@@ -26,6 +24,7 @@ from utils.image_management import save_image
 
 from .api_validators.logistics_company_trucks import (
     AddTruckValidator,
+    GetTruckValidator,
     UploadTruckImagesValidator,
 )
 from .models import (
@@ -80,34 +79,17 @@ def add_truck(
     return response
 
 
-@trucks_router.get(
-    "/get-trucks/{logistics_company_id}", response_model=List[ResponseViewTruck]
-)
-def get_trucks(
-    logistics_company_id: str,
-    request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
-):
+@trucks_router.get("/get-truck", response_model=List[ResponseViewTruck])
+def get_trucks(request: Request, payload: Annotated[GetTruckValidator, Depends()]):
+
+    logistics_company_id = payload.logistics_company_id
+
     log.info(
         f"{request.url.path} invoked : logistics_company_id {logistics_company_id}"
     )
 
     trucks_list = get_trucks_by_logistics_company_id(
-        logistics_company_id=logistics_company_id,
-        fields=[
-            "name",
-            "availability",
-            "logistics_company_id",
-            "capacity",
-            "registration_number",
-        ],
+        logistics_company_id=logistics_company_id
     )
 
     trucks = [ViewTruck(**truck) for truck in trucks_list]
@@ -166,28 +148,6 @@ async def upload_truck_images(
     files = payload.files
 
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
-
-    logistics_company_id = get_logistics_company_by_user_id(user_id=user.id)
-    if not logistics_company_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="invalid logistics company id provided",
-        )
-
-    trucks_owned_by_logistics_company = get_trucks_by_logistics_company_id(
-        logistics_company_id=str(logistics_company_id.get("_id")),
-        fields=["registration_number"],
-    )
-
-    for truck in trucks_owned_by_logistics_company:
-        logistics_truck_id = str(truck.get("_id"))
-        if truck_id == logistics_truck_id:
-            break
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="truck is not owned by users logistics company",
-        )
 
     image_ids = []
     for file in files:

@@ -1,9 +1,9 @@
-import json
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 from data.db import PyObjectId
+from models.truck import TruckInternal
 from models.truck.enums.availability import TruckAvailability
 from utils.logistics_utils import LogisticsService
 
@@ -29,22 +29,12 @@ class AddTruckResponse(BaseModel):
     truck_id: str
 
 
-class ViewTruck(BaseModel):
+class ViewTruck(TruckInternal):
     truck_id: PyObjectId = Field(None, alias="_id")
-    name: str
-    availability: str
-    capacity: int
-    logistics_company_id: str
-    registration_number: str
 
 
-class ResponseViewTruck(BaseModel):
+class ResponseViewTruck(TruckInternal):
     truck_id: str
-    name: str
-    availability: str
-    capacity: int
-    logistics_company_id: str
-    registration_number: str
 
 
 class TruckImages(BaseModel):

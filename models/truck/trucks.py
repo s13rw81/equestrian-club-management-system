@@ -10,11 +10,6 @@ from utils.logistics_utils import LogisticsService
 from .enums import TruckAvailability
 
 
-class TruckImages(BaseModel):
-    image_key: str
-    description: str = Field(max_length=200)
-
-
 class TruckInternal(BaseModel):
     registration_number: str
     truck_type: str
@@ -27,7 +22,7 @@ class TruckInternal(BaseModel):
     availability: TruckAvailability = TruckAvailability.UN_AVAILABLE.value
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
-    images: List[TruckImages] = []
+    images: List[str] = []
     services: List[LogisticsService]
 
     @field_serializer("services")

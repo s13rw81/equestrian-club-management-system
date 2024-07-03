@@ -281,7 +281,7 @@ This route will need `pagination` and `filtering`. Don't worry about
 it until the codebase wide `pagination-system` is implemented.
 
 
-### 3. `/user/horses/update-sell-listing/{horse_selling_service_id}`
+### 4. `/user/horses/update-sell-listing/{horse_selling_service_id}`
 
 #### HTTP Method
 `PUT`

@@ -46,9 +46,7 @@ def add_truck_db(truck: TruckInternal) -> bool:
         filter = {"_id": convert_to_object_id(truck.logistics_company_id)}
         update_truck = {
             "$push": {
-                "trucks": {
-                    "truck_id": convert_to_object_id(truck_id),
-                }
+                "trucks": truck_id,
             }
         }
 

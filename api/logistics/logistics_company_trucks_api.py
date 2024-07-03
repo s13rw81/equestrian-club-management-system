@@ -9,7 +9,6 @@ from data.dbapis.logistics.logistics_company.read_queries import (
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
     get_trucks_by_logistics_company_id,
-    is_truck_registered,
 )
 from data.dbapis.truck.write_queries import (
     add_truck_db,
@@ -25,8 +24,11 @@ from models.user.enums import UserRoles
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image
 
+from .api_validators.logistics_company_trucks import (
+    AddTruckValidator,
+    UploadTruckImagesValidator,
+)
 from .models import (
-    AddTruck,
     AddTruckResponse,
     ResponseTruckDetails,
     ResponseViewTruck,
@@ -40,35 +42,14 @@ trucks_router = APIRouter(prefix="/trucks", tags=["logistics-company"])
 
 @trucks_router.post("/add-truck")
 def add_truck(
-    truck_details: AddTruck,
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    payload: Annotated[AddTruckValidator, Depends()],
 ) -> AddTruckResponse:
 
-    log.info(f"{request.url.path} invoked : truck_details {truck_details}")
+    truck_details = payload.add_truck
+    logistics_company_id = payload.logistics_company_id
 
-    truck_registered = is_truck_registered(
-        registration_number=truck_details.registration_number
-    )
-    if truck_registered:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"truck with the registration number {truck_details.registration_number} is already registered",
-        )
-
-    logistics_company_id = is_logistics_company_verified(user_id=user.id)
-    if not logistics_company_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="logistics company is not verified by khayyal admin",
-        )
+    log.info(f"{request.url.path} invoked : truck_details {payload.add_truck}")
 
     truck = TruckInternal(
         registration_number=truck_details.registration_number,
@@ -177,18 +158,12 @@ def get_truck(
 
 @trucks_router.post("/upload-truck-images/{truck_id}/images")
 async def upload_truck_images(
-    truck_id: str,
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
-    files: List[UploadFile],
+    payload: Annotated[UploadTruckImagesValidator, Depends()],
 ):
+    truck_id = payload.truck_id
+    user = payload.user
+    files = payload.files
 
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
 

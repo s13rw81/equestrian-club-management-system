@@ -1,37 +1,33 @@
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, File, Request, UploadFile, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
 
-from data.dbapis.logistics.logistics_company.read_queries import (
-    get_logistics_company_by_user_id,
-)
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
     get_trucks_by_logistics_company_id,
-    is_truck_registered,
 )
 from data.dbapis.truck.write_queries import (
     add_truck_db,
-    update_truck_availability,
+    update_truck_details,
     update_truck_images,
 )
 from logging_config import log
-from logic.logistics.logistics_company_verified import is_logistics_company_verified
-from logic.logistics.write_truck_images import write_images
 from models.truck.trucks import TruckInternal
-from models.user import UserInternal
-from models.user.enums import UserRoles
-from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image
 
+from .api_validators.logistics_company_trucks import (
+    AddTruckValidator,
+    GetTrucksValidator,
+    GetTruckValidator,
+    UpdateTruckDetailsValidator,
+    UploadTruckImagesValidator,
+)
 from .models import (
-    AddTruck,
     AddTruckResponse,
     ResponseTruckDetails,
     ResponseViewTruck,
     TruckDetails,
-    UpdateTruckDetails,
     ViewTruck,
 )
 
@@ -40,35 +36,14 @@ trucks_router = APIRouter(prefix="/trucks", tags=["logistics-company"])
 
 @trucks_router.post("/add-truck")
 def add_truck(
-    truck_details: AddTruck,
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    payload: Annotated[AddTruckValidator, Depends()],
 ) -> AddTruckResponse:
 
-    log.info(f"{request.url.path} invoked : truck_details {truck_details}")
+    truck_details = payload.add_truck
+    logistics_company_id = payload.logistics_company_id
 
-    truck_registered = is_truck_registered(
-        registration_number=truck_details.registration_number
-    )
-    if truck_registered:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"truck with the registration number {truck_details.registration_number} is already registered",
-        )
-
-    logistics_company_id = is_logistics_company_verified(user_id=user.id)
-    if not logistics_company_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="logistics company is not verified by khayyal admin",
-        )
+    log.info(f"{request.url.path} invoked : truck_details {payload.add_truck}")
 
     truck = TruckInternal(
         registration_number=truck_details.registration_number,
@@ -99,34 +74,17 @@ def add_truck(
     return response
 
 
-@trucks_router.get(
-    "/get-trucks/{logistics_company_id}", response_model=List[ResponseViewTruck]
-)
-def get_trucks(
-    logistics_company_id: str,
-    request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
-):
+@trucks_router.get("/get-truck", response_model=List[ResponseViewTruck])
+def get_trucks(request: Request, payload: Annotated[GetTrucksValidator, Depends()]):
+
+    logistics_company_id = payload.logistics_company_id
+
     log.info(
         f"{request.url.path} invoked : logistics_company_id {logistics_company_id}"
     )
 
     trucks_list = get_trucks_by_logistics_company_id(
-        logistics_company_id=logistics_company_id,
-        fields=[
-            "name",
-            "availability",
-            "logistics_company_id",
-            "capacity",
-            "registration_number",
-        ],
+        logistics_company_id=logistics_company_id
     )
 
     trucks = [ViewTruck(**truck) for truck in trucks_list]
@@ -138,30 +96,15 @@ def get_trucks(
 
 @trucks_router.get("/get-truck/{truck_id}", response_model=ResponseTruckDetails)
 def get_truck(
-    truck_id: str,
+    payload: Annotated[GetTruckValidator, Depends()],
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
 ):
+
+    truck_id = payload.truck_id
+
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
 
-    truck = get_truck_details_by_id_db(
-        truck_id=truck_id,
-        fields=[
-            "name",
-            "truck_type",
-            "availability",
-            "images",
-            "logistics_company_id",
-            "registration_number",
-        ],
-    )
+    truck = get_truck_details_by_id_db(truck_id=truck_id)
 
     if not truck:
         raise HTTPException(
@@ -177,42 +120,14 @@ def get_truck(
 
 @trucks_router.post("/upload-truck-images/{truck_id}/images")
 async def upload_truck_images(
-    truck_id: str,
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
-    files: List[UploadFile],
+    payload: Annotated[UploadTruckImagesValidator, Depends()],
 ):
+    truck_id = payload.truck_id
+    user = payload.user
+    files = payload.files
 
     log.info(f"{request.url.path} invoked : truck_id {truck_id}")
-
-    logistics_company_id = get_logistics_company_by_user_id(user_id=user.id)
-    if not logistics_company_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="invalid logistics company id provided",
-        )
-
-    trucks_owned_by_logistics_company = get_trucks_by_logistics_company_id(
-        logistics_company_id=str(logistics_company_id.get("_id")),
-        fields=["registration_number"],
-    )
-
-    for truck in trucks_owned_by_logistics_company:
-        logistics_truck_id = str(truck.get("_id"))
-        if truck_id == logistics_truck_id:
-            break
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="truck is not owned by users logistics company",
-        )
 
     image_ids = []
     for file in files:
@@ -232,23 +147,14 @@ async def upload_truck_images(
 
 @trucks_router.put("/update-truck/{truck_id}")
 def update_truck(
-    truck_id: str,
-    update_details: UpdateTruckDetails,
-    request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    payload: Annotated[UpdateTruckDetailsValidator, Depends()], request: Request
 ):
+
+    update_details = payload.update_details
+    truck_id = payload.truck_id
 
     log.info(f"{request.url.path} invoked : update_details {update_details}")
 
-    update_truck_availability(
-        truck_id=truck_id, availability=update_details.availability.value
-    )
+    update_truck_details(truck_id=truck_id, truck_details=update_details)
 
     return {"message": "Truck availability updated successfully"}

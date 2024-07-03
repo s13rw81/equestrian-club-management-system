@@ -1,5 +1,6 @@
 from typing import List
 
+from api.logistics.models.logistics_company_trucks import UpdateTruckDetails
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.truck import TruckInternal
@@ -139,5 +140,25 @@ def update_truck_availability(truck_id: str, availability: str) -> bool:
     update = {"$set": {"availability": availability}}
 
     updated = truck_collection.update_one(filter=filter, update=update)
+
+    return updated.modified_count == 1
+
+
+def update_truck_details(truck_id: str, truck_details: UpdateTruckDetails) -> bool:
+    """given the truck_id update the details of the truck
+
+    Args:
+        truck_id (str)
+        truck_details (UpdateTruckDetails)
+    """
+
+    log.info(f"update_truck_details() invoke : {truck_id} {truck_details}")
+
+    filter = {"_id": convert_to_object_id(truck_id)}
+    update = {
+        k: v for k, v in truck_details.model_dump().items() if v != None and k != "_id"
+    }
+
+    updated = truck_collection.update_one(filter=filter, update={"$set": update})
 
     return updated.modified_count == 1

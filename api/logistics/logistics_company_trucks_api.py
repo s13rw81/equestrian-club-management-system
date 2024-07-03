@@ -3,29 +3,24 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
 
-from data.dbapis.logistics.logistics_company.read_queries import (
-    get_logistics_company_by_user_id,
-)
 from data.dbapis.truck.read_queries import (
     get_truck_details_by_id_db,
     get_trucks_by_logistics_company_id,
 )
 from data.dbapis.truck.write_queries import (
     add_truck_db,
-    update_truck_availability,
+    update_truck_details,
     update_truck_images,
 )
 from logging_config import log
 from models.truck.trucks import TruckInternal
-from models.user import UserInternal
-from models.user.enums import UserRoles
-from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image
 
 from .api_validators.logistics_company_trucks import (
     AddTruckValidator,
     GetTrucksValidator,
     GetTruckValidator,
+    UpdateTruckDetailsValidator,
     UploadTruckImagesValidator,
 )
 from .models import (
@@ -33,7 +28,6 @@ from .models import (
     ResponseTruckDetails,
     ResponseViewTruck,
     TruckDetails,
-    UpdateTruckDetails,
     ViewTruck,
 )
 
@@ -153,23 +147,14 @@ async def upload_truck_images(
 
 @trucks_router.put("/update-truck/{truck_id}")
 def update_truck(
-    truck_id: str,
-    update_details: UpdateTruckDetails,
-    request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    payload: Annotated[UpdateTruckDetailsValidator, Depends()], request: Request
 ):
+
+    update_details = payload.update_details
+    truck_id = payload.truck_id
 
     log.info(f"{request.url.path} invoked : update_details {update_details}")
 
-    update_truck_availability(
-        truck_id=truck_id, availability=update_details.availability.value
-    )
+    update_truck_details(truck_id=truck_id, truck_details=update_details)
 
     return {"message": "Truck availability updated successfully"}

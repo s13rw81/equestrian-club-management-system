@@ -2,12 +2,14 @@ from typing import Annotated, List
 
 from fastapi import Depends, HTTPException, UploadFile, status
 
-from api.logistics.models.logistics_company_trucks import AddTruck
+from api.logistics.models.logistics_company_trucks import AddTruck, UpdateTruckDetails
 from data.dbapis.logistics.logistics_company.read_queries import (
     get_logistics_company_by_user_id,
 )
-from data.dbapis.truck.read_queries import is_truck_registered
-from logging_config import log
+from data.dbapis.truck.read_queries import (
+    get_truck_details_by_id_db,
+    is_truck_registered,
+)
 from models.user import UserInternal, UserRoles
 from role_based_access_control import RoleBasedAccessControl
 
@@ -106,10 +108,48 @@ class GetTruckValidator(BaseTruckValidator):
     def __init__(self, user: user_dependency, truck_id: str) -> None:
         super().__init__(user)
         self.truck_id = truck_id
+        self.trucks_owned_by_logistics_company = self.logistics_company_details.get(
+            "trucks"
+        )
 
         if not self.truck_owned_by_logistics_company(
-            self.truck_id, self.logistics_company_details.get("trucks")
+            self.truck_id, self.trucks_owned_by_logistics_company
         ):
             raise BaseTruckValidator.http_exception(
                 "truck is not owned by users logistics company"
             )
+
+
+class UpdateTruckDetailsValidator(BaseTruckValidator):
+    def __init__(
+        self,
+        user: user_dependency,
+        truck_id: str,
+        update_details: UpdateTruckDetails,
+    ) -> None:
+        super().__init__(user)
+        self.truck_id = truck_id
+        self.trucks_owned_by_logistics_company = self.logistics_company_details.get(
+            "trucks"
+        )
+        self.update_details = update_details
+
+        if not self.truck_owned_by_logistics_company(
+            self.truck_id, self.trucks_owned_by_logistics_company
+        ):
+            raise BaseTruckValidator.http_exception(
+                "truck is not owned by users logistics company"
+            )
+
+        if self.update_details.registration_number:
+            if self.is_truck_already_registered(
+                self.update_details.registration_number
+            ):
+                raise BaseTruckValidator.http_exception(
+                    f"truck with the registration number {self.update_details.registration_number} is already registered"
+                )
+
+    @staticmethod
+    def is_truck_already_registered(registration_number: str) -> bool:
+        """returns if the registration number is already registered in khayyal"""
+        return is_truck_registered(registration_number=registration_number)

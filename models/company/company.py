@@ -20,6 +20,7 @@ class Company(BaseModel):
     address: Optional[Address] = None
     trucks: List[TruckInternal] = []
     admins: Optional[list] = []
+    images: Optional[list] = []
 
     class Config:
         arbitrary_types_allowed = True

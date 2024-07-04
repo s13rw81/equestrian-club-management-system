@@ -333,9 +333,9 @@ Return the `truck` with a schema similar to the following:
 #### Request Body
 ```json
 {
-   trucks: ["truck._id", "truck._id"],
-   features: "it will be a string for now, can be a list later",
-   description: "a description of the club-to-club service"
+   "trucks": ["truck._id", "truck._id"],
+   "features": "it will be a string for now, can be a list later",
+   "description": "a description of the club-to-club service"
 }
 ```
 
@@ -464,9 +464,9 @@ everything went well.
 #### Request Body
 ```json
 {
-   trucks: ["truck._id", "truck._id"],
-   features: "it will be a string for now, can be a list later",
-   description: "a description of the club-to-club service"
+   "trucks": ["truck._id", "truck._id"],
+   "features": "it will be a string for now, can be a list later",
+   "description": "a description of the club-to-club service"
 }
 ```
 **Notes**:

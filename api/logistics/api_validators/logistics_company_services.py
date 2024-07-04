@@ -1,6 +1,6 @@
 from typing import Annotated, List
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, UploadFile, status
 
 from api.logistics.models.logistics_company_services import (
     AddClubToClubService,
@@ -11,6 +11,9 @@ from data.dbapis.logistics.logistics_company.read_queries import (
 )
 from data.dbapis.logistics_company_services.read_queries import (
     club_to_club_service_by_logistics_company_id,
+)
+from models.logistics_company_services.logistics_company_services import (
+    ClubToClubServiceInternalWithID,
 )
 from models.user import UserInternal, UserRoles
 from role_based_access_control import RoleBasedAccessControl
@@ -98,3 +101,26 @@ class UpdateClubToClubServiceValidator(BaseLogisticsServiceValidator):
                     raise BaseLogisticsServiceValidator.http_exception(
                         message="all trucks must be owned by logistics company"
                     )
+
+
+class UploadClubToClubServiceImagesValidator(BaseLogisticsServiceValidator):
+    def __init__(self, user: user_dependency, files: List[UploadFile]) -> None:
+        super().__init__(user)
+        self.files = files
+        self.service_details = self.service_exists(
+            logistics_company_id=self.logistics_company_id
+        )
+        self.service_id = self.service_details.service_id
+
+        if not self.service_id:
+            raise BaseLogisticsServiceValidator.http_exception(
+                message="club to club service does not exists for this logistics company user"
+            )
+
+    @staticmethod
+    def service_exists(logistics_company_id: str) -> ClubToClubServiceInternalWithID:
+        """returns whether the club to club service already exists for the users logistics company"""
+        service_details = club_to_club_service_by_logistics_company_id(
+            logistics_company_id=logistics_company_id
+        )
+        return service_details

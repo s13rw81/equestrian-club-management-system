@@ -18,6 +18,7 @@ from data.dbapis.logistics_company_services.write_queries import (
     save_luggage_transfer_service_db,
     save_user_transfer_service_db,
     update_club_to_club_service,
+    update_club_to_club_service_images,
     update_luggage_transfer_service_db,
     update_user_transfer_service_db,
 )
@@ -32,14 +33,15 @@ from models.logistics_company_services.enums.service_enums import ServiceAvailab
 from models.user import UserInternal
 from models.user.enums import UserRoles
 from role_based_access_control import RoleBasedAccessControl
+from utils.image_management import save_image
 
 from .api_validators.logistics_company_services import (
     AddClubToClubServiceValidator,
     GetClubToClubServiceValidator,
     UpdateClubToClubServiceValidator,
+    UploadClubToClubServiceImagesValidator,
 )
 from .models import (
-    AddClubToClubService,
     AddLuggageTransferService,
     AddUserTransferService,
     ResponseAddClubToClubService,
@@ -48,7 +50,6 @@ from .models import (
     ResponseGetClubToClubService,
     ResponseGetLuggageTransferService,
     ResponseGetUserTransferService,
-    UpdateClubToClubService,
     UpdateLuggageTransferService,
     UpdateUserTransferService,
 )
@@ -160,6 +161,33 @@ def update_club_to_club_transfer_service(
         )
 
     return {"status": "OK"}
+
+
+@manage_service_router.post("/club-to-club-service/upload-images")
+async def club_to_club_service_upload_images(
+    request: Request,
+    payload: Annotated[UploadClubToClubServiceImagesValidator, Depends()],
+):
+
+    files = payload.files
+    service_id = payload.service_id
+
+    log.info(f"{request.url.path} invoked")
+
+    image_ids = []
+    for file in files:
+        image_id = await save_image(image_file=file)
+        image_ids.append(image_id)
+
+    if not image_ids:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to save image at this time",
+        )
+
+    update_club_to_club_service_images(service_id=service_id, image_ids=image_ids)
+
+    return {"status": "ok"}
 
 
 @manage_service_router.get("/get-user-transfer-service/{logistics_company_id}")

@@ -74,7 +74,7 @@ async def upload_images_for_logistic_company_by_id(company_id: str, images: list
     return {'status_code': 200, 'details': msg, 'data': result}
 
 
-@onboarding_api_router.get("/get_logistics_company_images/{company_id}")
+@onboarding_api_router.get("/get_logistics-company-images/{company_id}")
 async def get_company_images_by_id(request: Request, company_id: str = None) -> dict:
     """
     Retrieves image URLs for a club based on club_id.
@@ -89,7 +89,7 @@ async def get_company_images_by_id(request: Request, company_id: str = None) -> 
     return {'status_code': 200, 'details': f"Retrieved images for company {company_id}", 'data': generated_url_list}
 
 
-@onboarding_api_router.get("/get_logistics_company/{company_id}")
+@onboarding_api_router.get("/get_logistics-company/{company_id}")
 async def get_logistics_company_by_id(company_id: str, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.LOGISTIC_COMPANY}))]) -> dict:
 
     company = get_logistics_company_by_id_logic(company_id = company_id)

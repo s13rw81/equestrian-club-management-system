@@ -8,21 +8,25 @@ from utils.date_time import get_current_utc_datetime
 
 
 class AddBaseLogisticsService(BaseModel):
-    logistics_company_id: str
-    user_id: str
+    trucks: List[str]
+    features: str
+    description: str
 
 
 class ResponseBaseAddLogisticsService(BaseModel):
-    service_id: str
+    logistic_service_club_to_club_id: str
 
 
 class ResponseBaseGetLogisticsService(BaseModel):
     service_id: str
     logistics_company_id: str
-    trucks: Optional[List]
+    trucks: Optional[List[str]]
     created_at: datetime
     updated_at: datetime
     is_available: ServiceAvailability
+    features: str
+    description: str
+    images: Optional[List[str]]
 
     @field_serializer("is_available")
     def enum_serializer(self, enum):

@@ -33,6 +33,10 @@ from models.user import UserInternal
 from models.user.enums import UserRoles
 from role_based_access_control import RoleBasedAccessControl
 
+from .api_validators.logistics_company_services import (
+    AddClubToClubServiceValidator,
+    GetClubToClubServiceValidator,
+)
 from .models import (
     AddClubToClubService,
     AddLuggageTransferService,
@@ -51,19 +55,12 @@ from .models import (
 manage_service_router = APIRouter(prefix="/services", tags=["logistics-company"])
 
 
-@manage_service_router.get("/get-club-to-club-service/{logistics_company_id}")
+@manage_service_router.get("/get-club-to-club-service")
 def get_club_to_club_transfer_service(
-    logistics_company_id: str,
-    request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    request: Request, payload: Annotated[GetClubToClubServiceValidator, Depends()]
 ) -> ResponseGetClubToClubService:
+
+    logistics_company_id = payload.logistics_company_id
 
     log.info(f"{request.url.path} invoked")
 
@@ -83,6 +80,9 @@ def get_club_to_club_transfer_service(
         created_at=service_details.created_at,
         updated_at=service_details.updated_at,
         is_available=service_details.is_available,
+        features=service_details.features,
+        description=service_details.description,
+        images=service_details.images,
     )
 
     log.info(f"{request.url.path} returning : {response}")
@@ -92,44 +92,24 @@ def get_club_to_club_transfer_service(
 
 @manage_service_router.post("/add-club-to-club-service")
 def add_club_to_club_transfer_service(
-    club_to_club_service_details: AddClubToClubService,
-    request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    request: Request, payload: Annotated[AddClubToClubServiceValidator, Depends()]
 ) -> ResponseAddClubToClubService:
+
+    club_to_club_service_details = payload.service_details
+    logistics_company_id = payload.logistics_company_id
 
     log.info(f"{request.url.path} invoked : {club_to_club_service_details}")
 
-    logistics_company_details = get_logistics_company_by_id(
-        logistics_company_id=club_to_club_service_details.logistics_company_id
-    )
-    if not logistics_company_details:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="logistics company does not exist.",
-        )
-
-    service_details = club_to_club_service_by_logistics_company_id(
-        logistics_company_id=club_to_club_service_details.logistics_company_id
-    )
-    if service_details:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="club to club already exists for the logistics company",
-        )
-
     provider = Provider(
-        provider_id=club_to_club_service_details.logistics_company_id,
+        provider_id=logistics_company_id,
         provider_type=UserRoles.LOGISTIC_COMPANY,
     )
     club_to_club_service = ClubToClubServiceInternal(
-        provider=provider, is_available=ServiceAvailability.AVAILABLE
+        provider=provider,
+        is_available=ServiceAvailability.AVAILABLE,
+        trucks=club_to_club_service_details.trucks,
+        features=club_to_club_service_details.features,
+        description=club_to_club_service_details.description,
     )
 
     service_id = save_club_to_club_service_db(service=club_to_club_service)
@@ -139,7 +119,7 @@ def add_club_to_club_transfer_service(
             detail="unable to save service",
         )
 
-    response = ResponseAddClubToClubService(service_id=service_id)
+    response = ResponseAddClubToClubService(logistic_service_club_to_club_id=service_id)
 
     log.info(f"{request.url.path} returning : {response}")
 

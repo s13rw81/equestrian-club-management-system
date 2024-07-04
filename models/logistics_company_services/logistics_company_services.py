@@ -20,6 +20,10 @@ class BaseLogisticsServiceInternal(BaseModel):
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
     is_available: ServiceAvailability
+    trucks: Optional[List[str]]
+    description: str
+    features: str
+    images: Optional[List[str]] = []
 
     @field_serializer("is_available")
     def enum_serializer(self, enum):

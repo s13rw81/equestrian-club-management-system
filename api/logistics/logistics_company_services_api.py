@@ -135,13 +135,9 @@ def update_club_to_club_transfer_service(
 ):
 
     service_update_details = payload.update_details
-    logistics_company_id = payload.logistics_company_id
+    service_id = payload.service_id
 
     log.info(f"{request.url.path} invoked : {service_update_details}")
-
-    service_details = club_to_club_service_by_logistics_company_id(
-        logistics_company_id=logistics_company_id
-    )
 
     # this would be required later
     # if service_details.is_available.value == service_update_details.is_available.value:
@@ -151,7 +147,7 @@ def update_club_to_club_transfer_service(
     #     )
 
     service_updated = update_club_to_club_service(
-        service_id=service_details.service_id, update_details=service_update_details
+        service_id=service_id, update_details=service_update_details
     )
 
     if not service_updated:

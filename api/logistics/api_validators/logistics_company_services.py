@@ -92,6 +92,15 @@ class UpdateClubToClubServiceValidator(BaseLogisticsServiceValidator):
         super().__init__(user)
         self.update_details = update_details
         trucks_owned_by_logistics_company = self.logistics_company_details.get("trucks")
+        self.service_details = self.service_exists(
+            logistics_company_id=self.logistics_company_id
+        )
+        self.service_id = self.service_details.service_id
+
+        if not self.service_id:
+            raise BaseLogisticsServiceValidator.http_exception(
+                message="club to club service does not exists for this logistics company user"
+            )
 
         if self.update_details.trucks:
             for truck_id in self.update_details.trucks:
@@ -101,6 +110,14 @@ class UpdateClubToClubServiceValidator(BaseLogisticsServiceValidator):
                     raise BaseLogisticsServiceValidator.http_exception(
                         message="all trucks must be owned by logistics company"
                     )
+
+    @staticmethod
+    def service_exists(logistics_company_id: str) -> ClubToClubServiceInternalWithID:
+        """returns whether the club to club service already exists for the users logistics company"""
+        service_details = club_to_club_service_by_logistics_company_id(
+            logistics_company_id=logistics_company_id
+        )
+        return service_details
 
 
 class UploadClubToClubServiceImagesValidator(BaseLogisticsServiceValidator):

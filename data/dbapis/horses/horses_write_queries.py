@@ -15,18 +15,29 @@ def create_horse(horse: InternalUpdateSellHorse):
     return str(horse_id)
 
 
-def update_horse(horse_id: str, horse_data: InternalUpdateSellHorse):
-    updated_horse = collection.find_one_and_update(
-        {"_id": horse_id},
-        {"$set": horse_data},
-        return_document=ReturnDocument.AFTER
-    )
+# def update_horse(horse_id: str, horse_data: InternalUpdateSellHorse):
+#     updated_horse = collection.find_one_and_update(
+#         {"_id": horse_id},
+#         {"$set": horse_data},
+#         return_document=ReturnDocument.AFTER
+#     )
 
-    if updated_horse:
-        return HorseSellUpdate(**updated_horse)
-    return None
+#     if updated_horse:
+#         return HorseSellUpdate(**updated_horse)
+#     return None
 
 
 def delete_horse(horse_id: str):
     delete_result = collection.delete_one({"_id": horse_id})
     return delete_result.deleted_count == 1
+
+
+def update_horse(horse_id: str, horse_data: dict):
+    updated_horse = collection.find_one_and_update(
+        {"_id": horse_id},
+        {"$set": horse_data},
+        return_document=ReturnDocument.AFTER
+    )
+    if updated_horse:
+        return updated_horse
+    return None

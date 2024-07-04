@@ -353,8 +353,7 @@ Return the `truck` with a schema similar to the following:
 2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission to acess this route.
 
 #### The Flow:
-1. A new document will be created in the `logistic_service_club
-_to_club` collection.
+1. A new document will be created in the `logistic_service_club_to_club` collection.
 The schema of the document will be similar to the following:
     ```json
     {

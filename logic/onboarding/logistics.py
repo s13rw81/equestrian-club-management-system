@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from logging_config import log
 from fastapi import status
 from models.company import Company
+from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
 from models.user import UserInternal
 
 logistic_company_collection = get_logistics_company_collection()
@@ -51,17 +52,26 @@ def update_logistics_company(user: UserInternal, company_id: str, update_company
     company = get_logistics_company_by_id_logic(company_id)
 
     # check if user has permission
-    if company and user.id not in company['admins']:
+    if company and user.id not in company['users']:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail = 'user is does not have privilege to use this route.'
         )
     # update the model
     update_company_dict = update_company.model_dump()
+    updated_logictic_company = LogisticCompanyInternal(
+        name = update_company_dict['name'] if 'name' in update_company_dict and update_company_dict['name'] else company['name'],
+        phone_no = update_company_dict['phone_no'] if 'phone_no' in update_company_dict and update_company_dict['phone_no'] else company['phone_no'],
+        description = update_company_dict['description'] if 'description' in update_company_dict and update_company_dict['description'] else company[
+            'description'],
+        is_khayyal_verified = update_company_dict[
+            'is_khayyal_verified'] if 'is_khayyal_verified' in update_company_dict and update_company_dict[
+            'is_khayyal_verified'] else company['is_khayyal_verified'],
+        images = update_company_dict['images'] if 'images' in update_company_dict and update_company_dict['images'] else company['images'],
+        email_address = update_company_dict['email_address'] if 'email_address' in update_company_dict and update_company_dict['email_address'] else company['email_address']
+    )
 
     # Update the club in the database
-    result = logistic_company_collection.update_one({'_id': ObjectId(company_id)}, {'$set': update_company_dict})
+    result = logistic_company_collection.update_one({'_id': ObjectId(company_id)}, {'$set': updated_logictic_company.model_dump()})
 
     return result.modified_count == 1
-
-

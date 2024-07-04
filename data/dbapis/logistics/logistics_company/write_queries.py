@@ -1,8 +1,5 @@
 from data.db import get_logistics_company_collection
-from fastapi import HTTPException
-from fastapi import status
 from logging_config import log
-from models.company import Company
 from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
 
 logistics_company_collection = get_logistics_company_collection()

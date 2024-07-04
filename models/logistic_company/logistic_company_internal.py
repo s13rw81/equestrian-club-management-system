@@ -11,8 +11,8 @@ class LogisticCompanyInternal(BaseModel):
     phone_no: str
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
-    is_khayyal_verified: bool = None,
-    images: Optional[List[str]] = None
+    is_khayyal_verified: bool = False
+    images: Optional[List[str]] = []
     users: Optional[List] = []
 
     class Config:

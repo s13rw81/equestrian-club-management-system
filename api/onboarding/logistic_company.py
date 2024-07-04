@@ -43,7 +43,7 @@ async def create_logistics_company(create_new_logistics_company: Createlogistics
     return {'status_code': 201, 'details': msg, 'data': result}
 
 
-@onboarding_api_router.post("/logistic-company-upload-images")
+@onboarding_api_router.post("/logistic-company/upload-images")
 async def upload_images_for_logistic_company_by_id(company_id: str, images: list[UploadFile],
                                                    user: Annotated[UserInternal, Depends(get_current_user)]):
     user_ext = UserExternal(**user.model_dump())

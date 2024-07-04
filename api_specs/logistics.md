@@ -2,6 +2,8 @@
 
 This set of apis will be used for `logistics`.
 
+## Logistics Trucks
+
 ### 1. `/logistic-company/trucks/add-truck`
 
 #### HTTP Method
@@ -316,6 +318,186 @@ Return the `truck` with a schema similar to the following:
    not necessary. However, you can still choose to use it, it will be easier to extend it down the line.
 2. Ensure the requested `truck` is owned by the `logistic-company`.
 
+## Logistics Services
+
+### 1. `/logistic-company/services/add-club-to-club-service`
+
+#### HTTP Method
+`POST`
+
+#### The Process
+1. The user will use the admin app to onboard itself as a `logistic-company`.
+2. After getting onboarded as a logistic company, the user will use this route
+   to add the `club-to-club` service it offers.
+
+#### Request Body
+```json
+{
+   trucks: ["truck._id", "truck._id"],
+   features: "it will be a string for now, can be a list later",
+   description: "a description of the club-to-club service"
+}
+```
+
+**Notes**:
+1. The `trucks` key will contain a `list` of `truck_id`s. A `truck_id` is basically an `_id` of a document in
+   the `trucks` collection.
+
+#### Request Validations
+1. Each of the `trucks` must be owned by the `logistic-company`. 
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission to acess this route.
+
+#### The Flow:
+1. A new document will be created in the `logistic_service_club
+_to_club` collection.
+The schema of the document will be similar to the following:
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "trucks": ["truck._id", "truck._id"],
+      "features": "it will be a string for now, can be a list later",
+      "description": "a description of the club-to-club service",
+      "provider": {
+         "provider_id": "logistic_company_id",
+         "provider_type": "LOGISTIC_COMPANY"
+      }
+    }
+    ```
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return the `_id` of the newly created truck.
+
+```json
+  {
+    "logistic_service_club_to_club_id": "the id of the newly added club-to-club service"
+  }
+```
+
+### 2. `/logistic-company/services/club-to-club-service/upload-images`
+
+After creating a new `club-to-club-service` the user will use this route to upload the
+images associated with the `club-to-club-service`.
+
+#### HTTP Method
+
+`POST`
+
+#### The Process
+
+1. The user will provide a list of images to be uploaded
+   and associated with the `club-to-club-service`.
+
+#### Request Body
+
+The request body would consist of a `list` of images. You can request images by
+creating the route in the following way:
+
+```python
+@upload_images_demo_router.post("/logistic-company/trucks/upload-truck-images/{truck_id}")
+async def upload_truck_images(truck_id: int, images: list[UploadFile]):
+```
+
+**Notes**:
+
+1. Check out [upload_images_demo_crud.py](../api/upload_images_demo/upload_images_demo_crud.py)
+   file for examples on how to handle image uploads.
+2. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+
+#### Request Validations
+1. The `logistic-company` must have a `club-to-club-service` in place before it can acess this route to upload images for it.
+
+#### Authentication and RBAC
+
+1. This route will be an `authenticated` route
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission to
+   access this route.
+
+#### The Flow
+
+1. The images provided by the user will be saved using the `save_image()` function of
+   the image handling mechanism.
+2. The `image_id`s returned by the image handling mechanism would be saved in the same
+   `logistic_service_club_to_club` collection; in the document associated with the corresponding `logistic-company` of the user.
+   
+   The key for saving the images would be `images`.
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "images": ["image_id_1", "image_id_2"]
+    }
+    ```
+
+#### Error Handling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If everything goes right, return a generic response informing the user that
+everything went well.
+
+```json
+{
+  "status": "OK"
+}
+```
+
+### 3. `/logistic-company/services/update-club-to-club-service`
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+1. Logistic companies will use this route to update the `club-to-club-service`.
+
+
+#### Request Body
+```json
+{
+   trucks: ["truck._id", "truck._id"],
+   features: "it will be a string for now, can be a list later",
+   description: "a description of the club-to-club service"
+}
+```
+**Notes**:
+1. All the fields are optional in the request body. The provided fields will be updated.
+2. The `trucks` key will contain a `list` of `truck_id`s. A `truck_id` is basically an `_id` of a document in
+   the `trucks` collection.
+
+#### Request Validations
+1. The `logistic_company` of the `user` must be the owner of the `trucks`.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `LOGISTIC_COMPANY` will have the permission to acess this route.
+
+#### The Flow:
+1. Update the corresponding `logistic_service_club_to_club` document with the newly provided.
+2. In case `trucks` is provided replace all the existing `trucks` entirely with the new `trucks`.
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return a generic response.
+
+```json
+  {
+    "status": "OK"
+  }
+```
 
 
 

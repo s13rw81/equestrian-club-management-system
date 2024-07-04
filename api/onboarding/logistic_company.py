@@ -12,7 +12,8 @@ from fastapi import status
 from logging_config import log
 from logic.auth import get_current_user
 from logic.onboarding.logistics import update_logistics_company, \
-    get_logistics_company_by_id_logic, upgrade_user_role
+    get_logistics_company_by_id_logic
+from logic.onboarding.upgrade_user import upgrade_user_role
 from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
 from models.user import UserInternal, UserRoles
 from models.user.user_external import UserExternal
@@ -49,12 +50,9 @@ async def create_logistics_company(create_new_logistics_company: Createlogistics
 
 
 @onboarding_api_router.post("/logistic-company/upload-images")
-async def upload_images_for_logistic_company_by_id(company_id: str, images: list[UploadFile],
-                                                   user: Annotated[UserInternal, Depends(get_current_user)]):
+async def upload_images_for_logistic_company_by_id(company_id: str, images: list[UploadFile], user: Annotated[UserInternal, Depends(get_current_user)]):
     user_ext = UserExternal(**user.model_dump())
     log.info(f'uploading images for logistic company. {images} by {user_ext} for company_id: {company_id}')
-
-    # check if user is admin of logistic company
 
     image_ids = []
     for image in images:
@@ -97,8 +95,9 @@ async def get_logistics_company_by_id(company_id: str, user: Annotated[UserInter
     company = get_logistics_company_by_id_logic(company_id = company_id)
     if not company:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f'no company found with id')
-    if company.users and user.id in company.users:
-        return {'status_code': 200, 'detail': f'company found with id {company_id}', 'data': company.model_dump()}
+    if user.id in company['users']:
+        company['_id'] = str(company['_id'])
+        return {'status_code': 200, 'detail': f'company found with id {company_id}', 'data': company}
     else:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED,
                             detail = f'user does not have priviledge to access this route.')

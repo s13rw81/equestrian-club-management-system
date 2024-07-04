@@ -6,8 +6,9 @@ from pydantic import BaseModel, Field
 
 
 class CreateClubRequest(BaseModel):
-    name: str = Field(..., min_length = 1)
-    description: Optional[str] = Field(None, max_length = 500)
-    price: Optional[float] = Field(..., gt = 0)
-    address: Optional[Address] = []
-    contact: Optional[Contact] = []
+    name: Optional[str] = None
+    description: Optional[str] = None
+    email_address: str = None
+    phone_no: Optional[str] = None
+    address: Optional[str] = None
+

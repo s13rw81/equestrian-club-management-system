@@ -17,7 +17,7 @@ def save_club(new_club: ClubInternal) -> str:
     log.info(f"save_club invoked: {new_club}")
 
     # Check if a club with the same name and city already exists
-    existing_club = club_collection.find_one({"name": new_club.name, "address.city": new_club.address.city})
+    existing_club = club_collection.find_one({"email_addrress": new_club.email_address})
 
     if existing_club is not None:
         emsg = f"Club with name {new_club.name} and city {new_club.address.city} already exists."
@@ -31,4 +31,3 @@ def save_club(new_club: ClubInternal) -> str:
     retval = str(club_id)
     log.info(f"new club created with id: {retval}")
     return retval
-

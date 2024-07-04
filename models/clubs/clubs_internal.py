@@ -17,13 +17,12 @@ class ClubInternal(BaseModel):
     id: Optional[PyObjectId] = Field(alias = '_id', default = None)
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
-    price: Optional[float] = Field(..., gt = 0)
-    address: Optional[Address] = None
-    contact: Optional[Contact] = None
-    created_at: datetime = Field(default_factory = get_current_utc_datetime)
-    updated_at: datetime = Field(default_factory = get_current_utc_datetime)
-    image_urls: Optional[List[str]] = None
-    admins: Optional[List[UserExternal]] = list()
+    images: Optional[List[str]] = None
+    users: Optional[List[UserExternal]] = list()
+    email_address: str
+    address: str
+    phone_no: str
+    is_khayyal_verified: bool = False
 
     class Config:
         arbitrary_types_allowed = True

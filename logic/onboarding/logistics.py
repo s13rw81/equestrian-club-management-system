@@ -1,5 +1,4 @@
 from api.onboarding.models.update_company_model import UpdateCompanyModel
-from api.user.models import UpdateUserRole
 from bson import ObjectId
 from bson.errors import InvalidId
 from data.db import get_logistics_company_collection, get_users_collection
@@ -82,20 +81,5 @@ def update_logistics_company(user: UserInternal, company_id: str, update_company
     # Update the club in the database
     result = logistic_company_collection.update_one({'_id': ObjectId(company_id)},
                                                     {'$set': updated_logictic_company.model_dump()})
-
-    return result.modified_count == 1
-
-
-def upgrade_user_role(user_update_request: UpdateUserRole, user: UserInternal):
-    update_user_dict = user_update_request.model_dump(exclude_none = True)
-
-    update_filter = {"_id": ObjectId(user.id)}
-
-    result = users_collection.update_one(
-        update_filter,
-        {"$set": {'user_role': update_user_dict['user_role'].value}}
-    )
-
-    log.info(f"matched_count={result.matched_count}, modified_count={result.modified_count}")
 
     return result.modified_count == 1

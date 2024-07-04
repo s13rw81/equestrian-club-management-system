@@ -1,16 +1,11 @@
 import re
-from datetime import datetime
 from functools import lru_cache
 from typing import List, Optional
 
 from bson import ObjectId
 from data.db import PyObjectId
-from models.generic_models.generic_address_model import Address
-from models.generic_models.generic_contacts_model import Contact
 from models.ratings.club_ratings_internal import ClubRatingsInternal
-from models.user.user_external import UserExternal
 from pydantic import BaseModel, Field, field_validator
-from utils.date_time import get_current_utc_datetime
 
 
 class ClubInternal(BaseModel):
@@ -18,7 +13,7 @@ class ClubInternal(BaseModel):
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
     images: Optional[List[str]] = None
-    users: Optional[List[UserExternal]] = list()
+    users: Optional[List[str]] = list()
     email_address: str
     address: str
     phone_no: str

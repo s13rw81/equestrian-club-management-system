@@ -1,8 +1,6 @@
 from typing import Optional, List
 
-from models.generic_models.generic_contacts_model import Contact
-from pydantic import BaseModel, field_validator
-from validators.clubs.clubs_exists import check_club_email_exists
+from pydantic import BaseModel
 
 
 class UpdateClubRequest(BaseModel):

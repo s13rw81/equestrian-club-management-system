@@ -35,7 +35,7 @@ async def create_club(create_new_club: CreateClubRequest,
     log.info(f"creating club, user: {user}")
     user_ext = UserExternal(**user.model_dump())
     # Convert the request model to the DB model
-    new_club_internal = ClubInternal(**create_new_club.dict(), users = [user_ext])
+    new_club_internal = ClubInternal(**create_new_club.dict(), users = [user.id])
     result = save_club(new_club_internal)
     user_role = UpdateUserRole(user_role = UserRoles.CLUB)
     res = upgrade_user_role(user_role, user)
@@ -79,7 +79,7 @@ async def get_club_images_by_id(request: Request, club_id: str = None) -> dict:
     """
 
     club = club_collection.find_one({"_id": ObjectId(club_id)})
-    if not club or "images" not in club:
+    if not club or club['images'] is None:
         raise HTTPException(status_code = 404, detail = f"No images found for club with id {club_id}")
 
     generated_url_list = [generate_image_url(image_id = image_id, request = request) for image_id in club['images']]
@@ -88,13 +88,13 @@ async def get_club_images_by_id(request: Request, club_id: str = None) -> dict:
 
 
 @onboarding_api_router.get("/get-club/{club_id}")
-async def get_club_by_id(club_id: str, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.LOGISTIC_COMPANY}))]) -> dict:
-    company = get_club_by_id_logic(club_id = club_id)
-    if not company:
-        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f'no company found with id')
-    if user.id in company['users']:
-        company['_id'] = str(company['_id'])
-        return {'status_code': 200, 'detail': f'company found with id {club_id}', 'data': company}
+async def get_club_by_id(club_id: str, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))]) -> dict:
+    club = get_club_by_id_logic(club_id = club_id).model_dump()
+    if not club:
+        raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f'no club found with id')
+    if user.id in club['users']:
+        club['_id'] = str(club['_id'])
+        return {'status_code': 200, 'detail': f'club found with id {club_id}', 'data': club}
     else:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED,
                             detail = f'user does not have priviledge to access this route.')

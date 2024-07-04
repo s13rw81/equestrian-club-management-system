@@ -1,4 +1,4 @@
-from api import UpdateClubRequest
+from api.onboarding.models.update_club_model import UpdateClubRequest
 from bson import ObjectId
 from data.db import get_clubs_collection
 from data.dbapis.clubs import get_club_by_id_logic
@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from logging_config import log
 from models.clubs import ClubInternal
 from models.user import UserInternal
-from starlette import status
+from fastapi import status
 
 clubs_collection = get_clubs_collection()
 
@@ -19,7 +19,7 @@ def update_club_by_id_logic(user: UserInternal, updated_club: UpdateClubRequest,
     :return: instance of str, id of updated club
     """
     log.info(f"updating club data")
-    existing_club = get_club_by_id_logic(club_id = club_id)
+    existing_club = get_club_by_id_logic(club_id = club_id).model_dump()
 
     if existing_club and user.id not in existing_club['users']:
         raise HTTPException(

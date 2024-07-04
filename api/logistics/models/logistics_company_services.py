@@ -34,7 +34,10 @@ class ResponseBaseGetLogisticsService(BaseModel):
 
 
 class UpdateBaseLogisticsService(BaseModel):
-    is_available: ServiceAvailability
+    # is_available: ServiceAvailability
+    trucks: Optional[List[str]] = None
+    features: Optional[str] = None
+    description: Optional[str] = None
 
     @computed_field
     @property

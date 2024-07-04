@@ -36,6 +36,7 @@ from role_based_access_control import RoleBasedAccessControl
 from .api_validators.logistics_company_services import (
     AddClubToClubServiceValidator,
     GetClubToClubServiceValidator,
+    UpdateClubToClubServiceValidator,
 )
 from .models import (
     AddClubToClubService,
@@ -126,33 +127,30 @@ def add_club_to_club_transfer_service(
     return response
 
 
-@manage_service_router.put("/update-club-to-club-service/{service_id}")
+@manage_service_router.put("/update-club-to-club-service")
 def update_club_to_club_transfer_service(
-    service_id: str,
-    service_update_details: UpdateClubToClubService,
     request: Request,
-    user: Annotated[
-        UserInternal,
-        Depends(
-            RoleBasedAccessControl(
-                allowed_roles={UserRoles.ADMIN, UserRoles.LOGISTIC_COMPANY}
-            )
-        ),
-    ],
+    payload: Annotated[UpdateClubToClubServiceValidator, Depends()],
 ):
+
+    service_update_details = payload.update_details
+    logistics_company_id = payload.logistics_company_id
 
     log.info(f"{request.url.path} invoked : {service_update_details}")
 
-    service_details = get_club_to_club_service_by_service_id(service_id=service_id)
+    service_details = club_to_club_service_by_logistics_company_id(
+        logistics_company_id=logistics_company_id
+    )
 
-    if service_details.is_available.value == service_update_details.is_available.value:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="invalid availability status provided",
-        )
+    # this would be required later
+    # if service_details.is_available.value == service_update_details.is_available.value:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail="invalid availability status provided",
+    #     )
 
     service_updated = update_club_to_club_service(
-        service_id=service_id, update_details=service_update_details
+        service_id=service_details.service_id, update_details=service_update_details
     )
 
     if not service_updated:
@@ -161,7 +159,7 @@ def update_club_to_club_transfer_service(
             detail="unable to update service",
         )
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return {"status": "OK"}
 
 
 @manage_service_router.get("/get-user-transfer-service/{logistics_company_id}")

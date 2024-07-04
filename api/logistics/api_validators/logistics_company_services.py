@@ -2,7 +2,10 @@ from typing import Annotated, List
 
 from fastapi import Depends, HTTPException, status
 
-from api.logistics.models.logistics_company_services import AddClubToClubService
+from api.logistics.models.logistics_company_services import (
+    AddClubToClubService,
+    UpdateClubToClubService,
+)
 from data.dbapis.logistics.logistics_company.read_queries import (
     get_logistics_company_by_user_id,
 )
@@ -77,3 +80,21 @@ class AddClubToClubServiceValidator(BaseLogisticsServiceValidator):
 class GetClubToClubServiceValidator(BaseLogisticsServiceValidator):
     def __init__(self, user: user_dependency) -> None:
         super().__init__(user)
+
+
+class UpdateClubToClubServiceValidator(BaseLogisticsServiceValidator):
+    def __init__(
+        self, user: user_dependency, update_details: UpdateClubToClubService
+    ) -> None:
+        super().__init__(user)
+        self.update_details = update_details
+        trucks_owned_by_logistics_company = self.logistics_company_details.get("trucks")
+
+        if self.update_details.trucks:
+            for truck_id in self.update_details.trucks:
+                if not self.truck_owned_by_logistics_company(
+                    truck_id=truck_id, trucks_list=trucks_owned_by_logistics_company
+                ):
+                    raise BaseLogisticsServiceValidator.http_exception(
+                        message="all trucks must be owned by logistics company"
+                    )

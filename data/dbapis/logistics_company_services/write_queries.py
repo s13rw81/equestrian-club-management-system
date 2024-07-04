@@ -60,14 +60,16 @@ def update_club_to_club_service(
     )
 
     try:
+        filter = {"_id": convert_to_object_id(service_id)}
+        update = {
+            k: v
+            for k, v in update_details.model_dump().items()
+            if v != None and k != "_id"
+        }
+
         update_response = club_to_club_service_collection.update_one(
-            filter={"_id": convert_to_object_id(service_id)},
-            update={
-                "$set": {
-                    "is_available": update_details.is_available.value,
-                    "updated_at": update_details.updated_at,
-                }
-            },
+            filter=filter,
+            update={"$set": update},
         )
     except Exception as e:
         log.error(f"Exception : update_club_to_club_service() {str(e)}")

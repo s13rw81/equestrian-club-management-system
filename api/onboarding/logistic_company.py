@@ -12,7 +12,6 @@ from logging_config import log
 from logic.auth import get_current_user
 from logic.onboarding.logistics import update_logistics_company, \
     get_logistics_company_by_id_logic
-from models.company import Company
 from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
 from models.user import UserInternal
 from models.user.user_external import UserExternal

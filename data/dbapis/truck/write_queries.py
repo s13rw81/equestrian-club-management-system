@@ -96,7 +96,7 @@ def add_truck_db(truck: TruckInternal) -> bool:
 
     try:
         updated = update_truck_in_company_db(truck_id=truck_id)
-        update_truck_in_service_collection(truck_id=truck_id)
+        # update_truck_in_service_collection(truck_id=truck_id)
 
     except Exception as e:
         log.error(f"error caught in update_truck_in_company_db() {str(e)}")

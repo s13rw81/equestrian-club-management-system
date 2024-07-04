@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import Optional, List
 
 
@@ -8,11 +8,30 @@ class UploadedBy(BaseModel):
 
 
 class HorseSellUpdate(BaseModel):
-    name: Optional[str] = Field(None, example="Bobby")
-    year_of_birth: Optional[int] = Field(None, example=2017)
-    breed: Optional[str] = Field(None, example="Thoroughbred")
-    size: Optional[int] = Field(None, example=150000)
-    gender: Optional[str] = Field(None, example="Gelding")
-    description: Optional[str] = Field(None, example="Bobby is well-behaved and has excellent ring qualities.")
-    images: Optional[List[str]] = Field(None, example=["http://example.com/image1.jpg", "http://example.com/image2.jpg"])
-    # uploaded_by: Optional[UploadedBy] = Field(None)
+    name: Optional[str] = None
+    year_of_birth: Optional[int] = None
+    breed: Optional[str] = None
+    size: Optional[str] = None
+    gender: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+
+    @validator('year_of_birth', pre=True, always=True)
+    def validate_year(cls, value):
+        if value is not None:
+            if isinstance(value, str) and value.isdigit():
+                value = int(value)
+            if not (1900 <= value <= 2100):
+                raise ValueError('Year of birth must be between 1900 and 2100')
+        return value
+
+    @validator('price', pre=True, always=True)
+    def validate_price(cls, value):
+        if value is not None:
+            try:
+                value = float(value)
+            except ValueError:
+                raise ValueError('Price must be a positive number')
+            if value < 0:
+                raise ValueError('Price must be a positive number')
+        return value

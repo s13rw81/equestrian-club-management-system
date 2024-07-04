@@ -38,7 +38,7 @@ horse_selling_service_api_router = APIRouter(
 @horse_selling_service_api_router.get("/{horse_id}", response_model=List[HorseSellingItem])
 async def get_horses_selling(
     horse_id: str,
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER})),
+    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
 ):
     horse = get_horse_by_id(horse_id)
     if horse:
@@ -49,7 +49,7 @@ async def get_horses_selling(
 async def upload_image_demo(
     horse_selling_service_id: str,
     images: List[UploadFile] = File(...),
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER})),
+    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
 ):
     # Check if the horse_selling_service_id belongs to the requesting user
     horse_service = horse_selling_service_collection.find_one({"_id": horse_selling_service_id})
@@ -68,11 +68,6 @@ async def upload_image_demo(
     for image in images:
         image_id = await save_image(image_file=image)  # Await the coroutine
         image_ids.append(image_id)
-
-    # saving the image id in the database for later usages
-    # caution: this is for demonstration purposes, database code should always be in data package
-
-
 
     # Update the horse document with image IDs
     if "images" not in horse:
@@ -94,7 +89,7 @@ async def upload_image_demo(
 async def get_horses_for_sell(
     request: Request,  # Request parameter should be first
     own_listing: bool = Query(default=False),
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER})),
+    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
 ):
     match_stage = {"$match": {"provider.provider_id": user.id}} if own_listing else {"$match": {"provider.provider_id": {"$ne": user.id}}}
     print("USER ID", user.id)
@@ -141,6 +136,7 @@ async def get_horses_for_sell(
     # Generate image URLs
     for horse in result:
         horse["image_urls"] = [generate_image_url(image_id, request) for image_id in horse.get("images", [])]
-        del horse["images"]  # Remove the image IDs list since URLs are generated
+        if horse.get("images", []):
+            del horse["images"]  # Remove the image IDs list since URLs are generated
 
     return result

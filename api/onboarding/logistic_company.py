@@ -13,6 +13,7 @@ from logic.auth import get_current_user
 from logic.onboarding.logistics import update_logistics_company, \
     get_logistics_company_by_id_logic
 from models.company import Company
+from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
 from models.user import UserInternal
 from models.user.user_external import UserExternal
 from utils.image_management import generate_image_url, save_image
@@ -37,7 +38,7 @@ async def create_logistics_company(create_new_logistics_company: Createlogistics
         )
     user_ext = UserExternal(**user.model_dump())
     # Convert the request model to the DB model
-    new_logistics_company_internal = Company(**create_new_logistics_company.dict(), admins = [user.id])
+    new_logistics_company_internal = LogisticCompanyInternal(**create_new_logistics_company.dict(), users = [user.id])
     result = save_logistics_company(new_logistics_company_internal)
     msg = f"new logistics_company created with id: {result} by user: {user_ext}"
     return {'status_code': 201, 'details': msg, 'data': result}

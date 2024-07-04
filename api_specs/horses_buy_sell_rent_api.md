@@ -180,7 +180,9 @@ everything went well.
 
 ### 3. `user/horses/get-horses-for-sell`
 
-Users will use this route to get the horses that are on sale or were listed for sale by the user himself.
+Users will use this route to get the horses:
+- that are on sale and listed by others
+- listed for sale by the user himself
 
 #### HTTP Method
 
@@ -279,3 +281,224 @@ as the following.
 
 This route will need `pagination` and `filtering`. Don't worry about
 it until the codebase wide `pagination-system` is implemented.
+
+
+### 4. `/user/horses/update-sell-listing/{horse_selling_service_id}`
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+1. `users` and `clubs` will use this route to update their sell listings.
+
+#### Path Parameters
+1. `horse_selling_service_id`: The `_id` of the `horse_selling_service` that the user wants to update.
+
+
+#### Request Body
+```json
+{
+  "name": "A name of the horse",
+  "year_of_birth": "2069",
+  "breed": "top class horse breed",
+  "size": "size of the horse",
+  "gender": "male",
+  "description": "a description of the horse",
+  "price": "1000 SAR"
+}
+```
+**Notes**:
+1. All the fields are optional in the request body. The provided fields will be updated. 
+
+#### Request Validations
+1. The `provider.provider_id` of the `horse_selling_service` must match
+   with `user._id` or `club._id` depending on the type of the `provider`.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` or `CLUB` will have the permission to acess this route.
+
+#### The Flow:
+1. Update the fields of the relevent documents of the corresponding collections
+   i.e. `horse_selling_service` and `horses`. 
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return a generic response.
+
+```json
+  {
+    "status": "OK"
+  }
+```
+
+### 5. `user/horses/enquire-for-a-horse-sell`
+
+Users will use this route to make in enquiry for a horse sell.
+
+#### HTTP Method
+
+`POST`
+
+#### The Process
+
+- User accesses the sell listing using the `/user/horses/get-horses-for-sell` route.
+- User creates an enquiry for a listing. The enquiry will be visible to admins.
+
+#### Request Body
+
+```json
+{
+    "horse_selling_service_id": "the id",
+    "message": "the message of the user"
+}
+```
+
+#### Request Validations
+1. The user must not have uploaded the `horse` which it is making an enquiry for. That is, the `provider.provider_id`
+   of the `horse_selling_service` must not be the same as `user._id`.
+2. The user must not have made an enquiry for the same listing already. That is, there must not be an record
+   for the same `user_id` and `horse_selling_service_id` in the `horse_selling_enquiry` collection. (If the user had
+   already made an enquiry he can update the existing enquiry.)
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` will have the permission
+   to access this route.
+
+#### The Flow
+
+1. A new document in the `horse_selling_enquiry` collection will be created. The schema of
+   the document will be similar to the following:
+
+    ```json
+    {
+        "_id": ObjectId("12345"),
+        "user_id": "the id of the user",
+        "horse_selling_service_id": "the horse_selling_service_id",
+        "message": "the message of the user"
+    }
+    ```
+
+#### Exception Handling:
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+
+On completion of all the operations, return the `horse_selling_service_id`.
+
+```json
+{
+  "horse_selling_enquiry_id": "the id of the newly created record"
+}
+```
+
+### 6. `/user/horses/update-horse-sell-enquiry/{horse_selling_enquiry_id}`
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+1. `users` will use this route to update the `sell-enquiry` it has already made using the
+   `user/horses/enquire-for-a-horse-sell` route.
+
+#### Path Parameters
+1. `horse_selling_enquiry_id`: The `_id` of the `horse_selling_enquiry` that the user wants to update.
+
+
+#### Request Body
+```json
+{
+  "message": "updated message"
+}
+```
+
+#### Request Validations
+1. The user must be the creator of the enquiry. That is, the `horse_selling_enquiry.user_id` must
+   match with the `user._id`.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` will have the permission to acess this route.
+
+#### The Flow:
+1. Update the `message` of the corresponding `horse_selling_enquiry` document.
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return a generic response.
+
+```json
+  {
+    "status": "OK"
+  }
+```
+
+### 7. `/user/horses/get-horse-sell-enquiries`
+
+- Users will use this route to get the `selling-enquiries` made by himself.
+- Admins will use this route to ghet the `selling-enquiries` made by all other users.
+
+#### HTTP Method
+
+`GET`
+
+#### The Process
+
+- The `user` will use this route to get the enquiries that are made by him.
+- The `admin` will use this route to ger the enquiries tha are made by all the users.
+
+
+#### Authentication and RBAC
+
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` and `ADMIN` will have the permission
+   to access this route.
+
+#### The Flow
+
+1. In case it's a `USER` return all the enquiries made by the user.
+2. In case it's a `ADMIN` returl all the enquiries made by all the users.
+
+**Notes**:
+
+- As of now, only `USER` will use this route. So, don't worry about `ADMIN` too much.
+
+#### Exception Handling:
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+
+On completion of all the operations, return a list of all the data with a similar schema
+as the following.
+
+```json
+[
+    {
+        "horse_selling_enquiry_id": "horse_selling_enquiry._id",
+        "user_id": "horse_seling_enquiry.user_id",
+        "message": "horse_selling_enquiry.message"
+    }
+]
+```
+
+#### Pagination:
+
+This route will need `pagination` and `filtering`. Don't worry about
+it until the codebase wide `pagination-system` is implemented.
+
+
+

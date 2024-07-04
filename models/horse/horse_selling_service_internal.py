@@ -17,4 +17,4 @@ class HorseSellingServiceInternal(BaseModel):
     description: str
     provider: Provider
     price_sar: int
-
+    image_urls: Optional[List[str]] = None

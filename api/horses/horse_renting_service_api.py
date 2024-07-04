@@ -17,7 +17,7 @@ horse_renting_service_api_router = APIRouter(
 @horse_renting_service_api_router.get("/{horse_id}", response_model=List[InternalSellHorse])
 async def get_horses_renting(
     horse_id: str,
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER})),
+    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
 ):
     horse = get_renting_horse_by_id(horse_id)
     if horse:

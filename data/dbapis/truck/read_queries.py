@@ -10,9 +10,7 @@ from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING
 truck_collection = get_collection(collection_name="trucks")
 
 
-def get_trucks_by_logistics_company_id(
-    logistics_company_id: str, fields: List
-) -> Cursor:
+def get_trucks_by_logistics_company_id(logistics_company_id: str) -> Cursor:
     """get list of trucks that the company owns
 
     Args:
@@ -26,14 +24,14 @@ def get_trucks_by_logistics_company_id(
 
     filter = {"logistics_company_id": logistics_company_id}
 
-    trucks_list = truck_collection.find(filter=filter, projection=fields)
+    trucks_list = truck_collection.find(filter=filter)
 
     log.info(f"get_trucks_by_logistics_company_id() returning")
 
     return trucks_list
 
 
-def get_truck_details_by_id_db(truck_id: str, fields: List) -> dict:
+def get_truck_details_by_id_db(truck_id: str, fields: List = None) -> dict:
     """fetches the details of the truck based on truck_id
 
     Args:
@@ -43,7 +41,9 @@ def get_truck_details_by_id_db(truck_id: str, fields: List) -> dict:
     log.info(f"get_truck_details_by_id_db() invoked : {truck_id}")
 
     filter = {"_id": convert_to_object_id(truck_id)}
-    truck_details = truck_collection.find_one(filter=filter, projection=fields)
+    truck_details = truck_collection.find_one(
+        filter=filter, **({"projection": fields} if fields else {})
+    )
 
     log.info(f"get_truck_details_by_id_db() returning : {truck_details}")
 
@@ -111,3 +111,20 @@ def get_available_trucks_db(
     log.info(f"get_available_trucks_db() returning : {available_trucks}")
 
     return available_trucks
+
+
+def is_truck_registered(registration_number: str) -> bool:
+    """based on the registration number returns if the truck is registered with
+    khayyal
+
+    Args:
+        registration_number (str)
+
+    Returns:
+        bool
+    """
+
+    filter = {"registration_number": registration_number}
+    registration_count = truck_collection.count_documents(filter=filter, limit=1)
+
+    return True if registration_count > 0 else False

@@ -1,5 +1,6 @@
 from typing import List
 
+from api.logistics.models.logistics_company_trucks import UpdateTruckDetails
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.truck import TruckInternal
@@ -46,9 +47,7 @@ def add_truck_db(truck: TruckInternal) -> bool:
         filter = {"_id": convert_to_object_id(truck.logistics_company_id)}
         update_truck = {
             "$push": {
-                "trucks": {
-                    "truck_id": convert_to_object_id(truck_id),
-                }
+                "trucks": truck_id,
             }
         }
 
@@ -109,25 +108,17 @@ def add_truck_db(truck: TruckInternal) -> bool:
     return updated, truck_id
 
 
-def update_truck_images(
-    truck_id: str, file_paths: List[str], description: List[str]
-) -> bool:
-    """given a list of file_paths and a list of image descriptions update the same to truck
-    collection
+def update_truck_images(truck_id: str, image_ids: List[str]) -> bool:
+    """given a list of image id update the same to truckcollection
 
     Args:
         truck_id (str)
-        file_paths (List[str])
-        description (List[str])
+        image_ids (List[str])
     """
 
     log.info(f"update_truck_images() invoked : truck_id {truck_id}")
 
-    image_data = [
-        {"image_key": image_key, "description": description}
-        for image_key, description in zip(file_paths, description)
-    ]
-    update = {"$set": {"images": image_data}}
+    update = {"$set": {"images": image_ids}}
 
     filter = {"_id": convert_to_object_id(truck_id)}
     updated = truck_collection.update_one(filter=filter, update=update)
@@ -149,5 +140,25 @@ def update_truck_availability(truck_id: str, availability: str) -> bool:
     update = {"$set": {"availability": availability}}
 
     updated = truck_collection.update_one(filter=filter, update=update)
+
+    return updated.modified_count == 1
+
+
+def update_truck_details(truck_id: str, truck_details: UpdateTruckDetails) -> bool:
+    """given the truck_id update the details of the truck
+
+    Args:
+        truck_id (str)
+        truck_details (UpdateTruckDetails)
+    """
+
+    log.info(f"update_truck_details() invoke : {truck_id} {truck_details}")
+
+    filter = {"_id": convert_to_object_id(truck_id)}
+    update = {
+        k: v for k, v in truck_details.model_dump().items() if v != None and k != "_id"
+    }
+
+    updated = truck_collection.update_one(filter=filter, update={"$set": update})
 
     return updated.modified_count == 1

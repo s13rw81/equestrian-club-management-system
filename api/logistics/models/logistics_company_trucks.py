@@ -7,7 +7,8 @@ from data.db import PyObjectId
 from models.truck import TruckInternal
 from models.truck.enums.availability import TruckAvailability
 from utils.date_time import get_current_utc_datetime
-from utils.logistics_utils import LogisticsService
+
+# from utils.logistics_utils import LogisticsService
 
 
 class AddTruck(BaseModel):
@@ -18,13 +19,13 @@ class AddTruck(BaseModel):
     gps_equipped: bool
     air_conditioning: bool
     name: str
-    services: List[LogisticsService]
+    # services: List[LogisticsService]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    @field_serializer("services")
-    def enum_serializer(self, services):
-        return [service.value for service in services]
+    # @field_serializer("services")
+    # def enum_serializer(self, services):
+    #     return [service.value for service in services]
 
 
 class AddTruckResponse(BaseModel):
@@ -51,7 +52,7 @@ class UpdateTruckDetails(BaseModel):
     availability: Optional[TruckAvailability] = None
     registration_number: Optional[str] = None
     truck_type: Optional[str] = None
-    capacity: Optional[str] = None
+    capacity: Optional[int] = None
     special_features: Optional[str] = None
     gps_equipped: Optional[str] = None
     air_conditioning: Optional[str] = None

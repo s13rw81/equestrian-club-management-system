@@ -41,7 +41,7 @@ will call this api to onboard itself as a `logistic-company`.
 2. The user must have the role `UserRoles.USER`
 
 #### The Flow
-1. A new document will be created in the `logistic_companies` collection.
+1. A new document will be created in the `logistic_company` collection.
 The schema of the document will be similar to the following:
     ```json
     {
@@ -119,7 +119,7 @@ async def upload_image_demo(images: list[UploadFile]):
 1. The images provided by the user will be saved using the `save_image()` function of
    the image handling mechanism.
 2. The `image_id`s returned by the image handling mechanism would be saved in the same
-   `logistic_companies` collection in the document associated with the `logistic_company` of the user.
+   `logistic_company` collection in the document associated with the `logistic_company` of the user.
    The `logistic_company` will be figured out based on the user who calls the route.
    
    The key for saving the images would be `images`.
@@ -181,7 +181,7 @@ If everything goes well, return a response with a schema similar to the follwing
   "is_khayyal_verified": false,
   "image_urls": [
     "logistic_companies.images[0]",
-    "logistic_companies.images[1]
+    "logistic_companies.images[1]"
   ]
 }
 ```

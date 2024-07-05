@@ -3,6 +3,7 @@ from typing import Annotated
 from api.onboarding.models import CreatelogisticsCompanyRequest
 from api.onboarding.models.update_company_model import UpdateCompanyModel
 from api.onboarding.onboarding_router import onboarding_api_router
+from api.user.models import UpdateUser, UpdateUserRole
 from bson import ObjectId
 from data.db import get_logistics_company_collection
 from data.dbapis.logistics.logistics_company import save_logistics_company
@@ -12,9 +13,11 @@ from logging_config import log
 from logic.auth import get_current_user
 from logic.onboarding.logistics import update_logistics_company, \
     get_logistics_company_by_id_logic
-from models.company import Company
-from models.user import UserInternal
+from logic.onboarding.upgrade_user import upgrade_user_role
+from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
+from models.user import UserInternal, UserRoles
 from models.user.user_external import UserExternal
+from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import generate_image_url, save_image
 
 logistics_company_collection = get_logistics_company_collection()
@@ -22,7 +25,7 @@ logistics_company_collection = get_logistics_company_collection()
 
 @onboarding_api_router.post("/create-logistic-company")
 async def create_logistics_company(create_new_logistics_company: CreatelogisticsCompanyRequest,
-                                   user: Annotated[UserInternal, Depends(get_current_user)]) -> dict:
+                                   user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.USER}))]) -> dict:
     """
     :param user: user invoking the api
     :param create_new_logistics_company: instace of Createlogistics_company dto
@@ -37,19 +40,19 @@ async def create_logistics_company(create_new_logistics_company: Createlogistics
         )
     user_ext = UserExternal(**user.model_dump())
     # Convert the request model to the DB model
-    new_logistics_company_internal = Company(**create_new_logistics_company.dict(), admins = [user.id])
+    new_logistics_company_internal = LogisticCompanyInternal(**create_new_logistics_company.dict(), users = [user.id])
     result = save_logistics_company(new_logistics_company_internal)
     msg = f"new logistics_company created with id: {result} by user: {user_ext}"
+    update_user = UpdateUserRole(user_role=UserRoles.LOGISTIC_COMPANY.value)
+    res = upgrade_user_role(update_user, user)
+    log.info(res)
     return {'status_code': 201, 'details': msg, 'data': result}
 
 
-@onboarding_api_router.post("/logistic-company-upload-images")
-async def upload_images_for_logistic_company_by_id(company_id: str, images: list[UploadFile],
-                                                   user: Annotated[UserInternal, Depends(get_current_user)]):
+@onboarding_api_router.post("/logistic-company/upload-images")
+async def upload_images_for_logistic_company_by_id(company_id: str, images: list[UploadFile], user: Annotated[UserInternal, Depends(get_current_user)]):
     user_ext = UserExternal(**user.model_dump())
     log.info(f'uploading images for logistic company. {images} by {user_ext} for company_id: {company_id}')
-
-    # check if user is admin of logistic company
 
     image_ids = []
     for image in images:
@@ -71,8 +74,8 @@ async def upload_images_for_logistic_company_by_id(company_id: str, images: list
     return {'status_code': 200, 'details': msg, 'data': result}
 
 
-@onboarding_api_router.get("/get_logistics_company_images/{company_id}")
-async def get_company_images_by_id( request: Request, company_id: str = None) -> dict:
+@onboarding_api_router.get("/get_logistics-company-images/{company_id}")
+async def get_company_images_by_id(request: Request, company_id: str = None) -> dict:
     """
     Retrieves image URLs for a club based on club_id.
     """
@@ -86,16 +89,15 @@ async def get_company_images_by_id( request: Request, company_id: str = None) ->
     return {'status_code': 200, 'details': f"Retrieved images for company {company_id}", 'data': generated_url_list}
 
 
-@onboarding_api_router.get("/get_logistics_company/{company_id}")
-async def get_logistics_company_by_id(company_id: str,
-                                      user: Annotated[UserInternal, Depends(get_current_user)]) -> dict:
-    # if user.id not in get_admins_of_logistic_company(company_id):
+@onboarding_api_router.get("/get_logistics-company/{company_id}")
+async def get_logistics_company_by_id(company_id: str, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.LOGISTIC_COMPANY}))]) -> dict:
 
     company = get_logistics_company_by_id_logic(company_id = company_id)
     if not company:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = f'no company found with id')
-    if company.admins and user.id in company.admins:
-        return {'status_code': 200, 'detail': f'company found with id {company_id}', 'data': company.model_dump()}
+    if user.id in company['users']:
+        company['_id'] = str(company['_id'])
+        return {'status_code': 200, 'detail': f'company found with id {company_id}', 'data': company}
     else:
         raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED,
                             detail = f'user does not have priviledge to access this route.')

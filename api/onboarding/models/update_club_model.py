@@ -3,7 +3,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 
-class UpdateCompanyModel(BaseModel):
+class UpdateClubRequest(BaseModel):
     email_address: Optional[str] = None
     phone_no: Optional[str] = None
     name: Optional[str] = None

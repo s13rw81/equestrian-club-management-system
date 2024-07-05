@@ -4,7 +4,7 @@ from api.clubs.clubs_api import clubs_api_router
 from bson import ObjectId
 from data.db import get_clubs_collection
 from data.dbapis.clubs.read_queries import get_club_by_id_logic
-from data.dbapis.clubs.update_queries import update_club_by_id_logic
+from logic.onboarding.clubs import update_club_by_id_logic
 from fastapi import UploadFile, File, Depends, HTTPException
 from fastapi import status
 from logging_config import log

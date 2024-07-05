@@ -1,9 +1,9 @@
 from typing import Annotated, Optional, List
 
-from api.clubs.models.update_club_model import UpdateClubRequest
+from api.onboarding import UpdateClubRequest
 from data.dbapis.clubs.delete_queries import delete_club_by_id_logic
 from data.dbapis.clubs.read_queries import get_all_clubs_logic, get_club_by_id_logic
-from data.dbapis.clubs.update_queries import update_club_by_id_logic
+from logic.onboarding.clubs import update_club_by_id_logic
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi import status
 from logging_config import log
@@ -81,7 +81,7 @@ async def update_club_by_id(club_id: str, user: Annotated[UserExternal, Depends(
         contact = update_club.contact if update_club.contact else existing_club.contact,
         admins = update_club.admins if update_club.admins else existing_club.admins
     )
-    result = update_club_by_id_logic(club_id = club_id, updated_club = updated_club_details)
+    result = update_club(club_id = club_id, updated_club = updated_club_details)
 
     if not result:
         raise HTTPException(status_code = 404, detail = "Club not found or not updated")

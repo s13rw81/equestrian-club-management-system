@@ -14,7 +14,12 @@ def get_users_database_collection():
 
 
 @pytest.fixture(scope="class")
-def get_access_token(get_users_database_collection):
+def get_database_connection():
+    yield get_database()
+
+
+@pytest.fixture(scope="class")
+def get_access_token_not_otp_verified(get_users_database_collection):
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"
@@ -52,3 +57,35 @@ def get_access_token(get_users_database_collection):
     result = get_users_database_collection.delete_one({"email_address": TEST_USER_EMAIL})
 
     assert result.deleted_count == 1
+
+
+@pytest.fixture(scope="class")
+def get_access_token_otp_verified(get_access_token_not_otp_verified, get_users_database_collection):
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {get_access_token_not_otp_verified}"
+    }
+
+    response = client.post("/auth/generate-sign-up-otp", headers=headers)
+
+    assert response.status_code == 200
+
+    user_dict = get_users_database_collection.find_one({"email_address": TEST_USER_EMAIL})
+
+    assert not user_dict["otp_verified"]
+
+    otp = user_dict["sign_up_verification_otp"]["otp"]
+
+    params = {
+        "user_provided_otp": otp
+    }
+
+    response = client.post("/auth/verify-sign-up-otp", params=params, headers=headers)
+
+    assert response.status_code == 200
+
+    user_dict = get_users_database_collection.find_one({"email_address": TEST_USER_EMAIL})
+
+    assert user_dict["otp_verified"]
+
+    yield get_access_token_not_otp_verified

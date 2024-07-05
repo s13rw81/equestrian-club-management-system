@@ -15,18 +15,18 @@ class TruckInternal(BaseModel):
     truck_type: str
     capacity: int
     gps_equipped: bool
-    special_features: str = Field(max_length=200)
+    special_features: str
     air_conditioning: bool
-    logistics_company_id: Optional[PyObjectId]
+    logistics_company_id: str
     name: str
     availability: TruckAvailability = TruckAvailability.UN_AVAILABLE.value
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
     images: List[str] = []
-    services: List[LogisticsService]
+    # services: List[LogisticsService]
 
-    @field_serializer("services")
-    def enum_serializer(self, services):
-        return [service.value for service in services]
+    # @field_serializer("services")
+    # def enum_serializer(self, services):
+    #     return [service.value for service in services]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

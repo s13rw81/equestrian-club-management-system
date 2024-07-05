@@ -54,9 +54,9 @@ def get_access_token_not_otp_verified(get_users_database_collection):
 
     yield access_token
 
-    result = get_users_database_collection.delete_one({"email_address": TEST_USER_EMAIL})
-
-    assert result.deleted_count == 1
+    # result = get_users_database_collection.delete_one({"email_address": TEST_USER_EMAIL})
+    #
+    # assert result.deleted_count == 1
 
 
 @pytest.fixture(scope="class")

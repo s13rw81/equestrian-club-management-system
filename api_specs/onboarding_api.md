@@ -181,7 +181,7 @@ If everything goes well, return a response with a schema similar to the follwing
   "is_khayyal_verified": false,
   "image_urls": [
     "logistic_companies.images[0]",
-    "logistic_companies.images[1]
+    "logistic_companies.images[1]"
   ]
 }
 ```

@@ -36,6 +36,10 @@ Users will use this route to enlist new horses that is available for selling.
   "price": "1000 SAR"
 }
 ```
+#### Request Validations
+1. The user's `otp_verified` must be `true`
+
+**Note**: Use `pydantic` validators for the validations
 
 #### Authentication and RBAC
 

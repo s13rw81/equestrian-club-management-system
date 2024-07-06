@@ -6,6 +6,8 @@ primarily from the admin app after creation of the user. This includes,
 - club
 - trainer
 
+## Logistic Company
+
 ### 1. `onboarding/create-logistic-company`
 Once the user is created using the `auth` apis, the user 
 will call this api to onboard itself as a `logistic-company`.
@@ -191,9 +193,10 @@ If everything goes well, return a response with a schema similar to the follwing
    image handling mechanism. To learn how to use the image handling mechanism refer
    to the [Notes on handling images](../README.md#notes-on-handling-images) section
    of the `README.md` file.
-   
 
-### 4. `onboarding/create-club`
+## Club
+
+### 1. `onboarding/create-club`
 Once the user is created using the `auth` apis, the user 
 will call this api to onboard itself as a `club`.
 
@@ -264,7 +267,7 @@ Typically, the request would succeed and return,
 {"club_id":  "the id of the newly created club"}
 ```
 
-### 5. `onboarding/club/upload-images`
+### 2. `onboarding/club/upload-images`
 
 After onboarding as a `club`, the user will use this route to upload images
 of the `club`.
@@ -333,7 +336,7 @@ everything went well.
 }
 ```
 
-### 6. `onboarding/get-club`
+### 3. `onboarding/get-club`
 
 After the user onboards himself as a `club`, he calls this route to get details about his `club`.
 

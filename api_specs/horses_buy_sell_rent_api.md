@@ -493,6 +493,7 @@ as the following.
 [
     {
         "horse_selling_enquiry_id": "horse_selling_enquiry._id",
+        "horse_selling_service_id": "the horse_selling_service_id",
         "user_id": "horse_seling_enquiry.user_id",
         "message": "horse_selling_enquiry.message"
     }

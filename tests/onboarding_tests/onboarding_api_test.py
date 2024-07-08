@@ -65,7 +65,7 @@ class TestOnboardingLogisticCompanyFlow:
 
     @pytest.mark.dependency(depends=["TestOnboardingLogisticCompanyFlow::test_create_logistic_company"])
     def test_logistic_company_upload_images(self, get_access_token_otp_verified):
-        route_url = "onboarding/logistic-company/upload-images"
+        route_url = "/onboarding/logistic-company/upload-images"
 
         images_directory = "tests/test_images"
 
@@ -156,7 +156,7 @@ class TestOnboardingClubFlow:
 
     @pytest.mark.dependency(depends=["TestOnboardingClubFlow::test_create_club"])
     def test_club_upload_images(self, get_access_token_otp_verified):
-        route_url = "onboarding/club/upload-images"
+        route_url = "/onboarding/club/upload-images"
 
         images_directory = "tests/test_images"
 

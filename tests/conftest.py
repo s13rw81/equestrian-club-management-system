@@ -6,6 +6,81 @@ from main import app
 client = TestClient(app)
 
 TEST_USER_EMAIL = "test@test.com"
+TEST_USER_EMAIL_2 = "test2@test.com"
+
+
+class HelperFunctions:
+    @staticmethod
+    def create_an_otp_not_verified_user(user_email=TEST_USER_EMAIL):
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "full_name": "Test User",
+            "email_address": user_email,
+            "password": "111111",
+            "riding_stage": "BEGINNER",
+            "horse_ownership_status": "YES",
+            "equestrian_discipline": "RIDING_HORSE"
+        }
+
+        response = client.post("/user/signup", headers=headers, json=data)
+
+        assert response.status_code == 200
+
+        headers = {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        data = {
+            "username": user_email,
+            "password": "111111"
+        }
+
+        response = client.post("/auth/token", headers=headers, data=data)
+
+        assert response.status_code == 200
+
+        access_token = response.json()["access_token"]
+        return access_token
+
+    @staticmethod
+    def create_an_otp_verified_user(user_email=TEST_USER_EMAIL):
+        not_otp_verified_user_token = HelperFunctions.create_an_otp_not_verified_user(user_email=user_email)
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {not_otp_verified_user_token}"
+        }
+
+        response = client.post("/auth/generate-sign-up-otp", headers=headers)
+
+        assert response.status_code == 200
+
+        user_dict = get_users_database_collection.find_one({"email_address": user_email})
+
+        assert not user_dict["otp_verified"]
+
+        otp = user_dict["sign_up_verification_otp"]["otp"]
+
+        params = {
+            "user_provided_otp": otp
+        }
+
+        response = client.post("/auth/verify-sign-up-otp", params=params, headers=headers)
+
+        assert response.status_code == 200
+
+        user_dict = get_users_database_collection.find_one({"email_address": user_email})
+
+        assert user_dict["otp_verified"]
+
+        return user_email
+
+    @staticmethod
+    def get_database_connection():
+        return get_database()
 
 
 @pytest.fixture(scope="class")
@@ -15,77 +90,25 @@ def get_users_database_collection():
 
 @pytest.fixture(scope="class")
 def get_database_connection():
-    yield get_database()
+    yield HelperFunctions.get_database_connection()
 
 
 @pytest.fixture(scope="class")
-def get_access_token_not_otp_verified(get_users_database_collection):
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "full_name": "Test User",
-        "email_address": TEST_USER_EMAIL,
-        "password": "111111",
-        "riding_stage": "BEGINNER",
-        "horse_ownership_status": "YES",
-        "equestrian_discipline": "RIDING_HORSE"
-    }
-
-    response = client.post("/user/signup", headers=headers, json=data)
-
-    assert response.status_code == 200
-
-    headers = {
-        "accept": "application/json",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    data = {
-        "username": TEST_USER_EMAIL,
-        "password": "111111"
-    }
-
-    response = client.post("/auth/token", headers=headers, data=data)
-
-    assert response.status_code == 200
-
-    access_token = response.json()["access_token"]
+def get_access_token_not_otp_verified():
+    access_token = HelperFunctions.create_an_otp_not_verified_user(user_email=TEST_USER_EMAIL)
 
     yield access_token
 
-    # result = get_users_database_collection.delete_one({"email_address": TEST_USER_EMAIL})
-    #
-    # assert result.deleted_count == 1
+
+@pytest.fixture(scope="class")
+def get_access_token_otp_verified():
+    access_token = HelperFunctions.create_an_otp_verified_user(user_email=TEST_USER_EMAIL)
+
+    yield access_token
 
 
 @pytest.fixture(scope="class")
-def get_access_token_otp_verified(get_access_token_not_otp_verified, get_users_database_collection):
-    headers = {
-        "accept": "application/json",
-        "Authorization": f"Bearer {get_access_token_not_otp_verified}"
-    }
+def get_access_token_otp_verified_2():
+    access_token = HelperFunctions.create_an_otp_verified_user(user_email=TEST_USER_EMAIL_2)
 
-    response = client.post("/auth/generate-sign-up-otp", headers=headers)
-
-    assert response.status_code == 200
-
-    user_dict = get_users_database_collection.find_one({"email_address": TEST_USER_EMAIL})
-
-    assert not user_dict["otp_verified"]
-
-    otp = user_dict["sign_up_verification_otp"]["otp"]
-
-    params = {
-        "user_provided_otp": otp
-    }
-
-    response = client.post("/auth/verify-sign-up-otp", params=params, headers=headers)
-
-    assert response.status_code == 200
-
-    user_dict = get_users_database_collection.find_one({"email_address": TEST_USER_EMAIL})
-
-    assert user_dict["otp_verified"]
-
-    yield get_access_token_not_otp_verified
+    yield access_token

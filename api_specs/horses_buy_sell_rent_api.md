@@ -5,7 +5,7 @@ the horses. The `users` and `clubs` will enlist horses for others
 to buy or rent. As of now, `users` will be able to see the listing and make
 enquiry for the listing. The `enquiries` will be accessible by `khayyal-admin`.
 
-#### SELL
+## SELL
 
 ### 1. `user/horses/enlist-for-sell`
 
@@ -508,7 +508,7 @@ This route will need `pagination` and `filtering`. Don't worry about
 it until the codebase wide `pagination-system` is implemented.
 
 
-#### RENT
+## RENT
 
 ### 1. `user/horses/enlist-for-rent`
 

@@ -869,12 +869,16 @@ Users will use this route to make in enquiry for a horse sell.
 }
 ```
 
+**Notes**:
+1. `duration` would be of type `int` denoting the number of days the user wants to rent it for. The minimum value is `1`.
+
 #### Request Validations
 1. The user must not have uploaded the `horse` which it is making an enquiry for. That is, the `provider.provider_id`
    of the `horse_renting_service` must not be the same as `user._id`.
 2. The user must not have made an enquiry for the same listing already. That is, there must not be an record
    for the same `user_id` and `horse_renting_service_id` in the `horse_renting_enquiry` collection. (If the user had
    already made an enquiry he can update the existing enquiry.)
+3. The `date` must not be from the past.
 
 **Note**: Use `pydantic` validators for the validations.
 

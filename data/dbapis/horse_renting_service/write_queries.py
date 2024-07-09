@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 from data.db import convert_to_object_id, get_horse_renting_service_collection
 from logging_config import log
@@ -52,3 +52,35 @@ def update_renting_service_images(service_id: str, image_ids: List[str]) -> bool
     updated = horse_renting_service_collection.update_one(filter=filter, update=update)
 
     return updated.modified_count == 1
+
+
+def update_horse_renting_service_details(service_id: str, update_details: Dict) -> bool:
+    """given a service_id and update_details update the renting service details in the database
+
+    Args:
+        service_id (str)
+        update_details (Dict)
+
+    Returns:
+        bool
+    """
+
+    log.info(
+        f"update_horse_renting_service_details() invoked service_id {service_id}, update_details {update_details}"
+    )
+
+    filter = {"_id": convert_to_object_id(service_id)}
+    update = {k: v for k, v in update_details.items() if v != None and k != "_id"}
+
+    if not update:
+        return False
+
+    update_response = horse_renting_service_collection.update_one(
+        filter=filter, update={"$set": update}
+    )
+
+    log.info(
+        f"matched_count={update_response.matched_count}, modified_count={update_response.modified_count}"
+    )
+
+    return update_response.modified_count == 1

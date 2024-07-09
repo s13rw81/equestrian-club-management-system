@@ -5,9 +5,10 @@ from fastapi.requests import Request
 
 from data.dbapis.horse_renting_service.write_queries import (
     add_horse_renting_service_details,
+    update_horse_renting_service_details,
     update_renting_service_images,
 )
-from data.dbapis.horses.write_queries import add_horse
+from data.dbapis.horses.write_queries import add_horse, update_horse
 from logging_config import log
 from models.horse.horse import HorseInternal, UploadInfo
 from models.horse.horse_renting_service_internal import (
@@ -18,6 +19,7 @@ from utils.image_management import save_image
 
 from .api_validators.horse_renting_service import (
     EnlistHorseForRentServiceValidator,
+    UpdateHorseForRentServiceListingValidator,
     UploadRentImageValidator,
 )
 from .models import EnlistHorseForRentResponse
@@ -101,5 +103,32 @@ async def upload_rent_images(
         )
 
     update_renting_service_images(service_id=service_id, image_ids=image_ids)
+
+    return {"status": "ok"}
+
+
+@horse_renting_service_router.put(
+    path="/update-rent-listing/{horse_renting_service_id}"
+)
+def update_horse_renting_service_listings(
+    request: Request,
+    payload: Annotated[UpdateHorseForRentServiceListingValidator, Depends()],
+):
+
+    horse_renting_service_id = payload.horse_renting_service_id
+    update_details = payload.update_details
+    horse_id = payload.service_details.horse_id
+
+    log.info(f"{request.url.path} invoked update_details {update_details}")
+
+    update_horse(horse_id=horse_id, update_details=update_details.model_dump())
+
+    update_horse_renting_service_details(
+        service_id=horse_renting_service_id,
+        update_details={
+            "price_sar": update_details.price,
+            "updated_at": update_details.updated_at,
+        },
+    )
 
     return {"status": "ok"}

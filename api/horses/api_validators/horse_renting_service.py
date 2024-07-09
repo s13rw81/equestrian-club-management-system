@@ -8,7 +8,7 @@ from data.dbapis.horse_renting_service.read_queries import (
 from models.user import UserInternal, UserRoles
 from role_based_access_control import RoleBasedAccessControl
 
-from ..models import EnlistHorseForRent
+from ..models import EnlistHorseForRent, UpdateHorseForRentServiceListing
 
 user_dependency = Annotated[
     UserInternal,
@@ -52,6 +52,35 @@ class UploadRentImageValidator(BaseHorseRentingServiceValidator):
         super().__init__(user)
         self.horse_renting_service_id = horse_renting_service_id
         self.files = files
+        self.service_details = get_renting_service_details_by_service_id(
+            service_id=horse_renting_service_id
+        )
+
+        if not self.service_created_by_user(
+            renting_service_id=horse_renting_service_id, creator_id=user.id
+        ):
+            raise BaseHorseRentingServiceValidator.http_exception(
+                message="renting service not owned by user"
+            )
+
+    @staticmethod
+    def service_created_by_user(renting_service_id, creator_id) -> bool:
+        service_details = get_renting_service_details_by_service_id(
+            service_id=renting_service_id
+        )
+        return service_details.provider.provider_id == creator_id
+
+
+class UpdateHorseForRentServiceListingValidator(BaseHorseRentingServiceValidator):
+    def __init__(
+        self,
+        user: user_dependency,
+        horse_renting_service_id: str,
+        update_details: UpdateHorseForRentServiceListing,
+    ) -> None:
+        super().__init__(user)
+        self.horse_renting_service_id = horse_renting_service_id
+        self.update_details = update_details
         self.service_details = get_renting_service_details_by_service_id(
             service_id=horse_renting_service_id
         )

@@ -1,8 +1,12 @@
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.requests import Request
 
+from data.dbapis.horse_renting_service.read_queries import (
+    get_all_horse_rent_enquiries,
+    get_renting_enquiry_by_user_id,
+)
 from data.dbapis.horse_renting_service.write_queries import (
     add_horse_renting_service_details,
     add_horse_renting_service_enquiry,
@@ -23,11 +27,16 @@ from utils.image_management import save_image
 from .api_validators.horse_renting_service import (
     CreateRentEnquiryValidator,
     EnlistHorseForRentServiceValidator,
+    GetHorseRentEnquiryValidator,
     UpdateHorseForRentServiceListingValidator,
     UpdateRentEnquiryValidator,
     UploadRentImageValidator,
 )
-from .models import CreateRentEnquiryResponse, EnlistHorseForRentResponse
+from .models import (
+    CreateRentEnquiryResponse,
+    EnlistHorseForRentResponse,
+    GetHorseRentEnquiry,
+)
 
 horse_renting_service_router = APIRouter(prefix="", tags=["user-horses"])
 
@@ -155,7 +164,8 @@ def create_rent_enquiry(
 
     if update_existing:
         update_horse_renting_service_enquiry(
-            enquiry_id=old_enquiry_details.enquiry_id, enquiry_details=enquiry_details
+            enquiry_id=old_enquiry_details.horse_renting_enquiry_id,
+            enquiry_details=enquiry_details,
         )
 
         return CreateRentEnquiryResponse(
@@ -196,3 +206,25 @@ def update_rent_enquiry(
     )
 
     return {"status": "ok"}
+
+
+@horse_renting_service_router.get(
+    path="/get-horse-rent-enquiries", response_model=List[GetHorseRentEnquiry]
+)
+def get_rent_enquiries(
+    request: Request,
+    payload: Annotated[GetHorseRentEnquiryValidator, Depends()],
+):
+
+    is_admin = payload.is_admin
+    user = payload.user
+    log.info(f"{request.url.path} invoked")
+
+    log.info(f"user_id {user.id}")
+
+    if is_admin:
+        response = get_all_horse_rent_enquiries()
+    else:
+        response = get_renting_enquiry_by_user_id(user_id=user.id)
+
+    return response

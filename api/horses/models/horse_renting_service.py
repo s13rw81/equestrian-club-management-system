@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, computed_field, field_validator, model_validator
+from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
 
 from utils.date_time import get_current_utc_datetime
 
@@ -92,3 +92,14 @@ class UpdateHorseRentEnquiry(BaseModel):
             raise ValueError("duration should be a positive integer")
 
         return self
+
+
+class GetHorseRentEnquiry(BaseModel):
+    horse_renting_enquiry_id: str
+    horse_renting_service_id: str
+    user_id: str
+    message: str
+    date: datetime
+    duration: int
+    created_at: datetime
+    updated_at: datetime

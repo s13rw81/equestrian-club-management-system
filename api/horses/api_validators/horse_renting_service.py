@@ -25,6 +25,10 @@ user_dependency = Annotated[
     UserInternal,
     Depends(RoleBasedAccessControl(allowed_roles={UserRoles.USER, UserRoles.CLUB})),
 ]
+user_admin_dependency = Annotated[
+    UserInternal,
+    Depends(RoleBasedAccessControl(allowed_roles={UserRoles.USER, UserRoles.ADMIN})),
+]
 
 
 class BaseHorseRentingServiceValidator:
@@ -183,3 +187,9 @@ class UpdateRentEnquiryValidator(BaseHorseRentingServiceValidator):
         enquiry_details: HorseRentingServiceEnquiryInternalWithID, user_id: str
     ) -> bool:
         return enquiry_details.user_id == user_id
+
+
+class GetHorseRentEnquiryValidator(BaseHorseRentingServiceValidator):
+    def __init__(self, user: user_admin_dependency) -> None:
+        super().__init__(user)
+        self.is_admin = self.user.user_role == UserRoles.ADMIN

@@ -41,4 +41,6 @@ class HorseRentingServiceEnquiryInternal(BaseModel):
 
 
 class HorseRentingServiceEnquiryInternalWithID(HorseRentingServiceEnquiryInternal):
-    enquiry_id: Annotated[PyObjectId, str] = Field(default=None, alias="_id")
+    horse_renting_enquiry_id: Annotated[PyObjectId, str] = Field(
+        default=None, alias="_id"
+    )

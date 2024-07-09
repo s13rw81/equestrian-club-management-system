@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 
 from data.db import (
     convert_to_object_id,
@@ -102,3 +102,54 @@ def get_renting_enquiry_details_by_enquiry_id(
     log.info(f"get_renting_enquiry_details_by_enquiry_id() returning enquiry {enquiry}")
 
     return enquiry
+
+
+def get_renting_enquiry_by_user_id(
+    user_id: str,
+) -> List[HorseRentingServiceEnquiryInternalWithID]:
+    """return all the horse rent enquiry made by the user
+
+    Args:
+        user_id (str): _description_
+
+    Returns:
+        List[HorseRentingServiceEnquiryInternalWithID]
+    """
+
+    log.info(f"get_renting_enquiry_by_user_id() called user_id {user_id}")
+
+    filter = {"user_id": user_id}
+    response = renting_enquiry_collection.find(filter=filter)
+
+    if not response:
+        return []
+
+    enquiries = [
+        HorseRentingServiceEnquiryInternalWithID(**enquiry) for enquiry in response
+    ]
+
+    log.info(f"get_renting_enquiry_by_user_id() returning {enquiries}")
+
+    return enquiries
+
+
+def get_all_horse_rent_enquiries() -> List[HorseRentingServiceEnquiryInternalWithID]:
+    """return all the horse rent enquiry
+    Returns:
+        List[HorseRentingServiceEnquiryInternalWithID]
+    """
+
+    log.info(f"get_all_horse_rent_enquiries()")
+
+    response = renting_enquiry_collection.find()
+
+    if not response:
+        return []
+
+    enquiries = [
+        HorseRentingServiceEnquiryInternalWithID(**enquiry) for enquiry in response
+    ]
+
+    log.info(f"get_all_horse_rent_enquiries() returning {enquiries}")
+
+    return enquiries

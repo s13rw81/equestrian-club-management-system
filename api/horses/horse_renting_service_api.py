@@ -5,6 +5,7 @@ from fastapi.requests import Request
 
 from data.dbapis.horse_renting_service.write_queries import (
     add_horse_renting_service_details,
+    add_horse_renting_service_enquiry,
     update_horse_renting_service_details,
     update_renting_service_images,
 )
@@ -12,17 +13,19 @@ from data.dbapis.horses.write_queries import add_horse, update_horse
 from logging_config import log
 from models.horse.horse import HorseInternal, UploadInfo
 from models.horse.horse_renting_service_internal import (
+    HorseRentingServiceEnquiryInternal,
     HorseRentingServiceInternal,
     Provider,
 )
 from utils.image_management import save_image
 
 from .api_validators.horse_renting_service import (
+    CreateRentEnquiryValidator,
     EnlistHorseForRentServiceValidator,
     UpdateHorseForRentServiceListingValidator,
     UploadRentImageValidator,
 )
-from .models import EnlistHorseForRentResponse
+from .models import CreateRentEnquiryResponse, EnlistHorseForRentResponse
 
 horse_renting_service_router = APIRouter(prefix="", tags=["user-horses"])
 
@@ -132,3 +135,49 @@ def update_horse_renting_service_listings(
     )
 
     return {"status": "ok"}
+
+
+@horse_renting_service_router.post(path="/enquire-for-a-horse-rent")
+def create_rent_enquiry(
+    request: Request, payload: Annotated[CreateRentEnquiryValidator, Depends()]
+) -> CreateRentEnquiryResponse:
+
+    user = payload.user
+    old_enquiry_details = payload.old_enquiry_details
+    enquiry_details = payload.enquiry_details
+    update_existing = payload.update_existing
+
+    log.info(
+        f"{request.url.path} invoked enquiry_details {enquiry_details}, old_enquiry_details {old_enquiry_details}"
+    )
+
+    if update_existing:
+        # call the update enquiry function from here
+        log.info("value of update_existing")
+        return CreateRentEnquiryResponse(
+            horse_renting_enquiry_id=old_enquiry_details.enquiry_id
+        )
+
+    enquiry = HorseRentingServiceEnquiryInternal(
+        user_id=user.id,
+        horse_renting_service_id=enquiry_details.horse_renting_service_id,
+        message=enquiry_details.message,
+        date=enquiry_details.date,
+        duration=enquiry_details.duration,
+    )
+
+    enquiry_id = add_horse_renting_service_enquiry(enquiry_details=enquiry)
+
+    response = CreateRentEnquiryResponse(horse_renting_enquiry_id=enquiry_id)
+
+    log.info(f"{request.url.path} returning {response}")
+
+    return response
+
+
+# @horse_renting_service_router.put(
+#     path="/update-horse-rent-enquiry/{horse_renting_enquiry_id}"
+# )
+# def update_rent_enquiry(
+#     request: Request, payload: Annotated[UpdateRentEnquiryValidator, Depends()]
+# ): ...

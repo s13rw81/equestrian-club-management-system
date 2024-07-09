@@ -1,10 +1,18 @@
 from typing import Dict, List
 
-from data.db import convert_to_object_id, get_horse_renting_service_collection
+from data.db import (
+    convert_to_object_id,
+    get_horse_renting_enquiry_collection,
+    get_horse_renting_service_collection,
+)
 from logging_config import log
-from models.horse.horse_renting_service_internal import HorseRentingServiceInternal
+from models.horse.horse_renting_service_internal import (
+    HorseRentingServiceEnquiryInternal,
+    HorseRentingServiceInternal,
+)
 
 horse_renting_service_collection = get_horse_renting_service_collection()
+renting_enquiry_collection = get_horse_renting_enquiry_collection()
 
 
 def add_horse_renting_service_details(
@@ -84,3 +92,28 @@ def update_horse_renting_service_details(service_id: str, update_details: Dict) 
     )
 
     return update_response.modified_count == 1
+
+
+def add_horse_renting_service_enquiry(
+    enquiry_details: HorseRentingServiceEnquiryInternal,
+) -> str:
+    """add a new enquiry for a horse renting service and return the enquiry id
+
+    Args:
+        enquiry_details (HorseRentingServiceEnquiryInternal)
+
+    Returns:
+        str: id of the enquiry
+    """
+
+    log.info(
+        f"add_horse_renting_service_enquiry() invoked enquiry_details {enquiry_details}"
+    )
+
+    enquiry_id = (
+        renting_enquiry_collection.insert_one(document=enquiry_details.model_dump())
+    ).inserted_id
+
+    log.info(f"add_horse_renting_service_enquiry() returning {enquiry_id}")
+
+    return str(enquiry_id)

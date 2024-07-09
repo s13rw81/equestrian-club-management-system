@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, field_validator, model_validator
 
 from utils.date_time import get_current_utc_datetime
 
@@ -33,3 +33,32 @@ class UpdateHorseForRentServiceListing(BaseModel):
     @computed_field
     def updated_at(self) -> datetime:
         return get_current_utc_datetime()
+
+
+class HorseRentEnquiry(BaseModel):
+    horse_renting_service_id: str
+    message: str
+    date: str
+    duration: int
+
+    @field_validator("date")
+    @classmethod
+    def parse_date(cls, date: Optional[str]) -> Optional[datetime]:
+        try:
+            return datetime.fromisoformat(date)
+        except ValueError:
+            raise ValueError("Incorrect date format provided.")
+
+    @model_validator(mode="after")
+    def validate_all_fields(self):
+        if self.date <= datetime.now():
+            raise ValueError("date should be a future date")
+
+        if self.duration <= 0:
+            raise ValueError("duration should be a positive integer")
+
+        return self
+
+
+class CreateRentEnquiryResponse(BaseModel):
+    horse_renting_enquiry_id: str

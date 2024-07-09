@@ -28,3 +28,17 @@ class HorseRentingServiceInternal(BaseModel):
 
 class HorseRentingServiceInternalWithID(HorseRentingServiceInternal):
     service_id: Annotated[PyObjectId, str] = Field(default=None, alias="_id")
+
+
+class HorseRentingServiceEnquiryInternal(BaseModel):
+    user_id: str
+    horse_renting_service_id: str
+    message: Optional[str] = None
+    date: datetime
+    duration: int
+    created_at: datetime = Field(default_factory=get_current_utc_datetime)
+    updated_at: datetime = Field(default_factory=get_current_utc_datetime)
+
+
+class HorseRentingServiceEnquiryInternalWithID(HorseRentingServiceEnquiryInternal):
+    enquiry_id: Annotated[PyObjectId, str] = Field(default=None, alias="_id")

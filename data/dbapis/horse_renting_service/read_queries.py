@@ -73,3 +73,32 @@ def get_renting_enquiry_details_by_user_and_renting_service_id(
     )
 
     return enquiry
+
+
+def get_renting_enquiry_details_by_enquiry_id(
+    enquiry_id: str,
+) -> Union[HorseRentingServiceEnquiryInternalWithID, None]:
+    """return an enquiry if the enquiry exists based on the enquiry id
+
+    Args:
+        enquiry_id (str): _description_
+
+    Returns:
+        Union[HorseRentingServiceEnquiryInternalWithID, None]
+    """
+
+    log.info(
+        f"get_renting_enquiry_details_by_enquiry_id() invoked enquiry_id {enquiry_id}"
+    )
+
+    filter = {"_id": convert_to_object_id(enquiry_id)}
+    response = renting_enquiry_collection.find_one(filter=filter)
+
+    if not response:
+        return None
+
+    enquiry = HorseRentingServiceEnquiryInternalWithID(**response)
+
+    log.info(f"get_renting_enquiry_details_by_enquiry_id() returning enquiry {enquiry}")
+
+    return enquiry

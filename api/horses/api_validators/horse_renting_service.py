@@ -3,6 +3,7 @@ from typing import Annotated, List, Union
 from fastapi import Depends, HTTPException, UploadFile, status
 
 from data.dbapis.horse_renting_service.read_queries import (
+    get_renting_enquiry_details_by_enquiry_id,
     get_renting_enquiry_details_by_user_and_renting_service_id,
     get_renting_service_details_by_service_id,
 )
@@ -17,6 +18,7 @@ from ..models import (
     EnlistHorseForRent,
     HorseRentEnquiry,
     UpdateHorseForRentServiceListing,
+    UpdateHorseRentEnquiry,
 )
 
 user_dependency = Annotated[
@@ -147,3 +149,37 @@ class CreateRentEnquiryValidator(BaseHorseRentingServiceValidator):
         service_details: HorseRentingServiceInternalWithID, creator_id: str
     ) -> bool:
         return service_details.provider.provider_id == creator_id
+
+
+class UpdateRentEnquiryValidator(BaseHorseRentingServiceValidator):
+    def __init__(
+        self,
+        user: user_dependency,
+        horse_rent_enquiry_id: str,
+        enquiry_details: UpdateHorseRentEnquiry,
+    ) -> None:
+        super().__init__(user)
+
+        self.horse_rent_enquiry_id = horse_rent_enquiry_id
+        self.old_enquiry_details = self.get_enquiry(enquiry_id=horse_rent_enquiry_id)
+
+        self.enquiry_details = enquiry_details
+
+        if not self.enquiry_created_by_user(
+            enquiry_details=self.old_enquiry_details, user_id=user.id
+        ):
+            raise BaseHorseRentingServiceValidator.http_exception(
+                message="selected enquiry not created by current user"
+            )
+
+    @staticmethod
+    def get_enquiry(
+        enquiry_id: str,
+    ) -> Union[HorseRentingServiceEnquiryInternalWithID, None]:
+        return get_renting_enquiry_details_by_enquiry_id(enquiry_id=enquiry_id)
+
+    @staticmethod
+    def enquiry_created_by_user(
+        enquiry_details: HorseRentingServiceEnquiryInternalWithID, user_id: str
+    ) -> bool:
+        return enquiry_details.user_id == user_id

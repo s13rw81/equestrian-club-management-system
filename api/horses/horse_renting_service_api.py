@@ -7,6 +7,7 @@ from data.dbapis.horse_renting_service.write_queries import (
     add_horse_renting_service_details,
     add_horse_renting_service_enquiry,
     update_horse_renting_service_details,
+    update_horse_renting_service_enquiry,
     update_renting_service_images,
 )
 from data.dbapis.horses.write_queries import add_horse, update_horse
@@ -23,6 +24,7 @@ from .api_validators.horse_renting_service import (
     CreateRentEnquiryValidator,
     EnlistHorseForRentServiceValidator,
     UpdateHorseForRentServiceListingValidator,
+    UpdateRentEnquiryValidator,
     UploadRentImageValidator,
 )
 from .models import CreateRentEnquiryResponse, EnlistHorseForRentResponse
@@ -152,8 +154,10 @@ def create_rent_enquiry(
     )
 
     if update_existing:
-        # call the update enquiry function from here
-        log.info("value of update_existing")
+        update_horse_renting_service_enquiry(
+            enquiry_id=old_enquiry_details.enquiry_id, enquiry_details=enquiry_details
+        )
+
         return CreateRentEnquiryResponse(
             horse_renting_enquiry_id=old_enquiry_details.enquiry_id
         )
@@ -175,9 +179,20 @@ def create_rent_enquiry(
     return response
 
 
-# @horse_renting_service_router.put(
-#     path="/update-horse-rent-enquiry/{horse_renting_enquiry_id}"
-# )
-# def update_rent_enquiry(
-#     request: Request, payload: Annotated[UpdateRentEnquiryValidator, Depends()]
-# ): ...
+@horse_renting_service_router.put(
+    path="/update-horse-rent-enquiry/{horse_renting_enquiry_id}"
+)
+def update_rent_enquiry(
+    request: Request, payload: Annotated[UpdateRentEnquiryValidator, Depends()]
+):
+
+    horse_rent_enquiry_id = payload.horse_rent_enquiry_id
+    enquiry_details = payload.enquiry_details
+
+    log.info(f"{request.url.path} invoked enquiry_details {enquiry_details}")
+
+    update_horse_renting_service_enquiry(
+        enquiry_id=horse_rent_enquiry_id, enquiry_details=enquiry_details
+    )
+
+    return {"status": "ok"}

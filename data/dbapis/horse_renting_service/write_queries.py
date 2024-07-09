@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from api.horses.models import UpdateHorseRentEnquiry
 from data.db import (
     convert_to_object_id,
     get_horse_renting_enquiry_collection,
@@ -117,3 +118,38 @@ def add_horse_renting_service_enquiry(
     log.info(f"add_horse_renting_service_enquiry() returning {enquiry_id}")
 
     return str(enquiry_id)
+
+
+def update_horse_renting_service_enquiry(
+    enquiry_id: str,
+    enquiry_details: UpdateHorseRentEnquiry,
+) -> str:
+    """update the enquiry with enquiry_details of the given enquiry_id
+
+    Args:
+        enquiry_details (UpdateHorseRentEnquiry)
+    """
+
+    log.info(
+        f"update_horse_renting_service_enquiry() invoked enquiry_details {enquiry_details}"
+    )
+
+    filter = {"_id": convert_to_object_id(enquiry_id)}
+    update = {
+        k: v
+        for k, v in enquiry_details.model_dump().items()
+        if v != None and k != "_id"
+    }
+
+    if not update:
+        return False
+
+    update_response = renting_enquiry_collection.update_one(
+        filter=filter, update={"$set": update}
+    )
+
+    log.info(
+        f"matched_count={update_response.matched_count}, modified_count={update_response.modified_count}"
+    )
+
+    return update_response.modified_count == 1

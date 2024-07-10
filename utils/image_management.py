@@ -1,16 +1,22 @@
-from fastapi import UploadFile, status, Request
-from fastapi.exceptions import HTTPException
-from logging_config import log
-from config import IMAGES_UPLOAD_FOLDER
-from utils.date_time import get_current_utc_datetime
-import re
+import hashlib
 import os
+import re
+from typing import List
+
 import aiofiles
 import aiofiles.os
-import hashlib
-from data.dbapis.uploaded_imges.write_queries import save_uploaded_image, delete_uploaded_image
+from fastapi import Request, UploadFile, status
+from fastapi.exceptions import HTTPException
+
+from config import IMAGES_UPLOAD_FOLDER
 from data.dbapis.uploaded_imges.read_queries import get_uploaded_image_by_id
+from data.dbapis.uploaded_imges.write_queries import (
+    delete_uploaded_image,
+    save_uploaded_image,
+)
+from logging_config import log
 from models.uploaded_image import UploadedImageInternal
+from utils.date_time import get_current_utc_datetime
 
 
 async def save_image(image_file: UploadFile) -> str:
@@ -28,7 +34,7 @@ async def save_image(image_file: UploadFile) -> str:
     if extension not in ("jpg", "jpeg", "png", "webp", "heif", "heic"):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="file extension must be one of jpg, jpeg, png, webp, heif, heic"
+            detail="file extension must be one of jpg, jpeg, png, webp, heif, heic",
         )
 
     secure_filename = generate_secure_filename(filename)
@@ -39,9 +45,7 @@ async def save_image(image_file: UploadFile) -> str:
         while chunk := await image_file.read(1024):
             await buffer.write(chunk)
 
-    upload_image_internal = UploadedImageInternal(
-        image_path=file_path
-    )
+    upload_image_internal = UploadedImageInternal(image_path=file_path)
 
     uploaded_image_id = save_uploaded_image(uploaded_image=upload_image_internal)
 
@@ -60,6 +64,23 @@ def generate_image_url(image_id: str, request: Request) -> str:
     return f"{request.base_url}images/{image_id}"
 
 
+def generate_image_urls(image_ids: str, request: Request) -> List[str]:
+    """given a list of image_ids returns the corresponding urls
+
+    Args:
+        image_id (str)
+        request (Request)
+
+    Returns:
+        List[str]
+    """
+
+    image_urls = []
+    for image_id in image_ids:
+        image_urls.append(generate_image_url(image_id=image_id, request=request))
+    return image_urls
+
+
 def get_image_file_path(image_id: str) -> str:
     """
     returns the file_path of the image
@@ -70,8 +91,7 @@ def get_image_file_path(image_id: str) -> str:
 
     if result is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="image not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="image not found"
         )
     return result.image_path
 
@@ -81,8 +101,7 @@ async def delete_image(image_id: str) -> bool:
 
     if uploaded_image is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="image not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="image not found"
         )
 
     # delete the database entry
@@ -91,7 +110,7 @@ async def delete_image(image_id: str) -> bool:
     if not delete_image_result:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="cannot delete image"
+            detail="cannot delete image",
         )
 
     # remove the file from the file-system
@@ -112,10 +131,10 @@ def generate_secure_filename(filename):
     filename = "".join(filename_splitted[:-1]) + hash_str + "." + filename_splitted[-1]
 
     # Replace spaces with underscores
-    filename = filename.replace(' ', '_')
+    filename = filename.replace(" ", "_")
 
     # Remove any characters that are not alphanumeric, underscores, or dots
-    filename = re.sub(r'[^\w\.\-]', '', filename)
+    filename = re.sub(r"[^\w\.\-]", "", filename)
 
     # Limit the filename length
     max_filename_length = 255  # Example maximum length

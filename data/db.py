@@ -129,6 +129,21 @@ def get_upload_images_demo_collection():
     return get_database()["upload_images_demo"]
 
 
+def get_horse_collection():
+    log.info("inside get_horse_collection()")
+    return get_database()["horse"]
+
+
+def get_horse_renting_service_collection():
+    log.info("inside get_horse_renting_service_collection()")
+    return get_database()["horse_renting_service"]
+
+
+def get_horse_renting_enquiry_collection():
+    log.info("inside get_horse_renting_enquiry_collection()")
+    return get_database()["horse_renting_enquiry"]
+
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

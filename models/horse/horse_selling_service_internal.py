@@ -34,8 +34,6 @@ class HorseSellingServiceEnquiryInternal(BaseModel):
     user_id: str
     horse_selling_service_id: str
     message: Optional[str] = None
-    date: datetime
-    duration: int
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
 

@@ -98,7 +98,7 @@ def enlist_horse_for_sell(
 
 
 @horse_selling_service_router.post(path="/{horse_selling_service_id}/upload-images")
-async def upload_rent_images(
+async def upload_sell_images(
     request: Request, payload: Annotated[UploadSellImageValidator, Depends()]
 ):
 
@@ -125,7 +125,7 @@ async def upload_rent_images(
 @horse_selling_service_router.get(
     path="/get-horses-for-sell", response_model=List[GetHorseSellListing]
 )
-def get_horse_rent_listing(
+def get_horse_sell_listing(
     request: Request, payload: Annotated[GetHorseSellListingValidator, Depends()]
 ):
     user = payload.user
@@ -147,7 +147,7 @@ def get_horse_rent_listing(
 @horse_selling_service_router.put(
     path="/update-sell-listing/{horse_selling_service_id}"
 )
-def update_horse_renting_service_listings(
+def update_horse_selling_service_listings(
     request: Request,
     payload: Annotated[UpdateHorseForSellServiceListingValidator, Depends()],
 ):
@@ -172,7 +172,7 @@ def update_horse_renting_service_listings(
 
 
 @horse_selling_service_router.post(path="/enquire-for-a-horse-sell")
-def create_rent_enquiry(
+def create_sell_enquiry(
     request: Request, payload: Annotated[CreateSellEnquiryValidator, Depends()]
 ) -> CreateSellEnquiryResponse:
 
@@ -199,8 +199,6 @@ def create_rent_enquiry(
         user_id=user.id,
         horse_selling_service_id=enquiry_details.horse_selling_service_id,
         message=enquiry_details.message,
-        date=enquiry_details.date,
-        duration=enquiry_details.duration,
     )
 
     enquiry_id = add_horse_selling_service_enquiry(enquiry_details=enquiry)
@@ -215,7 +213,7 @@ def create_rent_enquiry(
 @horse_selling_service_router.put(
     path="/update-horse-sell-enquiry/{horse_selling_enquiry_id}"
 )
-def update_rent_enquiry(
+def update_sell_enquiry(
     request: Request, payload: Annotated[UpdateSellEnquiryValidator, Depends()]
 ):
 
@@ -234,7 +232,7 @@ def update_rent_enquiry(
 @horse_selling_service_router.get(
     path="/get-horse-sell-enquiries", response_model=List[GetHorseSellEnquiry]
 )
-def get_rent_enquiries(
+def get_sell_enquiries(
     request: Request,
     payload: Annotated[GetHorseSellEnquiryValidator, Depends()],
 ):

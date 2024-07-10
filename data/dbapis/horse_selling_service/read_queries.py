@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from api.horses.models import GetHorseRentListing
+from api.horses.models import GetHorseSellListing
 from data.db import (
     convert_to_object_id,
     get_horse_selling_enquiry_collection,
@@ -35,18 +35,18 @@ def get_selling_service_details_by_service_id(
     filter = {"_id": convert_to_object_id(service_id)}
     response = selling_service_collection.find_one(filter=filter)
 
-    renting_service_details = HorseSellingServiceInternalWithID(**response)
+    selling_service_details = HorseSellingServiceInternalWithID(**response)
 
     log.info(
-        f"get_selling_service_details_by_service_id() returning {renting_service_details}"
+        f"get_selling_service_details_by_service_id() returning {selling_service_details}"
     )
 
-    return renting_service_details
+    return selling_service_details
 
 
 def get_horse_sell_listings(
     user_id: str, own_listing: bool = False
-) -> List[GetHorseRentListing]:
+) -> List[GetHorseSellListing]:
     """return horses sell listings
 
     Args:
@@ -84,7 +84,7 @@ def get_horse_sell_listings(
 
     lookup_horses = {
         "$lookup": {
-            "from": "horse",
+            "from": "horses",
             "localField": "horse_object_id",
             "foreignField": "_id",
             "as": "horse",
@@ -126,11 +126,13 @@ def get_horse_sell_listings(
         project,
     ]
 
+    log.info(f"pipeline {pipeline}")
+
     response = selling_service_collection.aggregate(pipeline=pipeline)
 
-    rent_listings = [GetHorseRentListing(**rent_listing) for rent_listing in response]
+    sell_listings = [GetHorseSellListing(**sell_listing) for sell_listing in response]
 
-    return rent_listings
+    return sell_listings
 
 
 def get_selling_enquiry_details_by_user_and_selling_service_id(

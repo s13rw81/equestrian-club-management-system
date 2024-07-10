@@ -24,17 +24,23 @@ class SignUpUser(BaseModel):
         if riding_stage is None:
             return RidingStage.BEGINNER
 
+        return riding_stage
+
     @field_validator("horse_ownership_status")
     @classmethod
     def add_default_value_for_horse_ownership_status(cls, horse_ownership_status):
         if horse_ownership_status is None:
             return HorseOwnership.YES
 
+        return horse_ownership_status
+
     @field_validator("equestrian_discipline")
     @classmethod
     def add_default_value_for_equestrian_discipline(cls, equestrian_discipline):
         if equestrian_discipline is None:
             return EquestrianDiscipline.RIDING_HORSE
+
+        return equestrian_discipline
 
     @field_validator("email_address")
     @classmethod

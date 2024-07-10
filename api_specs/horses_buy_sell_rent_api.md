@@ -624,8 +624,8 @@ the user will use this route to upload images of the horse.
 
 #### Path Parameters
 
-1. `horse_renting_service_id`: This would be the `_id` of the `horse_renting_service`
-   . This parameter would match the `horse_renting_service._id` in the database.
+1. `horse_renting_service_id`: This would be the `_id` of the `horse_renting_service`.
+2. This parameter would match the `horse_renting_service._id` in the database.
 
 #### Request Body
 
@@ -744,7 +744,7 @@ as the following.
 ```json
 [
   {
-    "horse_selling_service_id": "horse_renting_service._id",
+    "horse_renting_service_id": "horse_renting_service._id",
     "horse_id": "horses._id",
     "name": "horses.name",
     "year_of_birth": "horses.year_of_birth",

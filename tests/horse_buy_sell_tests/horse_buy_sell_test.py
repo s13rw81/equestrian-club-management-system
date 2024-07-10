@@ -311,7 +311,6 @@ class TestHorseBuySellFlow:
         assert horse_sell_enquiry["horse_selling_enquiry_id"] == common_data_dict_sell["horse_selling_enquiry_id"]
 
 
-
 @pytest.mark.horse_buy_sell_rent
 class TestHorseRentFlow:
 

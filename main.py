@@ -8,8 +8,6 @@ from fastapi.responses import RedirectResponse
 
 from api.auth import user_auth_router
 from api.clubs.clubs_api import clubs_api_router
-from api.horses.horse_selling_service_api import horse_selling_service_api_router
-from api.horses.horses_sale_api import horse_sell_api_router
 from api.horses.routers import horse_trade_services_router
 from api.image_management import images_router
 from api.logistics import logistics_admin_router, logistics_user_router
@@ -33,8 +31,6 @@ app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)
 app.include_router(demo_rbac_router)
-app.include_router(horse_sell_api_router)
-app.include_router(horse_selling_service_api_router)
 app.include_router(logistics_admin_router)
 app.include_router(images_router)
 app.include_router(upload_images_demo_router)

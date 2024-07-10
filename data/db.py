@@ -131,7 +131,17 @@ def get_upload_images_demo_collection():
 
 def get_horse_collection():
     log.info("inside get_horse_collection()")
-    return get_database()["horse"]
+    return get_database()["horses"]
+
+
+def get_horse_selling_service_collection():
+    log.info("inside get_horse_renting_service_collection()")
+    return get_database()["horse_selling_service"]
+
+
+def get_horse_selling_enquiry_collection():
+    log.info("inside get_horse_renting_enquiry_collection()")
+    return get_database()["horse_selling_enquiry"]
 
 
 def get_horse_renting_service_collection():

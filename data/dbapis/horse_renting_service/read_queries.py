@@ -84,7 +84,7 @@ def get_horse_rent_listings(
 
     lookup_horses = {
         "$lookup": {
-            "from": "horse",
+            "from": "horses",
             "localField": "horse_object_id",
             "foreignField": "_id",
             "as": "horse",

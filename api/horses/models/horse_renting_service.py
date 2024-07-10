@@ -1,9 +1,18 @@
 from datetime import datetime
-from typing import Optional
+from typing import Annotated, List, Optional, Union
 
-from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 
+from data.db import PyObjectId
 from utils.date_time import get_current_utc_datetime
+from utils.image_management import generate_image_url
+from utils.mask_information import mask_email, mask_phone_number
 
 
 class EnlistHorseForRent(BaseModel):
@@ -18,6 +27,27 @@ class EnlistHorseForRent(BaseModel):
 
 class EnlistHorseForRentResponse(BaseModel):
     horse_renting_service_id: str
+
+
+class SellerInformation(BaseModel):
+    name: str
+    email_address: Annotated[Union[str, None], AfterValidator(mask_email)]
+    phone_no: Annotated[Union[str, None], AfterValidator(mask_phone_number)]
+    location: Optional[str] = None
+
+
+class GetHorseRentListing(BaseModel):
+    horse_renting_service_id: Annotated[PyObjectId, str]
+    horse_id: str
+    name: str
+    year_of_birth: str
+    breed: str
+    size: str
+    gender: str
+    description: str
+    image_urls: List[str]
+    price: str
+    seller_information: SellerInformation
 
 
 class UpdateHorseForRentServiceListing(BaseModel):

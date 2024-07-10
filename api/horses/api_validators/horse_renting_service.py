@@ -57,6 +57,12 @@ class EnlistHorseForRentServiceValidator(BaseHorseRentingServiceValidator):
             )
 
 
+class GetHorseRentListingValidator(BaseHorseRentingServiceValidator):
+    def __init__(self, user: user_dependency, own_listing: bool = False) -> None:
+        super().__init__(user)
+        self.own_listing = own_listing
+
+
 class UploadRentImageValidator(BaseHorseRentingServiceValidator):
     def __init__(
         self,

@@ -5,6 +5,7 @@ from fastapi.requests import Request
 
 from data.dbapis.horse_renting_service.read_queries import (
     get_all_horse_rent_enquiries,
+    get_horse_rent_listings,
     get_renting_enquiry_by_user_id,
 )
 from data.dbapis.horse_renting_service.write_queries import (
@@ -22,12 +23,13 @@ from models.horse.horse_renting_service_internal import (
     HorseRentingServiceInternal,
     Provider,
 )
-from utils.image_management import save_image
+from utils.image_management import generate_image_urls, save_image
 
 from .api_validators.horse_renting_service import (
     CreateRentEnquiryValidator,
     EnlistHorseForRentServiceValidator,
     GetHorseRentEnquiryValidator,
+    GetHorseRentListingValidator,
     UpdateHorseForRentServiceListingValidator,
     UpdateRentEnquiryValidator,
     UploadRentImageValidator,
@@ -36,6 +38,7 @@ from .models import (
     CreateRentEnquiryResponse,
     EnlistHorseForRentResponse,
     GetHorseRentEnquiry,
+    GetHorseRentListing,
 )
 
 horse_renting_service_router = APIRouter(prefix="", tags=["user-horses"])
@@ -118,7 +121,29 @@ async def upload_rent_images(
 
     update_renting_service_images(service_id=service_id, image_ids=image_ids)
 
-    return {"status": "ok"}
+    return {"status": "OK"}
+
+
+@horse_renting_service_router.get(
+    path="/get-horses-for-rent", response_model=List[GetHorseRentListing]
+)
+def get_horse_rent_listing(
+    request: Request, payload: Annotated[GetHorseRentListingValidator, Depends()]
+):
+    user = payload.user
+    own_listing = payload.own_listing
+    log.info(f"{request.url.path} invoked ")
+
+    rent_listings = get_horse_rent_listings(user_id=user.id, own_listing=own_listing)
+
+    for rent_listing in rent_listings:
+        rent_listing.image_urls = generate_image_urls(
+            image_ids=rent_listing.image_urls, request=request
+        )
+
+    log.info(f"{request.url.path} returning {rent_listings}")
+
+    return rent_listings
 
 
 @horse_renting_service_router.put(
@@ -145,7 +170,7 @@ def update_horse_renting_service_listings(
         },
     )
 
-    return {"status": "ok"}
+    return {"status": "OK"}
 
 
 @horse_renting_service_router.post(path="/enquire-for-a-horse-rent")
@@ -205,7 +230,7 @@ def update_rent_enquiry(
         enquiry_id=horse_rent_enquiry_id, enquiry_details=enquiry_details
     )
 
-    return {"status": "ok"}
+    return {"status": "OK"}
 
 
 @horse_renting_service_router.get(

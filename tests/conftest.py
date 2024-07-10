@@ -47,6 +47,9 @@ class HelperFunctions:
 
     @staticmethod
     def create_an_otp_verified_user(user_email=TEST_USER_EMAIL):
+
+        users_database_collection = HelperFunctions.get_database_connection()["users"]
+
         not_otp_verified_user_token = HelperFunctions.create_an_otp_not_verified_user(user_email=user_email)
 
         headers = {
@@ -58,7 +61,7 @@ class HelperFunctions:
 
         assert response.status_code == 200
 
-        user_dict = get_users_database_collection.find_one({"email_address": user_email})
+        user_dict = users_database_collection.find_one({"email_address": user_email})
 
         assert not user_dict["otp_verified"]
 
@@ -72,11 +75,12 @@ class HelperFunctions:
 
         assert response.status_code == 200
 
-        user_dict = get_users_database_collection.find_one({"email_address": user_email})
+        user_dict = users_database_collection.find_one({"email_address": user_email})
 
         assert user_dict["otp_verified"]
 
-        return user_email
+        # the token has now become verified
+        return not_otp_verified_user_token
 
     @staticmethod
     def get_database_connection():

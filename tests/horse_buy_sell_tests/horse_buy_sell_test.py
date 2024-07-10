@@ -1,6 +1,7 @@
 import pytest
 from data.db import convert_to_object_id
 from tests.conftest import client, TEST_USER_EMAIL, TEST_USER_EMAIL_2
+from datetime import date, timedelta
 
 HORSE_SELL_DETAILS = {
     "name": "A name of the horse",
@@ -16,7 +17,24 @@ HORSE_SELL_ENQUIRY_DETAILS = {
     "message": "this is an enquiry message"
 }
 
-common_data_dict = {}
+HORSE_RENT_DETAILS = {
+    "name": "A name of the horse",
+    "year_of_birth": "2069",
+    "breed": "top class horse breed",
+    "size": "size of the horse",
+    "gender": "male",
+    "description": "a description of the horse",
+    "price": "1000 SAR"
+}
+
+HORSE_RENT_ENQUIRY_DETAILS = {
+    "message": "this is an enquiry message",
+    "date": (date.today() + timedelta(days=1)).isoformat(),
+    "duration": 5
+}
+
+common_data_dict_sell = {}
+common_data_dict_rent = {}
 
 
 @pytest.mark.horse_buy_sell_rent
@@ -76,14 +94,14 @@ class TestHorseBuySellFlow:
         assert horse["uploaded_by"]["uploaded_by_id"] == str(user["_id"])
 
         assert horse_selling_service["price"] == HORSE_SELL_DETAILS["price"]
-        assert horse_selling_service["provider"]["provider_type"] == str(user["_id"])
+        assert horse_selling_service["provider"]["provider_id"] == str(user["_id"])
 
-        common_data_dict["horse_selling_service_id"] = horse_selling_service_id
-        common_data_dict["horse_id"] = horse_selling_service["horse_id"]
+        common_data_dict_sell["horse_selling_service_id"] = horse_selling_service_id
+        common_data_dict_sell["horse_id"] = horse_selling_service["horse_id"]
 
     @pytest.mark.dependency(depends=["TestHorseBuySellFlow::test_enlist_horse_for_sell"])
     def test_horse_sell_upload_images(self, get_access_token_otp_verified):
-        horse_selling_service_id = common_data_dict["horse_selling_service_id"]
+        horse_selling_service_id = common_data_dict_sell["horse_selling_service_id"]
 
         route_url = f"/user/horses/{horse_selling_service_id}/upload-images"
 
@@ -126,8 +144,8 @@ class TestHorseBuySellFlow:
 
         response_data = response.json()[0]
 
-        assert response_data["horse_selling_service_id"] == common_data_dict["horse_selling_service_id"]
-        assert response_data["horse_id"] == common_data_dict["horse_id"]
+        assert response_data["horse_selling_service_id"] == common_data_dict_sell["horse_selling_service_id"]
+        assert response_data["horse_id"] == common_data_dict_sell["horse_id"]
         assert response_data["name"] == HORSE_SELL_DETAILS["name"]
         assert response_data["year_of_birth"] == HORSE_SELL_DETAILS["year_of_birth"]
         assert response_data["breed"] == HORSE_SELL_DETAILS["breed"]
@@ -139,7 +157,7 @@ class TestHorseBuySellFlow:
 
     @pytest.mark.dependency(depends=["TestHorseBuySellFlow::test_enlist_horse_for_sell"])
     def test_update_sell_listing(self, get_access_token_otp_verified, get_database_connection):
-        horse_selling_service_id = common_data_dict["horse_selling_service_id"]
+        horse_selling_service_id = common_data_dict_sell["horse_selling_service_id"]
 
         route_url = f"/user/horses/update-sell-listing/{horse_selling_service_id}"
 
@@ -159,7 +177,7 @@ class TestHorseBuySellFlow:
         horses_collection = get_database_connection["horses"]
 
         horse = horses_collection.find_one(
-            {"_id": convert_to_object_id(common_data_dict["horse_id"])}
+            {"_id": convert_to_object_id(common_data_dict_sell["horse_id"])}
         )
 
         assert horse is not None
@@ -175,7 +193,7 @@ class TestHorseBuySellFlow:
         assert response.json()["status"] == "OK"
 
         horse = horses_collection.find_one(
-            {"_id": convert_to_object_id(common_data_dict["horse_id"])}
+            {"_id": convert_to_object_id(common_data_dict_sell["horse_id"])}
         )
 
         assert horse is not None
@@ -192,7 +210,7 @@ class TestHorseBuySellFlow:
         }
 
         request_data = {
-            "horse_selling_service_id": common_data_dict["horse_selling_service_id"],
+            "horse_selling_service_id": common_data_dict_sell["horse_selling_service_id"],
             "message": HORSE_SELL_ENQUIRY_DETAILS["message"]
         }
 
@@ -219,15 +237,14 @@ class TestHorseBuySellFlow:
         assert user is not None
 
         assert horse_selling_enquiry["user_id"] == str(user["_id"])
-        assert horse_selling_enquiry["horse_selling_service_id"] == common_data_dict["horse_selling_service_id"]
+        assert horse_selling_enquiry["horse_selling_service_id"] == common_data_dict_sell["horse_selling_service_id"]
         assert horse_selling_enquiry["message"] == HORSE_SELL_ENQUIRY_DETAILS["message"]
 
-        common_data_dict["horse_selling_enquiry_id"] = horse_selling_enquiry_id
+        common_data_dict_sell["horse_selling_enquiry_id"] = horse_selling_enquiry_id
 
     @pytest.mark.dpendency(depnds=["TestHorseBuySellFlow::test_enquire_for_a_horse_sell"])
     def test_update_horse_sell_enquiry(self, get_access_token_otp_verified_2, get_database_connection):
-
-        horse_selling_enquiry_id = common_data_dict["horse_selling_enquiry_id"]
+        horse_selling_enquiry_id = common_data_dict_sell["horse_selling_enquiry_id"]
 
         route_url = f"/user/horses/update-horse-sell-enquiry/{horse_selling_enquiry_id}"
 
@@ -290,8 +307,281 @@ class TestHorseBuySellFlow:
         horse_sell_enquiry = response.json()[0]
 
         assert horse_sell_enquiry["message"] == HORSE_SELL_ENQUIRY_DETAILS["message"]
-        assert horse_sell_enquiry["horse_selling_service_id"] == common_data_dict["horse_selling_service_id"]
-        assert horse_sell_enquiry["horse_selling_enquiry_id"] == common_data_dict["horse_selling_enquiry_id"]
+        assert horse_sell_enquiry["horse_selling_service_id"] == common_data_dict_sell["horse_selling_service_id"]
+        assert horse_sell_enquiry["horse_selling_enquiry_id"] == common_data_dict_sell["horse_selling_enquiry_id"]
 
 
+@pytest.mark.horse_buy_sell_rent
+class TestHorseRentFlow:
 
+    @pytest.mark.dependency
+    def test_enlist_horse_for_rent(self, get_access_token_otp_verified, get_database_connection):
+        route_url = "/user/horses/enlist-for-rent"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {get_access_token_otp_verified}"
+        }
+
+        request_body = {
+            "name": HORSE_RENT_DETAILS["name"],
+            "year_of_birth": HORSE_RENT_DETAILS["year_of_birth"],
+            "breed": HORSE_RENT_DETAILS["breed"],
+            "size": HORSE_RENT_DETAILS["size"],
+            "gender": HORSE_RENT_DETAILS["gender"],
+            "description": HORSE_RENT_DETAILS["description"],
+            "price": HORSE_RENT_DETAILS["price"]
+        }
+
+        response = client.post(route_url, headers=headers, json=request_body)
+
+        assert response.status_code == 200
+
+        horse_renting_service_id = response.json()["horse_renting_service_id"]
+
+        horses_collection = get_database_connection["horses"]
+
+        horse_renting_service_collection = get_database_connection["horse_renting_service"]
+
+        horse_renting_service = horse_renting_service_collection.find_one(
+            {"_id": convert_to_object_id(horse_renting_service_id)}
+        )
+
+        assert horse_renting_service is not None
+
+        horse = horses_collection.find_one(
+            {"_id": convert_to_object_id(horse_renting_service["horse_id"])}
+        )
+
+        assert horse is not None
+
+        users_collection = get_database_connection["users"]
+
+        user = users_collection.find_one({"email_address": TEST_USER_EMAIL})
+
+        assert horse["name"] == HORSE_RENT_DETAILS["name"]
+        assert horse["year_of_birth"] == HORSE_RENT_DETAILS["year_of_birth"]
+        assert horse["breed"] == HORSE_RENT_DETAILS["breed"]
+        assert horse["size"] == HORSE_RENT_DETAILS["size"]
+        assert horse["gender"] == HORSE_RENT_DETAILS["gender"]
+        assert horse["description"] == HORSE_RENT_DETAILS["description"]
+        assert horse["uploaded_by"]["uploaded_by_id"] == str(user["_id"])
+
+        assert horse_renting_service["price"] == HORSE_RENT_DETAILS["price"]
+        assert horse_renting_service["provider"]["provider_id"] == str(user["_id"])
+
+        common_data_dict_rent["horse_renting_service_id"] = horse_renting_service_id
+        common_data_dict_rent["horse_id"] = horse_renting_service["horse_id"]
+
+    @pytest.mark.dependency(depends=["TestHorseRentFlow::test_enlist_horse_for_rent"])
+    def test_horse_rent_upload_images(self, get_access_token_otp_verified):
+        horse_renting_service_id = common_data_dict_rent["horse_renting_service_id"]
+
+        route_url = f"/user/horses/{horse_renting_service_id}/upload-rent-images"
+
+        images_directory = "tests/test_images"
+
+        headers = {
+            "Authorization": f"Bearer {get_access_token_otp_verified}"
+        }
+
+        files = [
+            ('images', ('space_image_1.jpg', open(f'{images_directory}/space_image_1.jpg', 'rb'), 'image/jpeg')),
+            ('images', ('space_image_2.jpg', open(f'{images_directory}/space_image_2.jpg', 'rb'), 'image/jpeg')),
+            ('images', ('space_image_3.jpg', open(f'{images_directory}/space_image_3.jpg', 'rb'), 'image/jpeg')),
+        ]
+
+        response = client.post(route_url, headers=headers, files=files)
+
+        assert response.status_code == 200
+
+        assert response.json()["status"] == "OK"
+
+    @pytest.mark.dependency(depends=["TestHorseRentFlow::test_horse_rent_upload_images"])
+    def test_get_horses_for_renting(self, get_access_token_otp_verified):
+        # This test only tests for own_listing=True, write a separate test case for
+        # own_listing=False to test for another case
+        route_url = "/user/horses/get-horses-for-rent"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {get_access_token_otp_verified}"
+        }
+
+        query_params = {
+            "own_listing": True
+        }
+
+        response = client.get(route_url, params=query_params, headers=headers)
+
+        assert response.status_code == 200
+
+        response_data = response.json()[0]
+
+        assert response_data["horse_renting_service_id"] == common_data_dict_rent["horse_renting_service_id"]
+        assert response_data["horse_id"] == common_data_dict_rent["horse_id"]
+        assert response_data["name"] == HORSE_RENT_DETAILS["name"]
+        assert response_data["year_of_birth"] == HORSE_RENT_DETAILS["year_of_birth"]
+        assert response_data["breed"] == HORSE_RENT_DETAILS["breed"]
+        assert response_data["size"] == HORSE_RENT_DETAILS["size"]
+        assert response_data["gender"] == HORSE_RENT_DETAILS["gender"]
+        assert response_data["description"] == HORSE_RENT_DETAILS["description"]
+        assert len(response_data["image_urls"]) == 3
+        assert response_data["price"] == HORSE_RENT_DETAILS["price"]
+
+    @pytest.mark.dependency(depends=["TestHorseRentFlow::test_enlist_horse_for_rent"])
+    def test_update_rent_listing(self, get_access_token_otp_verified, get_database_connection):
+        horse_renting_service_id = common_data_dict_rent["horse_renting_service_id"]
+
+        route_url = f"/user/horses/update-rent-listing/{horse_renting_service_id}"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {get_access_token_otp_verified}"
+        }
+
+        request_data = {
+            "name": "a new name for the horse"
+        }
+
+        response = client.put(route_url, headers=headers, json=request_data)
+
+        assert response.json()["status"] == "OK"
+
+        horses_collection = get_database_connection["horses"]
+
+        horse = horses_collection.find_one(
+            {"_id": convert_to_object_id(common_data_dict_rent["horse_id"])}
+        )
+
+        assert horse is not None
+
+        assert horse["name"] == request_data["name"]
+
+        request_data = {
+            "name": HORSE_RENT_DETAILS["name"]
+        }
+
+        response = client.put(route_url, headers=headers, json=request_data)
+
+        assert response.json()["status"] == "OK"
+
+        horse = horses_collection.find_one(
+            {"_id": convert_to_object_id(common_data_dict_rent["horse_id"])}
+        )
+
+        assert horse is not None
+
+        assert horse["name"] == HORSE_RENT_DETAILS["name"]
+
+    @pytest.mark.dependency(depends=["TestHorseRentFlow::test_enlist_horse_for_rent"])
+    def test_enquire_for_a_horse_rent(self, get_access_token_otp_verified_2, get_database_connection):
+        route_url = "/user/horses/enquire-for-a-horse-rent"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {get_access_token_otp_verified_2}"
+        }
+
+        request_data = {
+            "horse_renting_service_id": common_data_dict_rent["horse_renting_service_id"],
+            "message": HORSE_RENT_ENQUIRY_DETAILS["message"],
+            "date": HORSE_RENT_ENQUIRY_DETAILS["date"],
+            "duration": HORSE_RENT_ENQUIRY_DETAILS["duration"]
+        }
+
+        response = client.post(route_url, headers=headers, json=request_data)
+
+        assert response.status_code == 200
+
+        horse_renting_enquiry_id = response.json()["horse_renting_enquiry_id"]
+
+        horse_renting_enquiry_collection = get_database_connection["horse_renting_enquiry"]
+
+        horse_renting_enquiry = horse_renting_enquiry_collection.find_one(
+            {"_id": convert_to_object_id(horse_renting_enquiry_id)}
+        )
+
+        assert horse_renting_enquiry is not None
+
+        users_collection = get_database_connection["users"]
+
+        user = users_collection.find_one(
+            {"email_address": TEST_USER_EMAIL_2}
+        )
+
+        assert user is not None
+
+        assert horse_renting_enquiry["user_id"] == str(user["_id"])
+        assert horse_renting_enquiry["horse_renting_service_id"] == common_data_dict_rent["horse_renting_service_id"]
+        assert horse_renting_enquiry["message"] == HORSE_RENT_ENQUIRY_DETAILS["message"]
+
+        common_data_dict_rent["horse_renting_enquiry_id"] = horse_renting_enquiry_id
+
+    @pytest.mark.dpendency(depnds=["TestHorseRentFlow::test_enquire_for_a_horse_rent"])
+    def test_update_horse_rent_enquiry(self, get_access_token_otp_verified_2, get_database_connection):
+        horse_renting_enquiry_id = common_data_dict_rent["horse_renting_enquiry_id"]
+
+        route_url = f"/user/horses/update-horse-rent-enquiry/{horse_renting_enquiry_id}"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {get_access_token_otp_verified_2}"
+        }
+
+        request_data = {
+            "message": "a new updated message"
+        }
+
+        response = client.put(route_url, headers=headers, json=request_data)
+
+        assert response.status_code == 200
+
+        assert response.json()["status"] == "OK"
+
+        horse_renting_enquiry_collection = get_database_connection["horse_renting_enquiry"]
+
+        horse_renting_enquiry = horse_renting_enquiry_collection.find_one(
+            {"_id": convert_to_object_id(horse_renting_enquiry_id)}
+        )
+
+        assert horse_renting_enquiry is not None
+
+        assert horse_renting_enquiry["message"] == request_data["message"]
+
+        request_data = {
+            "message": HORSE_RENT_ENQUIRY_DETAILS["message"]
+        }
+
+        response = client.put(route_url, headers=headers, json=request_data)
+
+        assert response.status_code == 200
+
+        assert response.json()["status"] == "OK"
+
+        horse_renting_enquiry = horse_renting_enquiry_collection.find_one(
+            {"_id": convert_to_object_id(horse_renting_enquiry_id)}
+        )
+
+        assert horse_renting_enquiry is not None
+
+        assert horse_renting_enquiry["message"] == HORSE_RENT_ENQUIRY_DETAILS["message"]
+
+    @pytest.mark.dependency(depends=["TestHorseRentFlow::test_enquire_for_a_horse_rent"])
+    def test_get_horse_rent_enquiries(self, get_access_token_otp_verified_2):
+        route_url = "/user/horses/get-horse-rent-enquiries"
+
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {get_access_token_otp_verified_2}"
+        }
+
+        response = client.get(route_url, headers=headers)
+
+        assert response.stats_code == 200
+
+        horse_rent_enquiry = response.json()[0]
+
+        assert horse_rent_enquiry["message"] == HORSE_RENT_ENQUIRY_DETAILS["message"]
+        assert horse_rent_enquiry["horse_renting_service_id"] == common_data_dict_rent["horse_renting_service_id"]
+        assert horse_rent_enquiry["horse_renting_enquiry_id"] == common_data_dict_rent["horse_renting_enquiry_id"]

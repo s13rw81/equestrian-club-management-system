@@ -167,13 +167,13 @@ class UpdateSellEnquiryValidator(BaseHorseSellingServiceValidator):
     def __init__(
         self,
         user: user_dependency,
-        horse_sell_enquiry_id: str,
+        horse_selling_enquiry_id: str,
         enquiry_details: UpdateHorseSellEnquiry,
     ) -> None:
         super().__init__(user)
 
-        self.horse_sell_enquiry_id = horse_sell_enquiry_id
-        self.old_enquiry_details = self.get_enquiry(enquiry_id=horse_sell_enquiry_id)
+        self.horse_sell_enquiry_id = horse_selling_enquiry_id
+        self.old_enquiry_details = self.get_enquiry(enquiry_id=horse_selling_enquiry_id)
 
         self.enquiry_details = enquiry_details
 

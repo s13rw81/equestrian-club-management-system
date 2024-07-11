@@ -40,7 +40,4 @@ def get_club_by_id_logic(club_id: str) -> ClubInternal | None:
     except InvalidId as e:
         log.error(f'{e} :  club_id')
     finally:
-        if club:
-            return ClubInternal(**club)
-
-    return None
+        return club

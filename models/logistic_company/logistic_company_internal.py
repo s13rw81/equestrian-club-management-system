@@ -12,8 +12,8 @@ class LogisticCompanyInternal(BaseModel):
     name: str = Field(..., min_length = 1)
     description: Optional[str] = Field(None, max_length = 500)
     is_khayyal_verified: bool = False
-    images: Optional[List[str]] = []
-    users: Optional[List] = []
+    image_urls: Optional[List[str]] = []
+    users: Optional[List[dict]] = []
 
     class Config:
         arbitrary_types_allowed = True

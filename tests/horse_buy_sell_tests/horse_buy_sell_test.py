@@ -580,7 +580,7 @@ class TestHorseRentFlow:
 
         response = client.get(route_url, headers=headers)
 
-        assert response.stats_code == 200
+        assert response.status_code == 200
 
         horse_rent_enquiry = response.json()[0]
 

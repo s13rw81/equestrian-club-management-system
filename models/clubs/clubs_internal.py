@@ -9,11 +9,11 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class ClubInternal(BaseModel):
-    id: Optional[PyObjectId] = Field(alias = '_id', default = None)
-    name: str = Field(..., min_length = 1)
-    description: Optional[str] = Field(None, max_length = 500)
-    images: Optional[List[str]] = None
-    users: Optional[List[str]] = list()
+    id: Optional[PyObjectId] = Field(alias='_id', default=None)
+    name: str = Field(..., min_length=1)
+    description: Optional[str] = Field(None, max_length=500)
+    image_urls: Optional[List[str]] = list()
+    users: Optional[List[dict]] = list()
     email_address: str
     address: str
     phone_no: str
@@ -46,7 +46,7 @@ class ClubInternal(BaseModel):
         return calculate_average_rating(self._id)
 
 
-@lru_cache(maxsize = 64)
+@lru_cache(maxsize=64)
 def calculate_average_rating(club_id: str):
     # TODO: review this logic
     # TODO: can anonymous user add rating ?

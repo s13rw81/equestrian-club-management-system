@@ -1,142 +1,251 @@
-from fastapi import HTTPException, APIRouter, status, Depends, UploadFile, File, Query, Request
-from typing import List
-from models.horse.horse_selling_service_internal import HorseSellingServiceInternal
-from .models.horse_selling_service import HorseSellingItem, HorseSellingResponse
-from data.dbapis.horses.horse_selling_service_queries import get_horse_by_id
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
-from models.horse.horse_internal import InternalSellHorse
-from logic.auth import get_current_user
-from models.user import UserInternal, UserRoles
-from role_based_access_control import RoleBasedAccessControl
-from bson import ObjectId
-from data.db import get_horses_selling_service_collection, get_horses_collection, get_users_collection
-from utils.image_management import save_image, generate_image_url
-from utils.date_time import get_current_utc_datetime
+from typing import Annotated, List
 
-def mask_email(email: str) -> str:
-    if email and '@' in email:
-        name, domain = email.split('@')
-        return f"{name[0]}XXXXXXXXXX@{domain}"
-    return email or "No Email"
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.requests import Request
 
-def mask_phone(phone: str) -> str:
-    if phone:
-        return f"{phone[:3]}XXXXXXXXXX"
-    return "No Phone"
+from data.dbapis.horse_selling_service.read_queries import (
+    get_all_horse_sell_enquiries,
+    get_horse_sell_listings,
+    get_selling_enquiry_by_user_id,
+)
+from data.dbapis.horse_selling_service.write_queries import (
+    add_horse_selling_service_details,
+    add_horse_selling_service_enquiry,
+    update_horse_selling_service_details,
+    update_horse_selling_service_enquiry,
+    update_selling_service_images,
+)
+from data.dbapis.horses.write_queries import add_horse, update_horse
+from logging_config import log
+from models.horse.horse import HorseInternal, UploadInfo
+from models.horse.horse_selling_service_internal import (
+    HorseSellingServiceEnquiryInternal,
+    HorseSellingServiceInternal,
+    Provider,
+)
+from utils.image_management import generate_image_urls, save_image
 
-# Get the horses collection
-horses_collection = get_horses_collection()
-horse_selling_service_collection = get_horses_selling_service_collection()
-users_collection = get_users_collection()
-
-horse_selling_service_api_router = APIRouter(
-    prefix="/user/horses/get-horses-for-sale",
-    tags=["horses_selling_services"]
+from .api_validators.horse_selling_service import (
+    CreateSellEnquiryValidator,
+    EnlistHorseForSellServiceValidator,
+    GetHorseSellEnquiryValidator,
+    GetHorseSellListingValidator,
+    UpdateHorseForSellServiceListingValidator,
+    UpdateSellEnquiryValidator,
+    UploadSellImageValidator,
+)
+from .models import (
+    CreateSellEnquiryResponse,
+    EnlistHorseForSellResponse,
+    GetHorseSellEnquiry,
+    GetHorseSellListing,
 )
 
-@horse_selling_service_api_router.get("/{horse_id}", response_model=List[HorseSellingItem])
-async def get_horses_selling(
-    horse_id: str,
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
+horse_selling_service_router = APIRouter(prefix="", tags=["user-horses"])
+
+
+@horse_selling_service_router.post(path="/enlist-for-sell")
+def enlist_horse_for_sell(
+    request: Request,
+    payload: Annotated[EnlistHorseForSellServiceValidator, Depends()],
+) -> EnlistHorseForSellResponse:
+
+    user = payload.user
+    enlist_details = payload.enlist_details
+
+    log.info(f"{request.url.path} invoked enlist_details {enlist_details}")
+
+    provider = UploadInfo(uploaded_by_id=user.id, uploaded_by_user=user.user_role)
+
+    horse = HorseInternal(
+        name=enlist_details.name,
+        year_of_birth=enlist_details.year_of_birth,
+        breed=enlist_details.breed,
+        size=enlist_details.size,
+        gender=enlist_details.gender,
+        description=enlist_details.description,
+        uploaded_by=provider,
+    )
+
+    horse_id = add_horse(horse_details=horse)
+
+    if not horse_id:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to enlist horse for rent",
+        )
+
+    provider = Provider(provider_id=user.id, provider_type=user.user_role)
+    selling_service_details = HorseSellingServiceInternal(
+        horse_id=horse_id, provider=provider, price_sar=enlist_details.price
+    )
+
+    selling_service_id = add_horse_selling_service_details(
+        selling_service_details=selling_service_details
+    )
+
+    if not selling_service_id:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to enlist horse for sell",
+        )
+
+    response = EnlistHorseForSellResponse(horse_selling_service_id=selling_service_id)
+
+    log.info(f"{request.url.path} returning {response}")
+
+    return response
+
+
+@horse_selling_service_router.post(path="/{horse_selling_service_id}/upload-images")
+async def upload_sell_images(
+    request: Request, payload: Annotated[UploadSellImageValidator, Depends()]
 ):
-    horse = get_horse_by_id(horse_id)
-    if horse:
-        return JSONResponse(content=jsonable_encoder([horse]))  # Return a list containing the horse
-    raise HTTPException(status_code=404, detail="Horse not found")
 
-@horse_selling_service_api_router.post("/{horse_selling_service_id}/upload-images")
-async def upload_image_demo(
-    horse_selling_service_id: str,
-    images: List[UploadFile] = File(...),
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
-):
-    # Check if the horse_selling_service_id belongs to the requesting user
-    horse_service = horse_selling_service_collection.find_one({"_id": horse_selling_service_id})
+    files = payload.files
+    service_id = payload.horse_selling_service_id
+    log.info(f"{request.url.path} invoked horse_selling_service_id {service_id}")
 
-    if horse_service is None:
-        raise HTTPException(status_code=404, detail="Horse selling service not found")
-
-    horse_id = horse_service["horse_id"]
-    horse = horses_collection.find_one({"_id": horse_id})
-
-    if horse is None:
-        raise HTTPException(status_code=404, detail="Horse not found or you are not the owner")
-
-    # Save images and collect their IDs
     image_ids = []
-    for image in images:
-        image_id = await save_image(image_file=image)  # Await the coroutine
+    for file in files:
+        image_id = await save_image(image_file=file)
         image_ids.append(image_id)
 
-    # Update the horse document with image IDs
-    if "images" not in horse:
-        horse["images"] = image_ids
-    else:
-        horse["images"].extend(image_ids)
+    if not image_ids:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to save image at this time",
+        )
 
-    if "images" not in horse_service:
-        horse_service["images"] = image_ids
-    else:
-        horse_service["images"].extend(image_ids)
-
-    horses_collection.update_one({"_id": horse_id}, {"$set": {"images": horse["images"]}})
-    horse_selling_service_collection.update_one({"_id": horse_selling_service_id}, {"$set": {"images": horse_service["images"]}})
+    update_selling_service_images(service_id=service_id, image_ids=image_ids)
 
     return {"status": "OK"}
 
-@horse_selling_service_api_router.get("/user/horses/get-horses-for-sell", response_model=List[HorseSellingResponse])
-async def get_horses_for_sell(
-    request: Request,  # Request parameter should be first
-    own_listing: bool = Query(default=False),
-    user: UserInternal = Depends(RoleBasedAccessControl({UserRoles.ADMIN, UserRoles.USER, UserRoles.CLUB})),
+
+@horse_selling_service_router.get(
+    path="/get-horses-for-sell", response_model=List[GetHorseSellListing]
+)
+def get_horse_sell_listing(
+    request: Request, payload: Annotated[GetHorseSellListingValidator, Depends()]
 ):
-    match_stage = {"$match": {"provider.provider_id": user.id}} if own_listing else {"$match": {"provider.provider_id": {"$ne": user.id}}}
-    print("USER ID", user.id)
+    user = payload.user
+    own_listing = payload.own_listing
+    log.info(f"{request.url.path} invoked ")
 
-    pipeline = [
-        match_stage,
-        {
-                '$lookup': {
-                    'from': 'users',
-                    'localField': 'provider_id',
-                    'foreignField': '_id.oid',
-                    'as': 'owner'
-                }
-            }, {
-                '$unwind': '$owner'
-            }, {
-                '$project': {
-                    'horse_selling_service_id': '$_id',
-                    'horse_id': '$_id',
-                    'name': '$name',
-                    'year_of_birth': '$year_of_birth',
-                    'breed': '$breed',
-                    'size': '$size',
-                    'gender': '$gender',
-                    'description': '$description',
-                    'images': '$images',
-                    'price': '$price_sar',
-                    'seller_information': {
-                        'name': '$owner.full_name',
-                        'email_address': mask_email("$owner.email_address"),
-                        'phone_no': mask_phone("$owner.phone_number"),
-                        'location': '$owner.address'
-                    }
-                }
-            }
-        ]
+    sell_listings = get_horse_sell_listings(user_id=user.id, own_listing=own_listing)
 
-    result = list(horse_selling_service_collection.aggregate(pipeline))
+    for sell_listing in sell_listings:
+        sell_listing.image_urls = generate_image_urls(
+            image_ids=sell_listing.image_urls, request=request
+        )
 
-    print(result)
-    if not result:
-        raise HTTPException(status_code=404, detail="No horses found")
+    log.info(f"{request.url.path} returning {sell_listings}")
 
-    # Generate image URLs
-    for horse in result:
-        horse["image_urls"] = [generate_image_url(image_id, request) for image_id in horse.get("images", [])]
-        if horse.get("images", []):
-            del horse["images"]  # Remove the image IDs list since URLs are generated
+    return sell_listings
 
-    return result
+
+@horse_selling_service_router.put(
+    path="/update-sell-listing/{horse_selling_service_id}"
+)
+def update_horse_selling_service_listings(
+    request: Request,
+    payload: Annotated[UpdateHorseForSellServiceListingValidator, Depends()],
+):
+
+    horse_selling_service_id = payload.horse_selling_service_id
+    update_details = payload.update_details
+    horse_id = payload.service_details.horse_id
+
+    log.info(f"{request.url.path} invoked update_details {update_details}")
+
+    update_horse(horse_id=horse_id, update_details=update_details.model_dump())
+
+    update_horse_selling_service_details(
+        service_id=horse_selling_service_id,
+        update_details={
+            "price_sar": update_details.price,
+            "updated_at": update_details.updated_at,
+        },
+    )
+
+    return {"status": "OK"}
+
+
+@horse_selling_service_router.post(path="/enquire-for-a-horse-sell")
+def create_sell_enquiry(
+    request: Request, payload: Annotated[CreateSellEnquiryValidator, Depends()]
+) -> CreateSellEnquiryResponse:
+
+    user = payload.user
+    old_enquiry_details = payload.old_enquiry_details
+    enquiry_details = payload.enquiry_details
+    update_existing = payload.update_existing
+
+    log.info(
+        f"{request.url.path} invoked enquiry_details {enquiry_details}, old_enquiry_details {old_enquiry_details}"
+    )
+
+    if update_existing:
+        update_horse_selling_service_enquiry(
+            enquiry_id=old_enquiry_details.horse_selling_enquiry_id,
+            enquiry_details=enquiry_details,
+        )
+
+        return CreateSellEnquiryResponse(
+            horse_selling_enquiry_id=old_enquiry_details.enquiry_id
+        )
+
+    enquiry = HorseSellingServiceEnquiryInternal(
+        user_id=user.id,
+        horse_selling_service_id=enquiry_details.horse_selling_service_id,
+        message=enquiry_details.message,
+    )
+
+    enquiry_id = add_horse_selling_service_enquiry(enquiry_details=enquiry)
+
+    response = CreateSellEnquiryResponse(horse_selling_enquiry_id=enquiry_id)
+
+    log.info(f"{request.url.path} returning {response}")
+
+    return response
+
+
+@horse_selling_service_router.put(
+    path="/update-horse-sell-enquiry/{horse_selling_enquiry_id}"
+)
+def update_sell_enquiry(
+    request: Request, payload: Annotated[UpdateSellEnquiryValidator, Depends()]
+):
+
+    horse_sell_enquiry_id = payload.horse_sell_enquiry_id
+    enquiry_details = payload.enquiry_details
+
+    log.info(f"{request.url.path} invoked enquiry_details {enquiry_details}")
+
+    update_horse_selling_service_enquiry(
+        enquiry_id=horse_sell_enquiry_id, enquiry_details=enquiry_details
+    )
+
+    return {"status": "OK"}
+
+
+@horse_selling_service_router.get(
+    path="/get-horse-sell-enquiries", response_model=List[GetHorseSellEnquiry]
+)
+def get_sell_enquiries(
+    request: Request,
+    payload: Annotated[GetHorseSellEnquiryValidator, Depends()],
+):
+
+    is_admin = payload.is_admin
+    user = payload.user
+    log.info(f"{request.url.path} invoked")
+
+    log.info(f"user_id {user.id}")
+
+    if is_admin:
+        response = get_all_horse_sell_enquiries()
+    else:
+        response = get_selling_enquiry_by_user_id(user_id=user.id)
+
+    return response

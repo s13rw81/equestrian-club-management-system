@@ -1,9 +1,11 @@
+from typing import List
+
 from api.logistics.models.logistics_company_services import (
     UpdateClubToClubService,
     UpdateLuggageTransferService,
     UpdateUserTransferService,
 )
-from data.db import convert_to_object_id, get_collection
+from data.db import convert_to_object_id
 from logging_config import log
 from models.logistics_company_services.logistics_company_services import (
     ClubToClubServiceInternal,
@@ -60,14 +62,16 @@ def update_club_to_club_service(
     )
 
     try:
+        filter = {"_id": convert_to_object_id(service_id)}
+        update = {
+            k: v
+            for k, v in update_details.model_dump().items()
+            if v != None and k != "_id"
+        }
+
         update_response = club_to_club_service_collection.update_one(
-            filter={"_id": convert_to_object_id(service_id)},
-            update={
-                "$set": {
-                    "is_available": update_details.is_available.value,
-                    "updated_at": update_details.updated_at,
-                }
-            },
+            filter=filter,
+            update={"$set": update},
         )
     except Exception as e:
         log.error(f"Exception : update_club_to_club_service() {str(e)}")
@@ -78,6 +82,24 @@ def update_club_to_club_service(
     )
 
     return update_response.modified_count == 1
+
+
+def update_club_to_club_service_images(service_id: str, image_ids: List[str]) -> bool:
+    """given a list of image id update the same to club to club service collection
+
+    Args:
+        service_id (str)
+        image_ids (List[str])
+    """
+
+    log.info(f"update_club_to_club_service_images() invoked : truck_id {service_id}")
+
+    update = {"$set": {"images": image_ids}}
+
+    filter = {"_id": convert_to_object_id(service_id)}
+    updated = club_to_club_service_collection.update_one(filter=filter, update=update)
+
+    return updated.modified_count == 1
 
 
 def save_user_transfer_service_db(service: UserTransferServiceInternal) -> str:

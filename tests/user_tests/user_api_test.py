@@ -1,13 +1,14 @@
 import pytest
-from tests.common import client, TEST_USER_EMAIL, get_access_token, get_users_database_collection
+from tests.conftest import client, TEST_USER_EMAIL
 
 
+@pytest.mark.user
 class TestUserFlow:
     @pytest.mark.dependency()
-    def test_generate_otp(self, get_access_token):
+    def test_generate_otp(self, get_access_token_not_otp_verified):
         headers = {
             "accept": "application/json",
-            "Authorization": f"Bearer {get_access_token}"
+            "Authorization": f"Bearer {get_access_token_not_otp_verified}"
         }
 
         response = client.post("/auth/generate-sign-up-otp", headers=headers)
@@ -15,7 +16,7 @@ class TestUserFlow:
         assert response.status_code == 200
 
     @pytest.mark.dependency(depends=["TestUserFlow::test_generate_otp"])
-    def test_verify_otp(self, get_access_token, get_users_database_collection):
+    def test_verify_otp(self, get_access_token_not_otp_verified, get_users_database_collection):
         user_dict = get_users_database_collection.find_one({"email_address": TEST_USER_EMAIL})
 
         assert not user_dict["otp_verified"]
@@ -24,7 +25,7 @@ class TestUserFlow:
 
         headers = {
             "accept": "application/json",
-            "Authorization": f"Bearer {get_access_token}"
+            "Authorization": f"Bearer {get_access_token_not_otp_verified}"
         }
 
         params = {
@@ -79,12 +80,8 @@ class TestUserFlow:
             "Content-Type": "application/x-www-form-urlencoded"
         }
         data = {
-            "grant_type": "",
             "username": TEST_USER_EMAIL,
-            "password": "string",
-            "scope": "",
-            "client_id": "",
-            "client_secret": ""
+            "password": "string"
         }
 
         response = client.post("/auth/token", headers=headers, data=data)

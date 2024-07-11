@@ -4,7 +4,7 @@ from api.logistics.models.logistics_company_trucks import UpdateTruckDetails
 from data.db import convert_to_object_id, get_collection
 from logging_config import log
 from models.truck import TruckInternal
-from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING
+from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING, LogisticsService
 
 truck_collection = get_collection(collection_name="trucks")
 company_collection = get_collection(collection_name="logistics_company")
@@ -67,9 +67,9 @@ def add_truck_db(truck: TruckInternal) -> bool:
         log.info(f"update_truck_in_service_collection() ")
 
         filter = {"provider.provider_id": truck.logistics_company_id}
-        update_service = {"$push": {"trucks": convert_to_object_id(truck_id)}}
+        update_service = {"$push": {"trucks": truck_id}}
 
-        for service in truck.services:
+        for service in LogisticsService:
             log.info(f"service {service}")
 
             collection = LOGISTICS_SERVICE_COLLECTION_MAPPING.get(service.value)
@@ -96,7 +96,7 @@ def add_truck_db(truck: TruckInternal) -> bool:
 
     try:
         updated = update_truck_in_company_db(truck_id=truck_id)
-        update_truck_in_service_collection(truck_id=truck_id)
+        # update_truck_in_service_collection(truck_id=truck_id)
 
     except Exception as e:
         log.error(f"error caught in update_truck_in_company_db() {str(e)}")

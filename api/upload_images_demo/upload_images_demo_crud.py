@@ -25,6 +25,23 @@ async def upload_image_demo(image: UploadFile):
     return {"status": "OK"}
 
 
+@upload_images_demo_router.post("/upload-multiple-images-demo")
+async def upload_multiple_images(images: list[UploadFile]):
+    image_ids = []
+
+    for image in images:
+        image_id = await save_image(image_file=image)
+        image_ids.append(image_id)
+
+    database_insert_dict = [{"image_id": image_id} for image_id in image_ids]
+
+    # saving the image id in the database for later usages
+    # caution: this is for demonstration purposes, database code should always be in data package
+    upload_images_demo_collection.insert_many(database_insert_dict)
+
+    return {"status": "OK"}
+
+
 @upload_images_demo_router.get("/get-all-image-urls")
 async def get_all_image_url(request: Request):
     uploaded_images = upload_images_demo_collection.find()

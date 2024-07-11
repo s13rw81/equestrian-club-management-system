@@ -54,7 +54,7 @@ def add_truck(
         air_conditioning=truck_details.air_conditioning,
         logistics_company_id=logistics_company_id,
         name=truck_details.name,
-        services=truck_details.services,
+        # services=truck_details.services,
     )
 
     log.info(f"truck {truck}")
@@ -157,4 +157,4 @@ def update_truck(
 
     update_truck_details(truck_id=truck_id, truck_details=update_details)
 
-    return {"message": "Truck availability updated successfully"}
+    return {"status": "OK"}

@@ -70,11 +70,11 @@ class UploadSellImageValidator(BaseHorseSellingServiceValidator):
         self,
         user: user_dependency,
         horse_selling_service_id: str,
-        files: List[UploadFile],
+        images: List[UploadFile],
     ) -> None:
         super().__init__(user)
         self.horse_selling_service_id = horse_selling_service_id
-        self.files = files
+        self.files = images
         self.service_details = get_selling_service_details_by_service_id(
             service_id=horse_selling_service_id
         )

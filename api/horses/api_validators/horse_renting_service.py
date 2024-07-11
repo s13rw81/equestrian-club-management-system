@@ -68,11 +68,11 @@ class UploadRentImageValidator(BaseHorseRentingServiceValidator):
         self,
         user: user_dependency,
         horse_renting_service_id: str,
-        files: List[UploadFile],
+        images: List[UploadFile],
     ) -> None:
         super().__init__(user)
         self.horse_renting_service_id = horse_renting_service_id
-        self.files = files
+        self.files = images
         self.service_details = get_renting_service_details_by_service_id(
             service_id=horse_renting_service_id
         )

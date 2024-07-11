@@ -2,7 +2,6 @@ import pytest
 from data.db import convert_to_object_id
 from tests.conftest import client, TEST_USER_EMAIL, TEST_USER_EMAIL_2
 from datetime import date, timedelta
-import httpx
 
 HORSE_SELL_DETAILS = {
     "name": "A name of the horse",

@@ -13,7 +13,7 @@ from data.dbapis.horse_selling_service.write_queries import (
     add_horse_selling_service_enquiry,
     update_horse_selling_service_details,
     update_horse_selling_service_enquiry,
-    update_selling_service_images,
+    update_selling_service_horse_images,
 )
 from data.dbapis.horses.write_queries import add_horse, update_horse
 from logging_config import log
@@ -77,7 +77,7 @@ def enlist_horse_for_sell(
 
     provider = Provider(provider_id=user.id, provider_type=user.user_role)
     selling_service_details = HorseSellingServiceInternal(
-        horse_id=horse_id, provider=provider, price_sar=enlist_details.price
+        horse_id=horse_id, provider=provider, price=enlist_details.price
     )
 
     selling_service_id = add_horse_selling_service_details(
@@ -104,6 +104,7 @@ async def upload_sell_images(
 
     files = payload.files
     service_id = payload.horse_selling_service_id
+    horse_id = payload.service_details.horse_id
     log.info(f"{request.url.path} invoked horse_selling_service_id {service_id}")
 
     image_ids = []
@@ -117,7 +118,7 @@ async def upload_sell_images(
             detail="unable to save image at this time",
         )
 
-    update_selling_service_images(service_id=service_id, image_ids=image_ids)
+    update_selling_service_horse_images(horse_id=horse_id, image_ids=image_ids)
 
     return {"status": "OK"}
 
@@ -163,7 +164,7 @@ def update_horse_selling_service_listings(
     update_horse_selling_service_details(
         service_id=horse_selling_service_id,
         update_details={
-            "price_sar": update_details.price,
+            "price": update_details.price,
             "updated_at": update_details.updated_at,
         },
     )

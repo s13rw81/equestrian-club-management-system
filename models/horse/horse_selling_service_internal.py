@@ -20,8 +20,7 @@ class Provider(BaseModel):
 class HorseSellingServiceInternal(BaseModel):
     horse_id: str
     provider: Provider
-    price_sar: str
-    images: Optional[List[str]] = []
+    price: str
     created_at: datetime = Field(default_factory=get_current_utc_datetime)
     updated_at: datetime = Field(default_factory=get_current_utc_datetime)
 

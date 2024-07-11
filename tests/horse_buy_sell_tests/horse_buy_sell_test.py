@@ -2,6 +2,7 @@ import pytest
 from data.db import convert_to_object_id
 from tests.conftest import client, TEST_USER_EMAIL, TEST_USER_EMAIL_2
 from datetime import date, timedelta
+import httpx
 
 HORSE_SELL_DETAILS = {
     "name": "A name of the horse",
@@ -112,12 +113,14 @@ class TestHorseBuySellFlow:
         }
 
         files = [
-            ('images', ('space_image_1.jpg', open(f'{images_directory}/space_image_1.jpg', 'rb'), 'image/jpeg')),
-            ('images', ('space_image_2.jpg', open(f'{images_directory}/space_image_2.jpg', 'rb'), 'image/jpeg')),
-            ('images', ('space_image_3.jpg', open(f'{images_directory}/space_image_3.jpg', 'rb'), 'image/jpeg')),
+            ('files', ('space_image_1.jpg', open(f'{images_directory}/space_image_1.jpg', 'rb'), 'image/jpeg')),
+            ('files', ('space_image_2.jpg', open(f'{images_directory}/space_image_2.jpg', 'rb'), 'image/jpeg')),
+            ('files', ('space_image_3.jpg', open(f'{images_directory}/space_image_3.jpg', 'rb'), 'image/jpeg')),
         ]
 
         response = client.post(route_url, headers=headers, files=files)
+
+        print(response.text)
 
         assert response.status_code == 200
 
@@ -302,7 +305,7 @@ class TestHorseBuySellFlow:
 
         response = client.get(route_url, headers=headers)
 
-        assert response.stats_code == 200
+        assert response.status_code == 200
 
         horse_sell_enquiry = response.json()[0]
 

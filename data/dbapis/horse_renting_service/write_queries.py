@@ -3,6 +3,7 @@ from typing import Dict, List
 from api.horses.models import UpdateHorseRentEnquiry
 from data.db import (
     convert_to_object_id,
+    get_horse_collection,
     get_horse_renting_enquiry_collection,
     get_horse_renting_service_collection,
 )
@@ -14,6 +15,7 @@ from models.horse.horse_renting_service_internal import (
 
 horse_renting_service_collection = get_horse_renting_service_collection()
 renting_enquiry_collection = get_horse_renting_enquiry_collection()
+horse_collection = get_horse_collection()
 
 
 def add_horse_renting_service_details(
@@ -45,20 +47,20 @@ def add_horse_renting_service_details(
     return str(renting_service_id)
 
 
-def update_renting_service_images(service_id: str, image_ids: List[str]) -> bool:
-    """given a list of image id update the same to horse_renting_service collection
+def update_renting_service_horse_images(horse_id: str, image_ids: List[str]) -> bool:
+    """given a list of image id update the same to horse collection
 
     Args:
-        service_id (str)
+        horse_id (str)
         image_ids (List[str])
     """
 
-    log.info(f"update_club_to_club_service_images() invoked : truck_id {service_id}")
+    log.info(f"update_renting_service_horse_images() invoked : horse_id {horse_id}")
 
     update = {"$set": {"images": image_ids}}
 
-    filter = {"_id": convert_to_object_id(service_id)}
-    updated = horse_renting_service_collection.update_one(filter=filter, update=update)
+    filter = {"_id": convert_to_object_id(horse_id)}
+    updated = horse_collection.update_one(filter=filter, update=update)
 
     return updated.modified_count == 1
 

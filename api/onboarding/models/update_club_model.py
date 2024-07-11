@@ -9,5 +9,5 @@ class UpdateClubRequest(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     is_khayyal_verified: bool = None
-    images: Optional[List[str]] = []
+    image_urls: Optional[List[str]] = []
     users: Optional[List] = []

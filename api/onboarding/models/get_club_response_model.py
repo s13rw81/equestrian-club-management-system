@@ -1,8 +1,4 @@
-from typing import Optional
-
-from models.generic_models.generic_address_model import Address
-from models.generic_models.generic_contacts_model import Contact
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class GetClubResponse(BaseModel):

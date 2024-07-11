@@ -3,8 +3,7 @@ from typing import Annotated
 from api.onboarding.models import CreatelogisticsCompanyRequest
 from api.onboarding.models.update_company_model import UpdateCompanyModel
 from api.onboarding.onboarding_router import onboarding_api_router
-from api.user.models import UpdateUser, UpdateUserRole
-from bson import ObjectId
+from api.user.models import UpdateUserRole
 from data.db import get_logistics_company_collection
 from data.dbapis.logistics.logistics_company import save_logistics_company
 from fastapi import Depends, HTTPException, UploadFile, Request
@@ -12,7 +11,7 @@ from fastapi import status
 from logging_config import log
 from logic.auth import get_current_user
 from logic.onboarding.logistics import update_logistics_company, \
-    get_logistics_company_by_id_logic, get_company_id_of_user
+    get_company_id_of_user
 from logic.onboarding.upgrade_user import upgrade_user_role
 from models.logistic_company.logistic_company_internal import LogisticCompanyInternal
 from models.user import UserInternal, UserRoles

@@ -1,13 +1,15 @@
 from typing import Annotated
 
+from api.onboarding.models import CreateClubRequest
 from api.onboarding.models.get_club_response_model import GetClubResponse
 from api.onboarding.models.update_club_model import UpdateClubRequest
-from api.onboarding.models import CreateClubRequest
+from api.onboarding.onboarding_router import onboarding_api_router
 from api.user.models import UpdateUserRole
-from bson import ObjectId
 from data.db import get_clubs_collection
-from data.dbapis.clubs import save_club, get_club_by_id_logic
+from data.dbapis.clubs import save_club
 from fastapi import Depends, UploadFile, HTTPException
+from fastapi import status
+from fastapi.requests import Request
 from logging_config import log
 from logic.auth import get_current_user
 from logic.onboarding.clubs import update_club_by_id_logic, get_club_id_of_user
@@ -15,9 +17,6 @@ from logic.onboarding.upgrade_user import upgrade_user_role
 from models.clubs import ClubInternal
 from models.user import UserInternal, UserRoles
 from models.user.user_external import UserExternal
-from api.onboarding.onboarding_router import onboarding_api_router
-from fastapi import status
-from fastapi.requests import Request
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image, generate_image_url
 

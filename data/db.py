@@ -84,7 +84,7 @@ def get_horses_collection():
     return get_database()["horses_collection"]
 
 
-def get_logistic_company_collection():
+def get_logistics_company_collection():
     log.info("inside get_clubs_collection()")
     return get_database()["logistic_company"]
 

@@ -70,11 +70,11 @@ class UploadSellImageValidator(BaseHorseSellingServiceValidator):
         self,
         user: user_dependency,
         horse_selling_service_id: str,
-        files: List[UploadFile],
+        images: List[UploadFile],
     ) -> None:
         super().__init__(user)
         self.horse_selling_service_id = horse_selling_service_id
-        self.files = files
+        self.files = images
         self.service_details = get_selling_service_details_by_service_id(
             service_id=horse_selling_service_id
         )
@@ -167,13 +167,13 @@ class UpdateSellEnquiryValidator(BaseHorseSellingServiceValidator):
     def __init__(
         self,
         user: user_dependency,
-        horse_sell_enquiry_id: str,
+        horse_selling_enquiry_id: str,
         enquiry_details: UpdateHorseSellEnquiry,
     ) -> None:
         super().__init__(user)
 
-        self.horse_sell_enquiry_id = horse_sell_enquiry_id
-        self.old_enquiry_details = self.get_enquiry(enquiry_id=horse_sell_enquiry_id)
+        self.horse_sell_enquiry_id = horse_selling_enquiry_id
+        self.old_enquiry_details = self.get_enquiry(enquiry_id=horse_selling_enquiry_id)
 
         self.enquiry_details = enquiry_details
 

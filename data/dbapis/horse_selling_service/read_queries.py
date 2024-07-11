@@ -103,7 +103,7 @@ def get_horse_sell_listings(
             "size": "$horse.size",
             "gender": "$horse.gender",
             "description": "$horse.description",
-            "image_urls": "$images",
+            "image_urls": "$horse.images",
             "price": "$price",
             "seller_information": {
                 "name": "$user.full_name",

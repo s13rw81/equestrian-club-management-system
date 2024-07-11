@@ -77,7 +77,7 @@ def enlist_horse_for_sell(
 
     provider = Provider(provider_id=user.id, provider_type=user.user_role)
     selling_service_details = HorseSellingServiceInternal(
-        horse_id=horse_id, provider=provider, price_sar=enlist_details.price
+        horse_id=horse_id, provider=provider, price=enlist_details.price
     )
 
     selling_service_id = add_horse_selling_service_details(
@@ -163,7 +163,7 @@ def update_horse_selling_service_listings(
     update_horse_selling_service_details(
         service_id=horse_selling_service_id,
         update_details={
-            "price_sar": update_details.price,
+            "price": update_details.price,
             "updated_at": update_details.updated_at,
         },
     )

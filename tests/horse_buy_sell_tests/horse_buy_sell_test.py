@@ -119,6 +119,8 @@ class TestHorseBuySellFlow:
 
         response = client.post(route_url, headers=headers, files=files)
 
+        print(response.text)
+
         assert response.status_code == 200
 
         assert response.json()["status"] == "OK"
@@ -302,7 +304,7 @@ class TestHorseBuySellFlow:
 
         response = client.get(route_url, headers=headers)
 
-        assert response.stats_code == 200
+        assert response.status_code == 200
 
         horse_sell_enquiry = response.json()[0]
 
@@ -578,7 +580,7 @@ class TestHorseRentFlow:
 
         response = client.get(route_url, headers=headers)
 
-        assert response.stats_code == 200
+        assert response.status_code == 200
 
         horse_rent_enquiry = response.json()[0]
 

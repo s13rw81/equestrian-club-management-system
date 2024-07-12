@@ -847,7 +847,7 @@ On success of the prescribed operations return a generic response.
 
 ### 5. `user/horses/enquire-for-a-horse-rent`
 
-Users will use this route to make in enquiry for a horse sell.
+Users will use this route to make in enquiry for a horse rent.
 
 #### HTTP Method
 

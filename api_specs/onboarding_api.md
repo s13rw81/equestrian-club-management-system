@@ -411,7 +411,7 @@ will call this api to onboard itself as a `trainer`.
   "full_name": "full name of the trainer",
   "email_address": "trainer_name@domain.com",
   "phone_no": "+911111111111",
-  "years_of_experience" 3,
+  "years_of_experience": 3,
   "specializations": "it will be a list of string",
   "training_location" : "it will be a string",
   "available_services": "a list of string",
@@ -441,6 +441,8 @@ If a trainer is only available on Mondays, Wednesdays, Thursdays and Sundays the
 
 **Example**:
 If a trainer prefers the `morning` and the `evening` slots the string would be `TFT`.
+
+3. `years_of_experience` would be an `int`.
 
 #### Request Validations
 1. A `trainer` with the same `email_address` must not exist.
@@ -475,7 +477,7 @@ The schema of the document will be similar to the following:
       "full_name": "full name of the trainer",
       "email_address": "trainer_name@domain.com",
       "phone_no": "+911111111111",
-      "years_of_experience" 3,
+      "years_of_experience": 3,
       "specializations": ["specialization_1", "specialization_2"],
       "training_location" : "Riyadh, Saudi Arabia",
       "available_services": ["service_1", "service_2"],

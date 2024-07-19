@@ -31,10 +31,10 @@ async def save_image(image_file: UploadFile) -> str:
 
     extension = filename.split(".")[-1]
 
-    if extension not in ("jpg", "jpeg", "png", "webp", "heif", "heic"):
+    if extension not in ("jpg", "jpeg", "png", "webp", "heif", "heic", "pdf"):
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="file extension must be one of jpg, jpeg, png, webp, heif, heic",
+            detail="file extension must be one of jpg, jpeg, png, webp, heif, heic, pdf"
         )
 
     secure_filename = generate_secure_filename(filename)

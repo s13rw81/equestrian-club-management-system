@@ -34,7 +34,9 @@ will call this api to onboard itself as a `logistic-company`.
 
 #### Request Validations
 1. A `logistic-company` with the same `email_address` must not exist
-2. The user's `otp_verified` must be `true`
+2. The `email_address` must be a valid email address
+4. The user's `otp_verified` must be `true`
+5. Any fields shouldn't be an empty string
 
 **Note**: Use `pydantic` validators for the validations
 
@@ -216,14 +218,16 @@ will call this api to onboard itself as a `club`.
   "email_address": "someemail@domain.com",
   "address": "the address of the club",
   "phone_no": "+911111111111",
-  "name": "name of the logistic-company",
-  "description": "a description of the company"
+  "name": "name of the club",
+  "description": "a description of the club"
 }
 ```
 
 #### Request Validations
 1. A `club` with the same `email_address` must not exist
-2. The user's `otp_verified` must be `true`
+2. The `email_address` must be a valid email address
+3. The user's `otp_verified` must be `true`
+4. None of a fields should be an empty string
 
 **Note**: Use `pydantic` validators for the validations
 
@@ -378,9 +382,134 @@ If everything goes well, return a response with a schema similar to the follwing
   ]
 }
 ```
-
 **Notes:**
 1. The `image_urls` key will contain a list of generated image urls using the
    image handling mechanism. To learn how to use the image handling mechanism refer
    to the [Notes on handling images](../README.md#notes-on-handling-images) section
    of the `README.md` file.
+
+
+## Trainer
+
+### 1. `onboarding/create-trainer`
+Once the user is created using the `auth` apis, the user 
+will call this api to onboard itself as a `trainer`.
+
+#### HTTP Method
+`POST`
+
+#### The Process
+- the user signs up using the `users/signup` route
+- the newly created user, in turn, calls the `auth/generate-signup-otp` route
+- the user verifies the otp using the `auth/verify-signup-otp` route
+- the user calls the `onboarding/create-trainer` route to onboard itself as a `trainer`
+
+#### Request Body
+
+```json
+{
+  "full_name": "full name of the trainer",
+  "email_address": "trainer_name@domain.com",
+  "phone_no": "+911111111111",
+  "years_of_experience" 3,
+  "specializations": "it will be a list of string",
+  "training_location" : "it will be a string",
+  "available_services": "a list of string",
+  "availavility": "TFTTFFT",
+  "preferred_time_slots": "TFT",
+  "social_media_links": {
+    "website": "https://trainer-name.com",
+    "linkedin": "https://linkedin.com/trainer-name",
+    "instagram": "https://instagram.com/trainer-name",
+    "facebook": "https://facebook.com/trainer-name",
+    "twitter": "https://twitter.com/trainer-name"
+  },
+  "biography": "a maximum 100 words string",
+  "expertise": "a list of string",
+  "levels_taught": "a list of string",
+  "club_id": "the id of the club the trainer is affiliated with"
+}
+```
+
+**Notes**:
+1. `availability` would be a 7 character string. The value of each of the characters would either be `T` or `F`. Each character indicates the availability of the trainer in the particular weekday starting from `Monday`
+
+**Example**:
+If a trainer is only available on Mondays, Wednesdays, Thursdays and Sundays the string would be `TFTTFFT`.
+
+2. Similar to 'availability`, `preferred_time_slots` would be a 3 character string. The value of each of the characters would either be `T` or `F'. There are three time_slots, namely: `morning`, `afternoon` and `evening`.
+
+**Example**:
+If a trainer prefers the `morning` and the `evening` slots the string would be `TFT`.
+
+#### Request Validations
+1. A `trainer` with the same `email_address` must not exist.
+2. The provided `email_address` should be a valid email address.
+3. The user's `otp_verified` must be `true`.
+4. None of the fields should be an empty string.
+5. Leaving `full_name`, and `email_address` everything else is `optional`.
+6. In case `social_media_links` is there in the request body, it must at least provide one link. In other words, `social_media_links`, if provided, should not be an empty object.
+7. All the fields in the `social_media_links` object are `optional`. However, any one link must be present in case `social_media_links` is there in the request body.
+8. Social Media Links:
+  i. `website` should be a valid website url
+  ii. `linkedin` should be a valid `linkedin` url
+  iii. `instagram` should be a valid `instagram` url
+  iv. `facebook` should be a valid `facebook` url
+  v. `twitter` should be a valid `twitter` url
+9. A maximum of 100 words would be allowed in the `biography` field.
+10. For all the fields which are of type list of strings, each of the strings inside the lists shouldn't be an empty string.
+11. The `club_id` must be valid. In other words, the provided `club_id` should match with any `club._id` in the database. 
+
+**Note**: Use `pydantic` validators for the validations
+
+#### Authentication and RBAC
+1. This would be an authenticated route
+2. The user must have the role `UserRoles.USER`
+
+#### The Flow
+1. A new document will be created in the `trainer` collection.
+The schema of the document will be similar to the following:
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "full_name": "full name of the trainer",
+      "email_address": "trainer_name@domain.com",
+      "phone_no": "+911111111111",
+      "years_of_experience" 3,
+      "specializations": ["specialization_1", "specialization_2"],
+      "training_location" : "Riyadh, Saudi Arabia",
+      "available_services": ["service_1", "service_2"],
+      "availavility": "TFTTFFT",
+      "preferred_time_slots": "TFT",
+      "social_media_links": {
+        "website": "https://trainer-name.com",
+        "linkedin": "https://linkedin.com/trainer-name",
+        "instagram": "https://instagram.com/trainer-name",
+        "facebook": "https://facebook.com/trainer-name",
+        "twitter": "https://twitter.com/trainer-name"
+      },
+      "biography": "a maximum 100 words string",
+      "expertise": ["expertise_1", "expertise_2"],
+      "levels_taught": ["level_1", "level_2"],
+      "club_id": "the id of the club the trainer is affiliated with",
+      "user_id": "the id of the user"
+    }
+    ```
+2. The role of the user would be updated to `UserRoles.TRAINER`
+
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
+
+#### Error Handling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If all the validations pass the request would also succeed. If anything
+else goes wrong the pipeline exception handler would catch the error.
+
+Typically, the request would succeed and return,
+
+```json
+{"trainer_id":  "the id of the newly created trainer"}
+```

@@ -612,7 +612,278 @@ On success of the prescribed operations, return a generic response.
 }
 ```
 
+### 3. `/onboarding/trainer/upload-certifications`
 
+After onboarding as a `trainer`, the user will use this route to upload certifications.
+
+#### HTTP Method
+
+`POST`
+
+#### The Process
+
+1. The user will provide a list of `files` to be uploaded and associated with the `trainer`.
+
+#### Request Body
+
+The request body would consist of a `list` of files. The files can either be an image or a pdf. You can request files by
+creating the route in the following way:
+
+```python
+@upload_images_demo_router.post("/onboarding/trainer/upload-certifications")
+async def upload_image_demo(images: list[UploadFile]):
+```
+
+**Notes**:
+
+1. Check out [upload_images_demo_crud.py](../api/upload_images_demo/upload_images_demo_crud.py)
+   file for examples on how to handle image uploads.
+2. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+3. Use the same image handling mechanism for the `pdf` files as well.
+
+
+#### Authentication and RBAC
+
+1. This route will be an `authenticated` route
+2. Only users with `user_role`: `TRAINER` will have the permission to
+   access this route.
+
+#### The Flow
+
+1. The files provided by the user will be saved using the `save_image()` function of
+   the image handling mechanism.
+2. The `image_id`s returned by the image handling mechanism would be saved in the same
+   `trainer` collection in the document associated with the `trainer` of the user.
+   The `trainer` will be figured out based on the user who calls the route.
+   
+   The key for saving the certifications would be `certifications`.
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "certifications": ["image_id_1", "image_id_2"]
+    }
+    ```
+
+#### Error Handling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If everything goes right, return a generic response informing the user that
+everything went well.
+
+```json
+{
+  "status": "OK"
+}
+```
+
+### 4. `/onboarding/trainer/upload-profile-files`
+
+After onboarding as a `trainer`, the user will use this route to upload profile files.
+
+#### HTTP Method
+
+`POST`
+
+#### The Process
+
+1. The user will provide a list of `files` to be uploaded and associated with the `trainer`.
+
+#### Request Body
+
+The request body would consist of a `list` of files. The files can either be an image or a pdf. You can request files by
+creating the route in the following way:
+
+```python
+@upload_images_demo_router.post("/onboarding/trainer/upload-profile-files")
+async def upload_image_demo(images: list[UploadFile]):
+```
+
+**Notes**:
+
+1. Check out [upload_images_demo_crud.py](../api/upload_images_demo/upload_images_demo_crud.py)
+   file for examples on how to handle image uploads.
+2. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+3. Use the same image handling mechanism for the `pdf` files as well.
+
+
+#### Authentication and RBAC
+
+1. This route will be an `authenticated` route
+2. Only users with `user_role`: `TRAINER` will have the permission to
+   access this route.
+
+#### The Flow
+
+1. The files provided by the user will be saved using the `save_image()` function of
+   the image handling mechanism.
+2. The `image_id`s returned by the image handling mechanism would be saved in the same
+   `trainer` collection in the document associated with the `trainer` of the user.
+   The `trainer` will be figured out based on the user who calls the route.
+   
+   The key for saving the profile files would be `profile_files`.
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "profile_files": ["image_id_1", "image_id_2"]
+    }
+    ```
+
+#### Error Handling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If everything goes right, return a generic response informing the user that
+everything went well.
+
+```json
+{
+  "status": "OK"
+}
+```
+
+### 5. `/onboarding/trainer/upload-profile-picture`
+
+After onboarding as a `trainer`, the user will use this route to upload profile picture.
+
+#### HTTP Method
+
+`POST`
+
+#### The Process
+
+1. The user will provide an image to be uploaded and associated with the `trainer`.
+
+#### Request Body
+
+The request body would consist of an image file. You can request a single image file by
+creating the route in the following way:
+
+```python
+@upload_images_demo_router.post("/onboarding/trainer/upload-profile-picture")
+async def upload_image_demo(images: UploadFile):
+```
+
+**Notes**:
+
+1. Check out [upload_images_demo_crud.py](../api/upload_images_demo/upload_images_demo_crud.py)
+   file for examples on how to handle image uploads.
+2. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+
+
+#### Authentication and RBAC
+
+1. This route will be an `authenticated` route
+2. Only users with `user_role`: `TRAINER` will have the permission to
+   access this route.
+
+#### The Flow
+
+1. The image file provided by the user will be saved using the `save_image()` function of
+   the image handling mechanism.
+2. The `image_id` returned by the image handling mechanism would be saved in the same
+   `trainer` collection in the document associated with the `trainer` of the user.
+   The `trainer` will be figured out based on the user who calls the route.
+   
+   The key for saving the profile picture would be `profile_picture`.
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "profile_picture": "image_id"
+    }
+    ```
+
+#### Error Handling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If everything goes right, return a generic response informing the user that
+everything went well.
+
+```json
+{
+  "status": "OK"
+}
+```
+
+#### 6. `/onboarding/get-trainer`
+
+After the user onboards himself as a `trainer`, he calls this route to get details about the `trainer` data associated with him.
+
+#### HTTP Method
+`GET`
+
+#### The Process
+1. The user onboards himself as a `trainer`.
+2. After the successful onboarding, the user calls this route to get details about the `trainer`
+   associated with him.
+
+#### Authentication and RBAC
+1. This will be an authenticated route.
+2. Only users with `user_role`: `TRAINER` will have access to this route.
+
+#### The Flow
+1. The user will call this route.
+2. This route will return the `trainer` associated with the user.
+
+#### Error Handling
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+If everything goes well, return a response with a schema similar to the follwing,
+
+```json
+{
+  "full_name": "john doe",
+  "email_address": "trainer_name@domain.com",
+  "phone_no": "+911111111111",
+  "years_of_experience": 3,
+  "specializations": ["specialization_1", "specialization_2"],
+  "training_location" : "Riyadh, Saudi Arabia",
+  "available_services": ["service_1", "service_2"],
+  "availavility": "TFTTFFT",
+  "preferred_time_slots": "TFT",
+  "social_media_links": {
+    "website": "https://trainer-name.com",
+    "linkedin": "https://linkedin.com/trainer-name",
+    "instagram": "https://instagram.com/trainer-name",
+    "facebook": "https://facebook.com/trainer-name",
+    "twitter": "https://twitter.com/trainer-name"
+  },
+  "biography": "a maximum 100 words string",
+  "expertise": ["expertise_1", "expertise_2"],
+  "levels_taught": ["level_1", "level_2"],
+  "club_id": "the id of the club the trainer is affiliated with",
+  "certification_urls": [
+    "trainer.certifications[0]",
+    "trainer.certifications[1]"
+  ],
+  "profile_file_urls": [
+    "trainer.profile_files[0]",
+    "trainer.profile_files[1]"
+  ],
+  "profile_picture_url": "trainer.profile_picture"
+}
+```
+
+**Notes:**
+1. The `certification_urls` and `profile_file_urls` keys will contain a list of image urls generated using the
+   image handling mechanism. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+2. The `profile_picture_url` will also contain an image url generated using the image handling mechanism.
 
 
 

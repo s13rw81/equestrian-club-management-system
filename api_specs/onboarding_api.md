@@ -432,12 +432,17 @@ will call this api to onboard itself as a `trainer`.
 ```
 
 **Notes**:
-1. `availability` would be a 7 character string. The value of each of the characters would either be `T` or `F`. Each character indicates the availability of the trainer in the particular weekday starting from `Monday`
+1. `availability` would be a 7 character string. The value of each of the
+characters would either be `T` or `F`. Each character indicates the availability of the
+trainer in the particular weekday starting from `Monday`
 
 **Example**:
-If a trainer is only available on Mondays, Wednesdays, Thursdays and Sundays the string would be `TFTTFFT`.
+If a trainer is only available on Mondays, 
+Wednesdays, Thursdays and Sundays the string would be `TFTTFFT`.
 
-2. Similar to 'availability`, `preferred_time_slots` would be a 3 character string. The value of each of the characters would either be `T` or `F'. There are three time_slots, namely: `morning`, `afternoon` and `evening`.
+2. Similar to 'availability`, `preferred_time_slots` would be a 3 character string.
+The value of each of the characters would either be `T` or `F'.
+There are three time_slots, namely: `morning`, `afternoon` and `evening`.
 
 **Example**:
 If a trainer prefers the `morning` and the `evening` slots the string would be `TFT`.
@@ -450,17 +455,19 @@ If a trainer prefers the `morning` and the `evening` slots the string would be `
 3. The user's `otp_verified` must be `true`.
 4. None of the fields should be an empty string.
 5. Leaving `full_name`, and `email_address` everything else is `optional`.
-6. In case `social_media_links` is there in the request body, it must at least provide one link. In other words, `social_media_links`, if provided, should not be an empty object.
-7. All the fields in the `social_media_links` object are `optional`. However, any one link must be present in case `social_media_links` is there in the request body.
-8. Social Media Links:
+6. In case `social_media_links` is there in the request body, it must at least provide one link.
+In other words, `social_media_links`, if provided, should not be an empty object.
+8. All the fields in the `social_media_links` object are `optional`.
+However, any one link must be present in case `social_media_links` is there in the request body.
+10. Social Media Links:
   i. `website` should be a valid website url
   ii. `linkedin` should be a valid `linkedin` url
   iii. `instagram` should be a valid `instagram` url
   iv. `facebook` should be a valid `facebook` url
   v. `twitter` should be a valid `twitter` url
-9. A maximum of 100 words would be allowed in the `biography` field.
-10. For all the fields which are of type list of strings, each of the strings inside the lists shouldn't be an empty string.
-11. The `club_id` must be valid. In other words, the provided `club_id` should match with any `club._id` in the database. 
+11. A maximum of 100 words would be allowed in the `biography` field.
+12. For all the fields which are of type list of strings, each of the strings inside the lists shouldn't be an empty string.
+13. The `club_id` must be valid. In other words, the provided `club_id` should match with any `club._id` in the database. 
 
 **Note**: Use `pydantic` validators for the validations
 
@@ -515,3 +522,97 @@ Typically, the request would succeed and return,
 ```json
 {"trainer_id":  "the id of the newly created trainer"}
 ```
+
+### 2. `onboarding/update-trainer`
+
+After onboarding itself as a `trainer` the user may use this route to update the details about
+himself.
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+- The user will onboard itself as a trainer using the `onboarding/create-trainer` route.
+- The may use this route to update the details about himself.
+
+#### Request Body
+
+```json
+{
+  "full_name": "full name of the trainer",
+  "email_address": "trainer_name@domain.com",
+  "phone_no": "+911111111111",
+  "years_of_experience": 3,
+  "specializations": "it will be a list of string",
+  "training_location" : "it will be a string",
+  "available_services": "a list of string",
+  "availavility": "TFTTFFT",
+  "preferred_time_slots": "TFT",
+  "social_media_links": {
+    "website": "https://trainer-name.com",
+    "linkedin": "https://linkedin.com/trainer-name",
+    "instagram": "https://instagram.com/trainer-name",
+    "facebook": "https://facebook.com/trainer-name",
+    "twitter": "https://twitter.com/trainer-name"
+  },
+  "biography": "a maximum 100 words string",
+  "expertise": "a list of string",
+  "levels_taught": "a list of string",
+  "club_id": "the id of the club the trainer is affiliated with"
+}
+```
+**Note**: For explanation about the fields please see `onboarding/create-trainer` route.
+
+#### Request Validations
+1. Same validations would apply as specified in the `onboarding/create-trainer` route.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an authentication route
+2. The user must have the role `UserRoles.TRAINER'
+
+#### The Flow
+1. Update the respective document in the `trainer` collection.
+2. In case, the field that is being update is a `list` completely replace the previously stored items.\
+  **To Illustrate**:
+  The field `specializations` is a `list` of `string`. Let's say it's stored in the database 
+  in the following way,
+  
+    ```json
+    {
+      "specializations": ["horse riding", "show jumping"]
+    }
+    ```
+    Now, the user, in the request body of this route, sends the following,
+
+    ```json
+    {
+      "specializations": ["shoeing", "grooming"]
+    }
+    ```
+    In this scenerio, remove the old list entirely and replace it with the newly provided updated list. After the update,
+   the value in the database will look like the following,
+
+    ```json
+    {
+      "specializations": ["shoeing", "grooming"]
+    }
+    ```
+
+#### Error Handling
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+On success of the prescribed operations, return a generic response.
+
+```json
+{
+  "status": "OK"
+}
+```
+
+
+
+
+

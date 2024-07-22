@@ -1,17 +1,18 @@
-from data.db import get_users_collection
+from data.db import convert_to_object_id, get_users_collection
 from logging_config import log
-from models.user import UserInternal, UpdateUserInternal, SignUpCredentialType
+from models.user import SignUpCredentialType, UpdateUserInternal, UserInternal
+from models.user.enums.user_roles import UserRoles
 
 users_collection = get_users_collection()
 
 
 def save_user(user: UserInternal) -> str:
     """
-        saves the new user in the database and returns the id
+    saves the new user in the database and returns the id
 
-        :param user: InternalUser
+    :param user: InternalUser
 
-        :returns: id
+    :returns: id
     """
 
     log.info(f"save_user invoked: {user}")
@@ -27,12 +28,12 @@ def save_user(user: UserInternal) -> str:
 
 def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> dict:
     """
-        updates the user as per the data provided in the edit_user dict
+    updates the user as per the data provided in the edit_user dict
 
-        :param update_user_data: UpdateUserInternal
-        :param user: str
+    :param update_user_data: UpdateUserInternal
+    :param user: str
 
-        :returns: True if successfully updated false otherwise
+    :returns: True if successfully updated false otherwise
 
     """
 
@@ -40,18 +41,41 @@ def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> dic
 
     update_user_dict = update_user_data.model_dump(exclude_none=True)
 
-    update_filter = ({"email_address": user.email_address}
-                     if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
-                     else {"phone_number": user.phone_number})
+    update_filter = (
+        {"email_address": user.email_address}
+        if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
+        else {"phone_number": user.phone_number}
+    )
 
     result = users_collection.update_one(
         update_filter,
-        {"$set": update_user_dict, "$currentDate": {"lastModified": True}}
+        {"$set": update_user_dict, "$currentDate": {"lastModified": True}},
     )
 
-    log.info(f"matched_count={result.matched_count}, modified_count={result.modified_count}")
+    log.info(
+        f"matched_count={result.matched_count}, modified_count={result.modified_count}"
+    )
 
     if result.modified_count == 1:
-        return {'status_code': 200, 'detail': 'password reset successful.'}
+        return {"status_code": 200, "detail": "password reset successful."}
     else:
-        return {'status_code': 500, 'detail': 'password reset failed.'}
+        return {"status_code": 500, "detail": "password reset failed."}
+
+
+def update_user_role(user_role: UserRoles, user: UserInternal) -> bool:
+    """updates the role of a particular user to user_role
+
+    Args:
+        user_role (_type_): _description_
+        user (UserInternal): _description_
+
+    Returns:
+        bool: _description_
+    """
+
+    filter = {"_id": convert_to_object_id(user.id)}
+    result = users_collection.update_one(
+        filter=filter, update={"$set": {"user_role": user_role.value}}
+    )
+
+    return result.modified_count == 1

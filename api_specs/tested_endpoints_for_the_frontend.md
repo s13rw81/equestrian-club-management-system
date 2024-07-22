@@ -76,8 +76,8 @@ using the `user/horses/enquire-for-a-horse-sell` route. \
 
 
 #### 7. user/horses/get-horse-sell-enquiries
-- Users will use this route to get the selling-enquiries made by himself.
-- Admins will use this route to ghet the selling-enquiries made by all other users.
+- Users will use this route to get the `selling-enquiries` made by themselves.
+- Admins will use this route to get the `selling-enquiries` made by all other users.
 
 [Reference](horses_buy_sell_rent_api.md#7-userhorsesget-horse-sell-enquiries)
 

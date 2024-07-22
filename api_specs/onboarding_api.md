@@ -220,6 +220,29 @@ will call this api to onboard itself as a `club`.
   "phone_no": "+911111111111",
   "name": "name of the club",
   "description": "a description of the club"
+  "location": {
+    "lat": "latitude",
+    "long": "longitude"
+  },
+  "riding_lesson_service": {
+    "pricing_options": [
+      {
+        "price": 400,
+        "number_of_lessons": 10
+      }
+    ]
+  },
+  "horse_shoeing_service": {
+    "pricing_options": [
+      {
+        "price": 400,
+        "number_of_horses": 10
+      }
+    ]
+  },
+  "generic_activity_service": {
+    "price": 500
+  }
 }
 ```
 
@@ -228,6 +251,9 @@ will call this api to onboard itself as a `club`.
 2. The `email_address` must be a valid email address
 3. The user's `otp_verified` must be `true`
 4. None of a fields should be an empty string
+5. The following are the mandatory fields: `email_address`, `address`, `phone_no`, `name`, `description` and `location`
+6. The fields `riding_lesson_service`, `horse_shoeing_service` and `generic_activity_service` are generally optional. However,
+   if these are provided, all the nested fields are mandatory.  
 
 **Note**: Use `pydantic` validators for the validations
 
@@ -246,6 +272,10 @@ The schema of the document will be similar to the following:
       "phone_no": "+911111111111",
       "name": "name of the logistic-company",
       "description": "a description of the company",
+      "location": {
+        "lat": "latitude",
+        "long": "longitude"
+      },
       "is_khayyal_verified": false,
       "users": [
         {"user_id": "the id of the user"}
@@ -253,6 +283,58 @@ The schema of the document will be similar to the following:
     }
     ```
 2. The role of the user would be updated to `UserRoles.CLUB`
+3. If `riding_lesson_service` is provided a new document will be created in the
+   `riding_lesson_service` collection.
+   The schema of the document will be similar to the following:
+
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "provider": {
+        "provider_id": "newly created club_id",
+        "provider_type": "CLUB" // this will be the UserRoles enum, in this case it will be UserRoles.CLUB
+      },
+      "pricing_options": [
+        {
+          "price": 400,
+          "number_of_lessons": 10
+        }
+      ]
+    }
+    ```
+4. If `horse_shoeing_service` is provided a new document will be created in the
+   `horse_shoeing_service` collection.
+   The schema of the document will be similar to the following:
+
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "provider": {
+        "provider_id": "newly created club_id",
+        "provider_type": "CLUB" // this will be the UserRoles enum, in this case it will be UserRoles.CLUB
+      },
+      "pricing_options": [
+        {
+          "price": 400,
+          "number_of_horses": 10
+        }
+      ]
+    }
+    ```
+5. If `generic_activity_service` is provided a new document will be created in the
+   `generic_activity_service` collection.
+   The schema of the document will be similar to the following:
+
+    ```json
+    {
+      "_id": ObjectId("12345"),
+      "provider": {
+        "provider_id": "newly created club_id",
+        "provider_type": "CLUB" // this will be the UserRoles enum, in this case it will be UserRoles.CLUB
+      },
+      "price": 400
+    }
+    ```
 
 **Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
 

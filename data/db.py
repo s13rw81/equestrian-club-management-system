@@ -154,6 +154,11 @@ def get_horse_renting_enquiry_collection():
     return get_database()["horse_renting_enquiry"]
 
 
+def get_trainer_collection():
+    log.info("inside get_trainer_collection")
+    return get_database()["trainer"]
+
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

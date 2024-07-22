@@ -441,6 +441,9 @@ After the user onboards himself as a `club`, he calls this route to get details 
 #### The Flow
 1. The user will call this route.
 2. This route will return the `club` associated with the user.
+3. Fetch `riding_lesson_service` data from the `riding_lesson_service` collection.
+4. Fetch `horse_shoeing_service` data from the `horse_shoeing_service` collection.
+5. Fetch `generic_activity_service` data from the `generic_activity_service` collection.
 
 #### Error Handling
 Raise a `HTTPException` if anything goes wrong.
@@ -457,6 +460,29 @@ If everything goes well, return a response with a schema similar to the follwing
   "name": "name of the club",
   "description": "a description of the club",
   "is_khayyal_verified": false,
+  "location": {
+    "lat": "latitude",
+    "long": "longitude"
+  },
+  "riding_lesson_service": {
+    "pricing_options": [
+      {
+        "price": 400,
+        "number_of_lessons": 10
+      }
+    ]
+  },
+  "horse_shoeing_service": {
+    "pricing_options": [
+      {
+        "price": 400,
+        "number_of_horses": 10
+      }
+    ]
+  },
+  "generic_activity_service": {
+    "price": 500
+  },
   "image_urls": [
     "club.images[0]",
     "club.images[1]",
@@ -470,6 +496,138 @@ If everything goes well, return a response with a schema similar to the follwing
    to the [Notes on handling images](../README.md#notes-on-handling-images) section
    of the `README.md` file.
 
+### 4. `onboarding/update-club`
+After the user onboards itself as a `club` he will use this route to update the details about the
+`club` and allied `services`.
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+- User onboards itsef as a `club` using the `onboarding/create-club` route
+- User may use this route to update the `club` details and the allied services
+
+#### Request Body
+
+```json
+{
+  "email_address": "someemail@domain.com",
+  "address": "the address of the club",
+  "phone_no": "+911111111111",
+  "name": "name of the club",
+  "description": "a description of the club"
+  "location": {
+    "lat": "latitude",
+    "long": "longitude"
+  },
+  "riding_lesson_service": {
+    "pricing_options": [
+      {
+        "price": 400,
+        "number_of_lessons": 10
+      }
+    ]
+  },
+  "horse_shoeing_service": {
+    "pricing_options": [
+      {
+        "price": 400,
+        "number_of_horses": 10
+      }
+    ]
+  },
+  "generic_activity_service": {
+    "price": 500
+  }
+}
+```
+
+#### Request Validations
+1. A `club` with the same `email_address` must not exist
+2. The `email_address` must be a valid email address
+3. Fields which are of `string` type of should not accept an empty string
+4. All top level fields and nested fields are `optional`
+
+**Note**: Use `pydantic` validators for the validations
+
+#### Authentication and RBAC
+1. This would be an authenticated route
+2. The user must have the role `UserRoles.CLUB`
+
+#### The Flow
+1. All the fields in the request body are optional
+2. For the fields which are provided will be updated in the database
+   with the given values
+3. Update the corresponding database collections i.e. `club`, `riding_lesson_service`,
+   `horse_shoeing_service` and `generic_activity_service` as per the provided data
+4. In case the value of a field is of `list` type, replace the entire existing list
+   in the database with the newly provided `list`.
+
+  **To Illustrate**:
+  The field `riding_lesson_service.pricing_options` is a `list` of `object`. Let's say it's stored in the database 
+  in the following way,
+  
+    ```json
+    {
+      "pricing_options": [
+        {
+          "number_of_lessons": 10,
+          "price": 400
+        },
+        {
+          "number_of_lessons": 20,
+          "price": 700
+        }
+      ]
+    }
+    ```
+    Now, the user, in the request body of this route, sends the following,
+
+    ```json
+    {
+      "pricing_options": [
+        {
+          "number_of_lessons": 10,
+          "price": 500
+        },
+        {
+          "number_of_lessons": 20,
+          "price": 800
+        }
+      ]
+    }
+    ```
+    In this scenerio, remove the old list entirely and replace it with the newly provided updated list. After the update,
+   the value in the database will look like the following,
+
+    ```json
+    {
+      "pricing_options": [
+        {
+          "number_of_lessons": 10,
+          "price": 500
+        },
+        {
+          "number_of_lessons": 20,
+          "price": 800
+        }
+      ]
+    }
+    ```
+
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
+
+#### Error Handling
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+Upon the success of the specified operations return a generic response,
+
+```json
+{
+  "status": "OK"
+}
+```
 
 ## Trainer
 
@@ -681,6 +839,7 @@ himself.
       "specializations": ["shoeing", "grooming"]
     }
     ```
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
 
 #### Error Handling
 Raise a `HTTPException` if anything goes wrong.

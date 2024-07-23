@@ -143,11 +143,6 @@ If everything goes well, return a response with a schema similar to the followin
 7. Fetch `genetic_activity_service` from the `generic_activity_service` collection.
 8. Use `monbodb aggregation framework` to generate the response in the `dbapis`.
 
-Required Data:
-1. trainer_id
-2. date
-3. pricing_option
-4. number_of_visitors
 
 ### 3. `/users/club/book-riding-lesson-service/{club_id}`
 The consumer will use this route to book `riding_lesson_service` of a club.
@@ -180,8 +175,10 @@ The consumer will use this route to book `riding_lesson_service` of a club.
 1. The `trainer_id` must be associated with the coresponding `club`.
 2. The `date` must not be from the past.
 3. The `pricing_option` must be one of the `pricing_option`s offered by the club. To
-   validate this query the `riding_lesson_service` collection to find out whether the
+   validate this, query the `riding_lesson_service` collection to find out whether the
    `club` offers the provided `pricing_option`.
+4. All the fields are mandatory.
+5. A field of type `string` is not allowed to have an empty string. 
 
   **Note**: Use `pydantic` validators for the validations.
 
@@ -218,6 +215,143 @@ document.
 {"riding_lesson_service_booking_id": "the id of the newly created service booking"}
 ```
 
+### 4. `/users/club/book-horse-shoeing-service/{club_id}`
+The consumer will use this route to book `horse_shoeing_service` of a club.
+
+#### HTTP Method
+`POST`
+
+#### Path Parameters
+1. `club_id`: The `id` of the `club` against which booking is being made.
+
+#### The Process
+- The `user` uses the `/user/clubs/get-club-details/{club_id}` route to fetch the details
+  of a club. The response includes the data about the `riding_lesson_service` the `club`
+  offers.
+- The `user`, in turn, uses this route to make a booking against the `horse_shoeing_service`
+  the `club` is offering.
+
+#### Request Body
+
+```json
+{
+  "farrier_id": "this will be a trainer_id",
+  "date": "the chosen date",
+  "pricing_option": "the chosen pricing option",
+  "horse_name": "the name of the horse"
+}
+```
+
+#### Request Validations
+1. The `trainer_id` must be associated with the coresponding `club`.
+2. The `date` must not be from the past.
+3. The `pricing_option` must be one of the `pricing_option`s offered by the club. To
+   validate this, query the `horse_shoeing_service` collection to find out whether the
+   `club` offers the provided `pricing_option`.
+4. All fields are mandatory.
+5. A field of type `string` is not allowed to be an empty string.
+
+  **Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This would be an authenticated route.
+2. The user must have the role `UserRles.USER`
+
+#### The Flow
+1. Create a new document in the `horse_shoeing_service_booking` collection.
+   The schema of the document will be similar to the following:
+    ```json
+      {
+        "_id": ObjectId("12345"),
+        "user_id": "the id of the user who's making the bookinng",
+        "horse_shoeing_service_id": "the id of the horse_shoeing_service, figure this out based on the club_id",
+        "farrier_id": "the chosen id, this will be a trainer._id",
+        "selected_date": "the chosen date",
+        "pricing_option": "the chosen pricing_option",
+        "horse_name": "the horse_name provided by the user"
+      }
+    ```
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
+
+#### Error Hadling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If all the prescribed operations succeed return the newly created `id` of the `horse_shoeing_service_booking`
+document.
+
+```json
+{"horse_shoeing_service_booking_id": "the id of the newly created service booking"}
+```
+
+### 5. `/users/club/book-generic-activity-service/{club_id}`
+The consumer will use this route to book `generic_activity_service` of a club.
+
+#### HTTP Method
+`POST`
+
+#### Path Parameters
+1. `club_id`: The `id` of the `club` against which booking is being made.
+
+#### The Process
+- The `user` uses the `/user/clubs/get-club-details/{club_id}` route to fetch the details
+  of a club. The response includes the data about the `generic_activity_service` the `club`
+  offers.
+- The `user`, in turn, uses this route to make a booking against the `generic_activity_service`
+  the `club` is offering.
+
+#### Request Body
+
+```json
+{
+  "trainer_id": "this will be a trainer_id",
+  "date": "the chosen date",
+  "number_of_people": "number of people"
+}
+```
+
+#### Request Validations
+1. The `trainer_id` must be associated with the coresponding `club`.
+2. The `date` must not be from the past.
+3. All fields are mandatory.
+4. A field of type `string` is not allowed to be an empty string.
+
+  **Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This would be an authenticated route.
+2. The user must have the role `UserRles.USER`
+
+#### The Flow
+1. Create a new document in the `generic_activity_service_booking` collection.
+   The schema of the document will be similar to the following:
+    ```json
+      {
+        "_id": ObjectId("12345"),
+        "user_id": "the id of the user who's making the bookinng",
+        "generic_activity_service_id": "the id of the generic_activity_service, figure this out based on the club_id",
+        "trainer_id": "the chosen id of the trainer",
+        "selected_date": "the chosen date",
+        "price": "figure out the price based on the generic_activity_service of the club",
+        "number_of_people": "the number of people provided by the user"
+      }
+    ```
+**Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
+
+#### Error Hadling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If all the prescribed operations succeed return the newly created `id` of the `generic_activity_service_booking`
+document.
+
+```json
+{"generic_activity_service_booking_id": "the id of the newly created service booking"}
+```
 
 
 

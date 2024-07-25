@@ -184,7 +184,7 @@ The consumer will use this route to book `riding_lesson_service` of a club.
 
 #### Authentication and RBAC
 1. This would be an authenticated route.
-2. The user must have the role `UserRles.USER`
+2. The user must have the role `UserRoles.USER`
 
 #### The Flow
 1. Create a new document in the `riding_lesson_service_booking` collection.
@@ -226,7 +226,7 @@ The consumer will use this route to book `horse_shoeing_service` of a club.
 
 #### The Process
 - The `user` uses the `/user/clubs/get-club-details/{club_id}` route to fetch the details
-  of a club. The response includes the data about the `riding_lesson_service` the `club`
+  of a club. The response includes the data about the `horse_shoeing_service` the `club`
   offers.
 - The `user`, in turn, uses this route to make a booking against the `horse_shoeing_service`
   the `club` is offering.
@@ -255,7 +255,7 @@ The consumer will use this route to book `horse_shoeing_service` of a club.
 
 #### Authentication and RBAC
 1. This would be an authenticated route.
-2. The user must have the role `UserRles.USER`
+2. The user must have the role `UserRoles.USER`
 
 #### The Flow
 1. Create a new document in the `horse_shoeing_service_booking` collection.
@@ -322,7 +322,7 @@ The consumer will use this route to book `generic_activity_service` of a club.
 
 #### Authentication and RBAC
 1. This would be an authenticated route.
-2. The user must have the role `UserRles.USER`
+2. The user must have the role `UserRoles.USER`
 
 #### The Flow
 1. Create a new document in the `generic_activity_service_booking` collection.
@@ -353,7 +353,7 @@ document.
 {"generic_activity_service_booking_id": "the id of the newly created service booking"}
 ```
 
-### 6. `/user/clubs/get-riding-lesson-service-booking`
+### 6. `/user/club/get-riding-lesson-service-booking`
 This route will be used by multiple types of users. Depending on the type of the user
 the response may vary. In general, it would return a list of `riding_lesson_service_booking`. 
 
@@ -401,7 +401,7 @@ If everything goes well return a response with a schema similar to the following
 This route will need `pagination` and `filtering`. Don't worry about it until codebase wide `pagination-system` is implemented.
 
 
-### 7. `/user/clubs/get-horse-shoeing-service-booking`
+### 7. `/user/club/get-horse-shoeing-service-booking`
 This route will be used by multiple types of users. Depending on the type of the user
 the response may vary. In general, it would return a list of `horse_shoeing_service_booking`. 
 
@@ -448,7 +448,7 @@ If everything goes well return a response with a schema similar to the following
 
 This route will need `pagination` and `filtering`. Don't worry about it until codebase wide `pagination-system` is implemented.
 
-### 8. `/user/clubs/get-generic-activity-service-booking`
+### 8. `/user/club/get-generic-activity-service-booking`
 This route will be used by multiple types of users. Depending on the type of the user
 the response may vary. In general, it would return a list of `generic_activity_service_booking`. 
 
@@ -496,5 +496,73 @@ If everything goes well return a response with a schema similar to the following
 This route will need `pagination` and `filtering`. Don't worry about it until codebase wide `pagination-system` is implemented.
 
 
+### 9. `/users/club/rate-a-club`
+The consumer will use this route provide `rating` and `review` to a club.
+
+#### HTTP Method
+`POST`
+
+
+#### The Process
+- The user will navigate to the `reviews` page of the `club`. In this page, the user will be shown the average rating and the list of reviews.
+- In case the user choses to leave a `rating` with or without a review, the user will call this route.
+
+#### Request Body
+
+```json
+{
+   "club_id": "the id of the club",
+   "rating": 4,
+   "review": "this club provides good services"
+}
+```
+
+#### Request Validations
+1. The `club_id` must be a valid `club_id`.
+2. The user must not have reviewed the club previously. That means in the `review` collection there must not exist an entry where the `reviewer.reviewer_id` matches the `user._id` and the `reviewee.reviewee_id` matches the provided `club_id`. In this case the user must use the update route to update the existing review.
+3. The `rating` will be an int ranging from 1-5.
+4. All the fields are mandatory unless otherwise explicitly mentioned.
+5. The `review` is optional.
+
+
+   **Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This would be an authenticated route.
+2. The user must have the role `UserRoles.USER`
+
+#### The Flow
+1. Create a new document in the `review` collection.
+   The schema of the document will be similar to the following:
+```json
+   {
+      "_id": ObjectId("12345"),
+      "reviewee": {
+         "reviewee_id": "club_id",
+         "reviewee_type": "CLUB"
+      },
+      "reviewer": {
+         "reviewer_id": "user._id",
+         "reviewer_type": "USER"
+      },
+      "rating": "provided rating",
+      "review": "provided review",
+      "approved_by_khayyal_admin": false
+   }
+```
+   **Note**: Use transactions for the database operations. **(Ignore this requirement until transaction management system is implemented.)**
+
+#### Error Hadling
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response
+
+If all the prescribed operations succeed return the newly created `id` of the `review`
+document.
+
+```json
+{"review_id": "review._id"}
+```
 
 

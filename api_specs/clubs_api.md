@@ -353,5 +353,148 @@ document.
 {"generic_activity_service_booking_id": "the id of the newly created service booking"}
 ```
 
+### 6. `/user/clubs/get-riding-lesson-service-booking`
+This route will be used by multiple types of users. Depending on the type of the user
+the response may vary. In general, it would return a list of `riding_lesson_service_booking`. 
+
+#### HTTP Method
+`GET`
+
+#### The Process
+- A normal `user` will call this route from the consumer app to get the `riding_lesson_service_booking` made by him.
+- A `club` will call this route from the admin app to get the `riding_lesson_service_booking` made by all the users with the specific club.
+- A `khayyal-admin` will call this route to get all the `riding_lesson_service_booking` available in the database.
+
+
+#### Authentication and RBAC
+1. This will be an authenticated route.
+2. Only users with `user_role`: `USER` or `user_role`: `CLUB` or `user_role`: `ADMIN` will have access to this route.
+
+#### The Flow
+1. If a `user` with `user_role`: `USER` calls this route, return the `riding_lesson_service_booking` made by that `user` only.
+2. If a user with `user_role`: `CLUB` calls this route, return the `riding_lesson_service_booking` made with the `club` only.
+3. If a user with `user_role`: `ADMIN` calls this route, return all the `riding_lesson_service_booking` available in the database.
+4. The collection name in the database is the same as well: `riding_lesson_service_booking`.
+
+#### Error Handling
+Raise an `HTTPException` if anything goes wrong.
+
+#### The Response
+If everything goes well return a response with a schema similar to the following:
+
+```json
+[
+   {
+      "user_id": "riding_lesson_service_booking.user_id",
+      "riding_lesson_service_id": "riding_lesson_service_booking.riding_lesson_service_id",
+      "club_id": "the club_id associated with the riding_lesson_service",
+      "trainer_id": "riding_lesson_service_booking.trainer_id",
+      "selected_date": "riding_lesson_service_booking.selected_date",
+      "pricing_option": "riding_lesson_service_booking.pricing_option",
+      "number_of_visitors": "riding_lesson_service_booking.number_of_visitors"
+   }
+]
+```
+
+#### Pagination
+
+This route will need `pagination` and `filtering`. Don't worry about it until codebase wide `pagination-system` is implemented.
+
+
+### 7. `/user/clubs/get-horse-shoeing-service-booking`
+This route will be used by multiple types of users. Depending on the type of the user
+the response may vary. In general, it would return a list of `horse_shoeing_service_booking`. 
+
+#### HTTP Method
+`GET`
+
+#### The Process
+- A normal `user` will call this route from the consumer app to get the `horse_shoeing_service_booking` made by him.
+- A `club` will call this route from the admin app to get the `horse_shoeing_service_booking` made by all the users with the specific club.
+- A `khayyal-admin` will call this route to get all the `horse_shoeing_service_booking` available in the database.
+
+
+#### Authentication and RBAC
+1. This will be an authenticated route.
+2. Only users with `user_role`: `USER` or `user_role`: `CLUB` or `user_role`: `ADMIN` will have access to this route.
+
+#### The Flow
+1. If a `user` with `user_role`: `USER` calls this route, return the `horse_shoeing_service_booking` made by that `user` only.
+2. If a user with `user_role`: `CLUB` calls this route, return the `horse_shoeing_service_booking` made with the `club` only.
+3. If a user with `user_role`: `ADMIN` calls this route, return all the `horse_shoeing_service_booking` available in the database.
+4. The collection name in the database is the same as well: `horse_shoeing_service_booking`.
+
+#### Error Handling
+Raise an `HTTPException` if anything goes wrong.
+
+#### The Response
+If everything goes well return a response with a schema similar to the following:
+
+```json
+[
+   {
+      "user_id": "horse_shoeing_service_booking.user_id",
+      "horse_shoeing_service_id": "horse_shoeing_service_booking.horse_shoeing_service_id",
+      "club_id": "the club_id associated with the horse_shoeing_service",
+      "farrier_id": "horse_shoeing_service_booking.farrier_id",
+      "selected_date": "horse_shoeing_service_booking.selected_date",
+      "pricing_option": "horse_shoeing_service_booking.pricing_option",
+      "horse_name": "horse_shoeing_service_booking.horse_name"
+   }
+]
+```
+
+#### Pagination
+
+This route will need `pagination` and `filtering`. Don't worry about it until codebase wide `pagination-system` is implemented.
+
+### 8. `/user/clubs/get-generic-activity-service-booking`
+This route will be used by multiple types of users. Depending on the type of the user
+the response may vary. In general, it would return a list of `generic_activity_service_booking`. 
+
+#### HTTP Method
+`GET`
+
+#### The Process
+- A normal `user` will call this route from the consumer app to get the `generic_activity_service_booking` made by him.
+- A `club` will call this route from the admin app to get the `generic_activity_service_booking` made by all the users with the specific club.
+- A `khayyal-admin` will call this route to get all the `generic_activity_service_booking` available in the database.
+
+
+#### Authentication and RBAC
+1. This will be an authenticated route.
+2. Only users with `user_role`: `USER` or `user_role`: `CLUB` or `user_role`: `ADMIN` will have access to this route.
+
+#### The Flow
+1. If a `user` with `user_role`: `USER` calls this route, return the `generic_activity_service_booking` made by that `user` only.
+2. If a user with `user_role`: `CLUB` calls this route, return the `generic_activity_service_booking` made with the `club` only.
+3. If a user with `user_role`: `ADMIN` calls this route, return all the `generic_activity_service_booking` available in the database.
+4. The collection name in the database is the same as well: `generic_activity_service_booking`.
+
+#### Error Handling
+Raise an `HTTPException` if anything goes wrong.
+
+#### The Response
+If everything goes well return a response with a schema similar to the following:
+
+```json
+[
+   {
+      "user_id": "generic_activity_service_booking.user_id",
+      "generic_activity_service_id": "generic_activity_service_booking.generic_activity_service_id",
+      "club_id": "the club_id associated with the generic_activity_service",
+      "tariner_id": "generic_activity_service_booking.trainer_id",
+      "selected_date": "generic_activity_service_booking.selected_date",
+      "price": "generic_activity_service_booking.pricing_option",
+      "number_of_people": "generic_activity_service_booking.number_of_people"
+   }
+]
+```
+
+#### Pagination
+
+This route will need `pagination` and `filtering`. Don't worry about it until codebase wide `pagination-system` is implemented.
+
+
 
 

@@ -389,10 +389,11 @@ The `users` of the consumer app will call this route to find nearby trucks stitu
 - The `user` will provide the radius through query parameters. The radius will be in KM.
 
 #### Query Parameters
-1. `radius`: The `radius` within which the `user` would like to search for `trucks`. The unit of the `radius` will be `KM`. This query parameter will be of `float` type and optional with a default value of 10.\
-**For example:** If the user wants to locate `trucks` within the radius 5 KM it will send 5 as the radius. As in, `/user/logistics/find-nearby-trucks?radius=5`
+1. `radius`: The `radius` within which the `user` would like to search for `trucks`. The unit of the `radius` will be `KM`. This query parameter will be of `float` type and optional with a default value of 10.
 3. `lat`: The `lat` will be of `float` type and mandatory; indicating the `latitude` of the location centering which the user wants to perform the search.
-4. `long`: The `long` will be of `float` type and mandatory; indicating the `longitude` of the location centering which the user wants to perform the search.
+4. `long`: The `long` will be of `float` type and mandatory; indicating the `longitude` of the location centering which the user wants to perform the search.\
+
+**For example:** If the user wants to locate `trucks` within the radius 5 KM it will send 5 as the radius. As in, `/user/logistics/find-nearby-trucks?radius=5&lat=24.45N&long=45.80E`
 
 #### Authentication and RBAC
 
@@ -496,7 +497,7 @@ it until the codebase wide `pagination-system` is implemented.
 The schema of the document will be similar to the following:
       ```json
       {
-         "logistics_company_id": "the id of the logistic_company what owns the provided truck`
+         "logistics_company_id": "the id of the logistic_company what owns the provided truck",
          "truck_id": "id of the truck of the client's choice",
          "pickup": {
             "lat": "the latitude of the pickup location",

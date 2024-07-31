@@ -17,19 +17,24 @@ This set of apis will be used for `logistics`.
 #### Request Body
 ```json
 {
-  "registration_number": "reg no",
-  "truck_type": "the type of the truck",
-  "capacity": "100MT",
-  "special_features": "AC",
-  "gps_equipped": true,
-  "air_conditioning": true,
-  "name": "the name of the truck"
+   "registration_number": "reg no",
+   "truck_type": "the type of the truck",
+   "capacity": "100MT",
+   "special_features": "AC",
+   "gps_equipped": true,
+   "air_conditioning": true,
+   "location": {
+      "lat": "latitude",
+      "long": "longitude"
+   },
+   "name": "the name of the truck"
 }
 ```
 #### Request Validations
 1. The `logistic_company` associated with the `user` must have been verified by the khayyal-admin. That means
    `logistic_company.is_khayyal_verified` must be `true`.
 2. A `truck` with the same registration number must not exist in the database.
+3. All the fields are mandatory unless otherwise indicated.
 
 **Note**: Use `pydantic` validators for the validations.
 
@@ -40,19 +45,23 @@ This set of apis will be used for `logistics`.
 #### The Flow:
 1. A new document will be created in the `trucks` collection.
 The schema of the document will be similar to the following:
-    ```json
-    {
-      "_id": ObjectId("12345"),
-      "logistics_company_id": "the id of the associated logistic company",
-      "registration_number": "reg no",
-      "truck_type": "the type of the truck",
-      "capacity": "100MT",
-      "special_features": "AC",
-      "gps_equipped": true,
-      "air_conditioning": true,
-      "name": "the name of the truck"
-    }
-    ```
+      ```json
+      {
+         "_id": ObjectId("12345"),
+         "logistics_company_id": "the id of the associated logistic company",
+         "registration_number": "reg no",
+         "truck_type": "the type of the truck",
+         "capacity": "100MT",
+         "special_features": "AC",
+         "gps_equipped": true,
+         "air_conditioning": true,
+         "location": {
+            "lat": "latitude",
+            "long": "longitude"
+         }
+         "name": "the name of the truck"
+      }
+      ```
 
 #### Error Handling:
 Raise a `HTTPException` if anything goes wrong.
@@ -159,13 +168,17 @@ everything went well.
 #### Request Body
 ```json
 {
-  "registration_number": "reg no",
-  "truck_type": "the type of the truck",
-  "capacity": "100MT",
-  "special_features": "AC",
-  "gps_equipped": true,
-  "air_conditioning": true,
-  "name": "the name of the truck"
+   "registration_number": "reg no",
+   "truck_type": "the type of the truck",
+   "capacity": "100MT",
+   "special_features": "AC",
+   "gps_equipped": true,
+   "air_conditioning": true,
+   "location": {
+      "lat": "latitude",
+      "long": "longitude"
+   }
+   "name": "the name of the truck"
 }
 ```
 **Notes**:
@@ -244,7 +257,12 @@ as the following.
       "special_features": "AC",
       "gps_equipped": true,
       "air_conditioning": true,
-      "name": "the name of the truck"
+      "location": {
+         "lat": "latitude",
+         "long": "longitude"
+      }
+      "name": "the name of the truck",
+      "image_urls": ["image_1", "image_2"]
    }
 ]
 ```

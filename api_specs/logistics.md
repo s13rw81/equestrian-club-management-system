@@ -272,6 +272,10 @@ as the following.
 1. Since the query is only from a single collection, usage of `mongodb-aggregation-framework` is
    not necessary. However, you can still choose to use it, it will be easier to extend it down the line.
 2. Ensure only the `trucks` associated with the `logistic_company` is returned.
+3. The `image_urls` key will contain a list of image urls generated using the
+   image handling mechanism. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
 
 #### Pagination:
 
@@ -326,7 +330,12 @@ Return the `truck` with a schema similar to the following:
    "special_features": "AC",
    "gps_equipped": true,
    "air_conditioning": true,
-   "name": "the name of the truck"
+   "location": {
+      "lat": "latitude",
+      "long": "longitude"
+   }
+   "name": "the name of the truck",
+   "image_urls": ["image_1", "image_2"]
 }
 ```
 
@@ -335,6 +344,10 @@ Return the `truck` with a schema similar to the following:
 1. Since the query is only from a single collection, usage of `mongodb-aggregation-framework` is
    not necessary. However, you can still choose to use it, it will be easier to extend it down the line.
 2. Ensure the requested `truck` is owned by the `logistic-company`.
+3. The `image_urls` key will contain a list of image urls generated using the
+   image handling mechanism. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
 
 ## Logistics Services
 

@@ -389,10 +389,10 @@ The `users` of the consumer app will call this route to find nearby trucks stitu
 - The `user` will provide the radius through query parameters. The radius will be in KM.
 
 #### Query Parameters
-1. `radius`: The `radius` within which the `user` would like to search for `trucks`. The unit of the `radius` will be `KM`. This query parameter will be of `float` type and optional with a default value of 10.
+1. `radius`: The `radius` within which the `user` would like to search for `trucks`. The unit of the `radius` will be `KM`. This query parameter will be of `float` type and optional with a default value of 10.\
 **For example:** If the user wants to locate `trucks` within the radius 5 KM it will send 5 as the radius. As in, `/user/logistics/find-nearby-trucks?radius=5`
-2. `lat`: The `lat` will be of `float` type and mandatory; indicating the `latitude` of the location centering which the user wants to perform the search.
-3. `long`: The `long` will be of `float` type and mandatory; indicating the `longitude` of the location centering which the user wants to perform the search.
+3. `lat`: The `lat` will be of `float` type and mandatory; indicating the `latitude` of the location centering which the user wants to perform the search.
+4. `long`: The `long` will be of `float` type and mandatory; indicating the `longitude` of the location centering which the user wants to perform the search.
 
 #### Authentication and RBAC
 

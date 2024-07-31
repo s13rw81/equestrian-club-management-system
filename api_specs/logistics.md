@@ -456,6 +456,8 @@ it until the codebase wide `pagination-system` is implemented.
 
 ### 2. `/user/logistics/create-booking`
 
+A `user` from the consuemer app will call this route to create a `logistic-booking`. 
+
 #### HTTP Method
 `POST`
 
@@ -497,8 +499,13 @@ it until the codebase wide `pagination-system` is implemented.
 The schema of the document will be similar to the following:
       ```json
       {
+         "_id": ObjectId("12345"),
          "logistics_company_id": "the id of the logistic_company what owns the provided truck",
          "truck_id": "id of the truck of the client's choice",
+         "consumer": {
+            "consumer_id": "the id of the user who's making the booking",
+            "consumer_type": "user.roleType, USER as of now"
+         }
          "pickup": {
             "lat": "the latitude of the pickup location",
             "long": "the longitude of the pickup location"
@@ -526,6 +533,133 @@ On success of the prescribed operations return the `_id` of the newly created `l
     "logistic_service_booking": "id of the newly created booking"
   }
 ```
+
+### 3. `/user/logistics/update-booking/{logistics_service_booking_id}`
+
+A `user` from the consumer will use this route to update a `logistic-service-booking` that he's created.
+
+#### HTTP Method
+`PUT`
+
+#### The Process
+1. The `user` will use this route to update a `logistic-service-booking` that is created by him.
+
+#### Path Parameters
+1. `logistics_service_booking_id`: The `_id` of the `logistic_service_booking` the user wants to update.
+
+#### Request Body
+```json
+{
+   "truck_id": "id of the truck of the client's choice",
+   "pickup": {
+      "lat": "the latitude of the pickup location",
+      "long": "the longitude of the pickup location"
+   },
+   "destination": {
+      "lat": "the latitude of the destination location",
+      "long": "the longitude of the destination locatoin"
+   },
+   "groomer": {
+      "name": "name of the groomer",
+      "phone_no": "phone_no of the groomer"
+   },
+   "details": "details of the consignment"
+}
+```
+#### Request Validations
+1. All the fields would be optional. Only provided fields will be updated.
+2. The `logistics_service_booking_id` must be valid. The `consumer.consumer_id` must match with the `user._id` of the `user` who's making the call. That means the `user` who's doing the update must be the same who created the booking.
+3. Request validations of the `/user/logistics/create-booking` route would apply in this route too.
+4. For all the `string` type fields, empty string wouldn't be accepted as a valid input.
+5. If `truck_id` is provided the new `truck_id` must be associated with the same `logistic_company` as the previous `truck_id`. That means, the `user` won't be able to update the `logistic_company` of the booking.
+6.  
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` will have the permission to acess this route.
+
+#### The Flow:
+1. Find the `logistic_service_booking` with the provided `logistics_company_id` in the path parameter.
+2. Update all the corresponding fields in the database as provided in the request body.
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return a generic response.
+
+```json
+  {
+    "status": "OK"
+  }
+```
+
+### 4. `/user/logistics/get-booking`
+
+This route will be used by different type of users depending on the situation to get details about the `logistic-service-booking`.
+
+#### HTTP Method
+
+`GET`
+
+#### The Process
+1. A `USER` will call this route from the consumer app to get all the `logistic-service-booking` that is made by him.
+2. A `LOGISTIC_COMPANY` will use this route from the admin app to get all the `logistic-service-booking` that are made agianst that company.
+
+#### Authentication and RBAC
+
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` and `user_role`: `LOGISTIC_COMPANY` will have the permission
+   to access this route.
+
+#### The Flow
+
+1. If the caller is a `USER` find all the `logistic_service_booking` that are made by the user. That means the `logistic_service_booking.consumer.consumer_id` will match with the `user._id`.  
+2. If the caller is a `LOGISTIC_COMPANY` find all the `logistic_service_booking` that are made against the `logistic_company`. That means the `logistic_service_booking.logistics_company_id` will match with `logistic_company._id`.
+
+#### Exception Handling:
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+
+On completion of all the operations, return a list of all the data with a similar schema
+as the following.
+
+```json
+[
+   {
+      "_id": ObjectId("12345"),
+      "logistics_company_id": "logistic_service_booking.logistics_company_id",
+      "truck_id": "logistic_service_booking.truck_id",
+      "consumer": {
+         "consumer_id": "logistic_service_booking.consumer.consumer_id",
+         "consumer_type": "logistic_service_booking.consumer.consumer_type"
+      }
+      "pickup": {
+         "lat": "logistic_service_booking.pickup.lat",
+         "long": "logistic_service_booking.pickup.long"
+      },
+      "destination": {
+         "lat": "logistic_service_booking.destination.lat",
+         "long": "logistic_service_booking.destination.long"
+      },
+      "groomer": {
+         "name": "logistic_service_booking.groomer.name",
+         "phone_no": "logistic_service_booking.groomer.phone_no"
+      },
+      "details": "logistic_service_booking.details"
+   }
+]
+```
+
+
+#### Pagination:
+
+This route will need `pagination` and `filtering`. Don't worry about
+it until the codebase wide `pagination-system` is implemented.
 
 ## Logistics Services
 

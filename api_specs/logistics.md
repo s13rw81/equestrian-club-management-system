@@ -27,6 +27,10 @@ This set of apis will be used for `logistics`.
       "lat": "latitude",
       "long": "longitude"
    },
+   "driver": {
+      "name": "name of the driver",
+      "phone_no": "phone no of the driver"
+   }
    "name": "the name of the truck"
 }
 ```
@@ -35,6 +39,7 @@ This set of apis will be used for `logistics`.
    `logistic_company.is_khayyal_verified` must be `true`.
 2. A `truck` with the same registration number must not exist in the database.
 3. All the fields are mandatory unless otherwise indicated.
+4. For all the `string` type fields, empty string wouldn't be accepted as a valid input.
 
 **Note**: Use `pydantic` validators for the validations.
 
@@ -58,6 +63,10 @@ The schema of the document will be similar to the following:
          "location": {
             "lat": "latitude",
             "long": "longitude"
+         },
+         "driver": {
+            "name": "name of the driver",
+            "phone_no": "phone no of the driver"
          }
          "name": "the name of the truck"
       }
@@ -177,6 +186,10 @@ everything went well.
    "location": {
       "lat": "latitude",
       "long": "longitude"
+   },
+   "driver": {
+      "name": "name of the driver",
+      "phone_no": "phone no of the driver"
    }
    "name": "the name of the truck"
 }
@@ -186,8 +199,10 @@ everything went well.
 
 #### Request Validations
 1. The `logistic_company` of the `user` must be the owner of the truck.
-2. In case the registration number is being updated, a `truck` with the new registration number
+2. Same validations will apply as per the `/logistic-company/trucks/add-truck` route.
+3. In case the registration number is being updated, a `truck` with the new registration number
    must not exist in the database.
+4. For all the `string` type fields, empty string wouldn't be accepted as a valid input.
 
 **Note**: Use `pydantic` validators for the validations.
 
@@ -260,7 +275,11 @@ as the following.
       "location": {
          "lat": "latitude",
          "long": "longitude"
-      }
+      },
+      "driver": {
+         "name": "name of the driver",
+         "phone_no": "phone_no of the driver"
+      },
       "name": "the name of the truck",
       "image_urls": ["image_1", "image_2"]
    }
@@ -333,6 +352,10 @@ Return the `truck` with a schema similar to the following:
    "location": {
       "lat": "latitude",
       "long": "longitude"
+   },
+   "driver": {
+      "name": "the name of the driver",
+      "phone_no": "the phone_no of the driver"
    }
    "name": "the name of the truck",
    "image_urls": ["image_1", "image_2"]
@@ -348,6 +371,160 @@ Return the `truck` with a schema similar to the following:
    image handling mechanism. To learn how to use the image handling mechanism refer
    to the [Notes on handling images](../README.md#notes-on-handling-images) section
    of the `README.md` file.
+
+## User Logistics
+
+### 1. `/user/logistics/find-nearby-trucks`
+
+The `users` of the consumer app will call this route to find nearby trucks stituated within a specified radius.
+
+
+#### HTTP Method
+
+`GET`
+
+#### The Process
+
+- When an `user` wants to make a logistic booking he will call this route to get all the nearby trucks within a specified radius.
+- The `user` will provide the radius through query parameters. The radius will be in KM.
+
+#### Query Parameters
+1. `radius`: The `radius` within which the `user` would like to search for `trucks`. The unit of the `radius` will be `KM`. This query parameter will be of `float` type and optional with a default value of 10.
+**For example:** If the user wants to locate `trucks` within the radius 5 KM it will send 5 as the radius. As in, `/user/logistics/find-nearby-trucks?radius=5`
+2. `lat`: The `lat` will be of `float` type and mandatory; indicating the `latitude` of the location centering which the user wants to perform the search.
+3. `long`: The `long` will be of `float` type and mandatory; indicating the `longitude` of the location centering which the user wants to perform the search.
+
+#### Authentication and RBAC
+
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` will have the permission
+   to access this route.
+
+#### The Flow
+
+1. Query the `trucks` collection to get all the trucks.
+2. User the `haversine` formula to determine the distance between the `user` provided location and the location of the `trucks`. Filter out only the `trucks` that fall within the `radius`.
+Read more about the `haversine` algorithm: [straight-line distance between two co-ordinates - ChatGPT](https://chatgpt.com/share/748d7116-6ba2-4ef9-82b6-07fcb20e9bac)
+
+#### Exception Handling:
+
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+
+On completion of all the operations, return a list of all the data with a similar schema
+as the following.
+
+```json
+[
+   {
+      "_id": ObjectId("12345"),
+      "logistics_company_id": "the id of the associated logistic company",
+      "registration_number": "reg no",
+      "truck_type": "the type of the truck",
+      "capacity": "100MT",
+      "special_features": "AC",
+      "gps_equipped": true,
+      "air_conditioning": true,
+      "location": {
+         "lat": "latitude",
+         "long": "longitude"
+      },
+      "driver": {
+         "name": "name of the driver",
+         "phone_no": "phone_no of the driver"
+      }
+      "name": "the name of the truck",
+      "image_urls": ["image_1", "image_2"]
+   }
+]
+```
+
+**Notes**:
+
+1. Ensure only the `trucks` associated with the `logistic_company` is returned.
+2. The `image_urls` key will contain a list of image urls generated using the
+   image handling mechanism. To learn how to use the image handling mechanism refer
+   to the [Notes on handling images](../README.md#notes-on-handling-images) section
+   of the `README.md` file.
+
+#### Pagination:
+
+This route will need `pagination` and `filtering`. Don't worry about
+it until the codebase wide `pagination-system` is implemented.
+
+### 2. `/user/logistics/create-booking`
+
+#### HTTP Method
+`POST`
+
+#### The Process
+1. The `user` will call this route from the consumer app to create a `logistic-booking`.
+
+#### Request Body
+```json
+{
+   "truck_id": "id of the truck of the client's choice",
+   "pickup": {
+      "lat": "the latitude of the pickup location",
+      "long": "the longitude of the pickup location"
+   },
+   "destination": {
+      "lat": "the latitude of the destination location",
+      "long": "the longitude of the destination locatoin"
+   },
+   "groomer": {
+      "name": "name of the groomer",
+      "phone_no": "phone_no of the groomer"
+   },
+   "details": "details of the consignment"
+}
+```
+#### Request Validations
+1. For all the `string` type fields, empty string wouldn't be accepted as a valid input.
+2. The `truck_id` must be a valid `truck_id`.
+
+**Note**: Use `pydantic` validators for the validations.
+
+#### Authentication and RBAC
+1. This will be an `authenticated` route.
+2. Only users with `user_role`: `USER` will have the permission to acess this route.
+
+#### The Flow:
+1. Find out the `logistic_company` that owns the `truck` associated with the `truck_id` provided in the request.
+1. A new document will be created in the `logistic_service_booking` collection.
+The schema of the document will be similar to the following:
+      ```json
+      {
+         "logistics_company_id": "the id of the logistic_company what owns the provided truck`
+         "truck_id": "id of the truck of the client's choice",
+         "pickup": {
+            "lat": "the latitude of the pickup location",
+            "long": "the longitude of the pickup location"
+         },
+         "destination": {
+            "lat": "the latitude of the destination location",
+            "long": "the longitude of the destination locatoin"
+         },
+         "groomer": {
+            "name": "name of the groomer",
+            "phone_no": "phone_no of the groomer"
+         },
+         "details": "details of the consignment"
+      }
+      ```
+
+#### Error Handling:
+Raise a `HTTPException` if anything goes wrong.
+
+#### The Response:
+On success of the prescribed operations return the `_id` of the newly created `logistic_service_booking`.
+
+```json
+  {
+    "logistic_service_booking": "id of the newly created booking"
+  }
+```
 
 ## Logistics Services
 

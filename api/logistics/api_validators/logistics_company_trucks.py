@@ -84,10 +84,10 @@ class UploadTruckImagesValidator(BaseTruckValidator):
         self,
         user: user_dependency,
         truck_id: str,
-        files: List[UploadFile],
+        images: List[UploadFile],
     ) -> None:
         super().__init__(user)
-        self.files = files
+        self.files = images
         self.truck_id = truck_id
         trucks_owned_by_logistics_company = self.logistics_company_details.get("trucks")
 

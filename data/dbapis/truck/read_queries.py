@@ -10,7 +10,9 @@ from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING
 truck_collection = get_collection(collection_name="trucks")
 
 
-def get_trucks_by_logistics_company_id(logistics_company_id: str) -> Cursor:
+def get_trucks_by_logistics_company_id(
+    logistics_company_id: str, fields: List[str] = None
+) -> Cursor:
     """get list of trucks that the company owns
 
     Args:
@@ -24,7 +26,9 @@ def get_trucks_by_logistics_company_id(logistics_company_id: str) -> Cursor:
 
     filter = {"logistics_company_id": logistics_company_id}
 
-    trucks_list = truck_collection.find(filter=filter)
+    trucks_list = truck_collection.find(
+        filter=filter, **({"projection": fields} if fields else {})
+    )
 
     log.info(f"get_trucks_by_logistics_company_id() returning")
 

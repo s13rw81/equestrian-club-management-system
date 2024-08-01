@@ -3,7 +3,9 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, computed_field
 
+from data.db import PyObjectId
 from models.logistics_user_service_bookings.logistics_user_service_bookings import (
+    Consumer,
     Groomer,
     Location,
 )
@@ -32,3 +34,25 @@ class UpdateBooking(BaseModel):
     @computed_field
     def updated_at(self) -> datetime:
         return get_current_utc_datetime()
+
+
+class GetBookings(BaseModel):
+    truck_id: str
+    logistics_company_id: str
+    pickup: Location
+    destination: Location
+    groomer: Groomer
+    details: str
+    consumer: Consumer
+    booking_id: PyObjectId = Field(alias="_id")
+
+
+class ResponseGetBookings(BaseModel):
+    booking_id: str
+    truck_id: str
+    logistics_company_id: str
+    pickup: Location
+    destination: Location
+    groomer: Groomer
+    details: str
+    consumer: Consumer

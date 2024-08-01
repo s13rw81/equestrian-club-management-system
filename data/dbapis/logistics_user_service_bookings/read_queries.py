@@ -32,3 +32,51 @@ def get_logistic_service_booking_by_id_db(
         return LogisticsServiceBookingInternal(**booking_details)
 
     return booking_details
+
+
+def get_logistic_service_bookings_by_user(consumer_id: str, fields: List[str] = None):
+    """return service bookings made by a particular user
+
+    Args:
+        consumer_id (str): id of the user
+
+    Returns:
+        Cursor
+    """
+
+    log.info(
+        f"get_logistic_service_bookings_by_user() invoked consumer_id {consumer_id}"
+    )
+
+    filter = {"consumer.consumer_id": consumer_id}
+
+    bookings = logistic_service_booking_collection.find(
+        filter=filter, **({"projection": fields} if fields else {})
+    )
+
+    return bookings
+
+
+def get_logistic_service_bookings_by_logistic_company(
+    logistic_company_id: str, fields: List[str] = None
+):
+    """return service bookings made by a particular user
+
+    Args:
+        logistic_company_id (str): id of the user
+
+    Returns:
+        Cursor
+    """
+
+    log.info(
+        f"get_logistic_service_bookings_by_logistic_company() invoked logistic_company_id {logistic_company_id}"
+    )
+
+    filter = {"logistics_company_id": logistic_company_id}
+
+    bookings = logistic_service_booking_collection.find(
+        filter=filter, **({"projection": fields} if fields else {})
+    )
+
+    return bookings

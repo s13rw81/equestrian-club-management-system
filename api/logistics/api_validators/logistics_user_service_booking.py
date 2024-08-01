@@ -19,6 +19,15 @@ user_dependency = Annotated[
     Depends(RoleBasedAccessControl(allowed_roles={UserRoles.USER})),
 ]
 
+user_logistic_company_dependency = Annotated[
+    UserInternal,
+    Depends(
+        RoleBasedAccessControl(
+            allowed_roles={UserRoles.USER, UserRoles.LOGISTIC_COMPANY}
+        )
+    ),
+]
+
 
 class BaseLogisticsBookingValidator:
     http_exception = lambda message: HTTPException(
@@ -105,3 +114,8 @@ class UpdateBookingValidator(BaseLogisticsBookingValidator):
                 raise BaseLogisticsBookingValidator.http_exception(
                     message="cannot modify logistics company"
                 )
+
+
+class GetBookingsValidator(BaseLogisticsBookingValidator):
+    def __init__(self, user: user_logistic_company_dependency) -> None:
+        super().__init__(user)

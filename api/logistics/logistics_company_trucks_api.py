@@ -2,8 +2,10 @@ from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.exceptions import HTTPException
+from pydantic_extra_types.coordinate import Latitude, Longitude
 
 from data.dbapis.truck.read_queries import (
+    get_all_trucks,
     get_truck_details_by_id_db,
     get_trucks_by_logistics_company_id,
 )
@@ -13,11 +15,13 @@ from data.dbapis.truck.write_queries import (
     update_truck_images,
 )
 from logging_config import log
+from logic.logistics.haversine import haversine
 from models.truck.trucks import TruckInternal
 from utils.image_management import generate_image_urls, save_image
 
 from .api_validators.logistics_company_trucks import (
     AddTruckValidator,
+    FindNearbyTrucksValidator,
     GetTrucksValidator,
     GetTruckValidator,
     UpdateTruckDetailsValidator,
@@ -32,6 +36,7 @@ from .models import (
 )
 
 trucks_router = APIRouter(prefix="/trucks", tags=["logistic-company"])
+user_trucks_router = APIRouter(tags=["users-logistics"])
 
 
 @trucks_router.post("/add-truck")
@@ -201,3 +206,46 @@ def update_truck(
     update_truck_details(truck_id=truck_id, truck_details=update_details)
 
     return {"status": "OK"}
+
+
+@user_trucks_router.get("/find-nearby-trucks", response_model=List[ResponseViewTruck])
+def find_nearby_trucks(
+    payload: Annotated[FindNearbyTrucksValidator, Depends()], request: Request
+):
+
+    radius = payload.radius
+    lat = payload.lat
+    long = payload.long
+
+    log.info(f"{request.url.path} invoked radius {radius}, lat {lat}, long {long}")
+
+    fields = [
+        "logistics_company_id",
+        "registration_number",
+        "truck_type",
+        "capacity",
+        "special_features",
+        "gps_equipped",
+        "air_conditioning",
+        "name",
+        "truck_id",
+        "driver",
+        "location",
+        "images",
+    ]
+    all_trucks = get_all_trucks(fields=fields)
+
+    nearby_trucks = []
+
+    for truck in all_trucks:
+        truck_lat = truck["location"]["lat"]
+        truck_long = truck["location"]["long"]
+
+        distance = haversine(lon1=long, lat1=lat, lon2=truck_long, lat2=truck_lat)
+        log.info(f"distance {distance}")
+        if distance <= radius:
+            nearby_trucks.append(ViewTruck(**truck))
+
+    log.info(f"{request.url.path} returning {nearby_trucks}")
+
+    return nearby_trucks

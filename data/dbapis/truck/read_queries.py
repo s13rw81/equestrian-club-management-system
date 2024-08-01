@@ -132,3 +132,19 @@ def is_truck_registered(registration_number: str) -> bool:
     registration_count = truck_collection.count_documents(filter=filter, limit=1)
 
     return True if registration_count > 0 else False
+
+
+def get_all_trucks(fields: List[str] = None) -> Cursor:
+    """get all the trucks available within khayyal"""
+
+    log.info(f"get_all_trucks() invoked")
+
+    filter = {}
+
+    trucks_list = truck_collection.find(
+        filter=filter, **({"projection": fields} if fields else {})
+    )
+
+    log.info(f"get_all_trucks() returning {trucks_list}")
+
+    return trucks_list

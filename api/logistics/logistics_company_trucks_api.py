@@ -244,6 +244,10 @@ def find_nearby_trucks(
         distance = haversine(lon1=long, lat1=lat, lon2=truck_long, lat2=truck_lat)
         log.info(f"distance {distance}")
         if distance <= radius:
+            if truck.get("images"):
+                truck["images"] = generate_image_urls(
+                    image_ids=truck["images"], request=request
+                )
             nearby_trucks.append(ViewTruck(**truck))
 
     log.info(f"{request.url.path} returning {nearby_trucks}")

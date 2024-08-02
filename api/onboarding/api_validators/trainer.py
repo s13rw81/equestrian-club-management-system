@@ -46,7 +46,7 @@ class AddTrainerValidator(BaseTrainerValidator):
                 message="trainer with same email already exists"
             )
 
-        if self.validate_club_id(club_id=self.trainer_details.club_id):
+        if not self.validate_club_id(club_id=self.trainer_details.club_id):
             raise BaseTrainerValidator.http_exception(
                 message="club_id should be a valid club id"
             )

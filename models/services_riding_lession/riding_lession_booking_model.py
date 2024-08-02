@@ -4,7 +4,7 @@ from typing import Optional
 from bson import ObjectId
 from data.db import PyObjectId
 from models.generic_models.generic_address_model import Address
-from models.riding_lession_services.riding_lesson_service_model import RidingLessonService
+from models.services_riding_lession.riding_lesson_service_model import RidingLessonService
 
 from models.user.user_external import UserExternal
 from pydantic import BaseModel, Field

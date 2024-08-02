@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated, List, Optional
 
-from pydantic import AnyUrl, BaseModel, EmailStr, Field
+from pydantic import AnyUrl, BaseModel, EmailStr, Field, field_serializer
 
 from data.db import PyObjectId
 from utils.date_time import get_current_utc_datetime
@@ -13,6 +13,18 @@ class SocialMediaLinks(BaseModel):
     instagram: Optional[AnyUrl] = None
     facebook: Optional[AnyUrl] = None
     twitter: Optional[AnyUrl] = None
+
+    @field_serializer(
+        "website",
+        "linkedin",
+        "instagram",
+        "facebook",
+        "twitter",
+    )
+    def url_serializer(self, url):
+        if not url:
+            return
+        return str(url)
 
 
 class TrainerInternal(BaseModel):
@@ -38,5 +50,16 @@ class TrainerInternal(BaseModel):
     profile_picture: Optional[str] = None
 
 
+
 class TrainerInternalWithID(TrainerInternal):
     trainer_id: Annotated[PyObjectId, str] = Field(default=None, alias="_id")
+
+
+class TrainerSlim(BaseModel):
+    trainer_id: PyObjectId = Field(default=None, alias="_id")
+    full_name: str
+
+    class Config:
+        json_encoders = {
+            PyObjectId: lambda v: str(v)  # Custom encoder for PyObjectId
+        }

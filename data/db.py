@@ -179,6 +179,11 @@ def get_reviews_collection():
     return get_database()["reviews"]
 
 
+def get_logistic_service_booking_collection():
+    log.info("inside get_logistic_service_booking_collection()")
+    return get_database()["logistic_service_booking"]
+
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (

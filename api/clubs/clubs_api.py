@@ -47,6 +47,7 @@ async def get_club_details_by_id(user: Annotated[UserInternal, Depends(RoleBased
     if not club:
         raise HTTPException(status_code=404, detail="Club not found")
 
+    club['id'] = str(club['_id'])
     club['riding_lesson_service'] = club['riding_lesson_service'][0]
     club['horse_shoeing_service'] = club['horse_shoeing_service'][0]
     club['generic_activity_service'] = club['generic_activity_service'][0]

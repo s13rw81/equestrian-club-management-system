@@ -497,8 +497,8 @@ If everything goes well, return a response with a schema similar to the follwing
    of the `README.md` file.
 
 ### 4. `onboarding/update-club`
-After the user onboards itself as a `club` he will use this route to update the details about the
-`club` and allied `services`.
+After the user onboards himself as a `club` he will use this route to update the details about the
+`club` and the allied `services`.
 
 #### HTTP Method
 `PUT`

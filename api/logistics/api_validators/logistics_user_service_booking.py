@@ -100,7 +100,7 @@ class UpdateBookingValidator(BaseLogisticsBookingValidator):
                 )
 
             self.truck_details = get_truck_details_by_id_db(
-                truck_id=self.booking_details.truck_id
+                truck_id=self.update_details.truck_id
             )
             if not self.truck_details:
                 raise BaseLogisticsBookingValidator.http_exception(

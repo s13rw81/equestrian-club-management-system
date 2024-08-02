@@ -264,7 +264,7 @@ as the following.
 ```json
 [
    {
-      "_id": ObjectId("12345"),
+      "truck_id": "12345",
       "logistics_company_id": "the id of the associated logistic company",
       "registration_number": "reg no",
       "truck_type": "the type of the truck",
@@ -341,7 +341,7 @@ Return the `truck` with a schema similar to the following:
 
 ```json
 {
-   "_id": ObjectId("12345"),
+   "truck_id": "12345",
    "logistics_company_id": "the id of the associated logistic company",
    "registration_number": "reg no",
    "truck_type": "the type of the truck",
@@ -419,7 +419,7 @@ as the following.
 ```json
 [
    {
-      "_id": ObjectId("12345"),
+      "truck_id": "12345",
       "logistics_company_id": "the id of the associated logistic company",
       "registration_number": "reg no",
       "truck_type": "the type of the truck",
@@ -631,7 +631,7 @@ as the following.
 ```json
 [
    {
-      "_id": ObjectId("12345"),
+      "booking_id": ObjectId("12345"),
       "logistics_company_id": "logistic_service_booking.logistics_company_id",
       "truck_id": "logistic_service_booking.truck_id",
       "consumer": {

@@ -456,7 +456,7 @@ it until the codebase wide `pagination-system` is implemented.
 
 ### 2. `/user/logistics/create-booking`
 
-A `user` from the consuemer app will call this route to create a `logistic-booking`. 
+A `user` from the consumer app will call this route to create a `logistic-booking`. 
 
 #### HTTP Method
 `POST`

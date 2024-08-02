@@ -1059,7 +1059,7 @@ everything went well.
 }
 ```
 
-#### 6. `/onboarding/get-trainer`
+### 6. `/onboarding/get-trainer`
 
 After the user onboards himself as a `trainer`, he calls this route to get details about the `trainer` data associated with him.
 

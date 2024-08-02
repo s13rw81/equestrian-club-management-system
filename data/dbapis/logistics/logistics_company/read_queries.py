@@ -19,7 +19,7 @@ def get_logistics_company_by_user_id(user_id: str) -> Dict:
 
     log.info(f"get_logistics_company_by_user_id() invoked user_id:{user_id}")
 
-    filter = {"admins.id": user_id}
+    filter = {"users.user_id": user_id}
     projection = {"is_khayyal_verified": True, "trucks": True}
     logistics_company = logistics_company_collection.find_one(
         filter=filter, projection=projection

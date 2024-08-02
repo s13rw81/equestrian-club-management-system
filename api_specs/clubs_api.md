@@ -103,9 +103,9 @@ If everything goes well, return a response with a schema similar to the followin
   ]
   "image_urls": [
     "club.images[0]",
-    "club.images[1]
+    "club.images[1]"
   ],
-  riding_lesson_service": {
+  "riding_lesson_service": {
     "pricing_options": [
       {
         "price": 400,

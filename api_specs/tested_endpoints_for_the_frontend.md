@@ -37,6 +37,33 @@ After onboarding as a `logistic_company`, the user will use this route to upload
 After the user onboards himself as a `logistic-company`, he calls this route to get details about his `logistic-company`. \
 [Reference](onboarding_api.md#3-onboardingget-logistic-company)
 
+### Trainer
+
+#### 1. onboarding/create-trainer
+Once the user is created using the `auth` apis, the user 
+will call this api to onboard itself as a `trainer`. \
+[Reference](onboarding_api.md#1-onboardingcreate-trainer)
+
+#### 2. onboarding/update-trainer 
+After onboarding itself as a `trainer` the user may use this route to update the details about
+himself. \
+[Reference](onboarding_api.md#2-onboardingupdate-trainer)
+
+#### 3. onboarding/trainer/upload-certifications
+After onboarding as a `trainer`, the user will use this route to upload certifications. \
+[Reference](onboarding_api.md#3-onboardingtrainerupload-certifications)
+
+#### 4. onboarding/trainer/upload-profile-files
+After onboarding as a `trainer`, the user will use this route to upload profile files. \
+[Reference](onboarding_api.md#4-onboardingtrainerupload-profile-files)
+
+#### 5. onboarding/trainer/upload-profile-picture
+After onboarding as a `trainer`, the user will use this route to upload profile picture. \
+[Reference](onboarding_api.md#5-onboardingtrainerupload-profile-picture)
+
+#### 6. onboarding/get-trainer
+After the user onboards himself as a `trainer`, he calls this route to get details about the `trainer` data associated with him. \
+[Reference](onboarding_api.md#6-onboardingget-trainer)
 
 ## Horse Buy Sell Rent
 These routes facilitates the `horse-buy-sell-rent` functionalities. Currently, a `user` or a `club` lists a `horse`
@@ -119,7 +146,58 @@ the `user/horses/enquire-for-a-horse-rent` route. \
 [Reference](horses_buy_sell_rent_api.md#7-userhorsesget-horse-rent-enquiries)
 
 
+## Logistics
 
+The routes listed under this section are intended to facilitate all the `logistics` related functionalities. A few routes will be used in the admin app while others will be used in the consumer app. Please read the description and the reference to gain more insights about the intended use-cases for each of the routes.
+
+### Logistics Trucks
+
+Routes listed under this section are primarily intended to be used in the admin app to enable the logistic company manage trucks.
+
+#### 1. logistic-company/trucks/add-truck
+After onboarding as a logistic company the user will use this route to add trucks to offer logistic services.\
+[Reference](logistics.md#1-logistic-companytrucksadd-truck)
+
+#### 2. logistic-company/trucks/upload-truck-images/{truck_id}
+After creating a new `truck` the logistic company will use this route to upload the
+images associated with the `truck`.\
+[Reference](logistics.md#2-logistic-companytrucksupload-truck-imagestruck_id)
+
+#### 3. logistic-company/trucks/update-truck/{truck_id}
+A logistic company uses this route to update its trucks.\
+[Reference](logistics.md#3-logistic-companytrucksupdate-trucktruck_id)
+
+#### 4. logistic-company/trucks/get-truck
+A logistic company uses this route to fetch its trucks.\
+[Reference](logistics.md#4-logistic-companytrucksget-truck)
+
+#### 5. logistic-company/trucks/get-truck/{truck_id}
+A logistic company uses this route to get details about a particular truck.\
+[Reference](logistics.md#5-logistic-companytrucksget-trucktruck_id)
+
+
+### User Logistics
+
+This routes listed under this section are primarily intended to be used in the consumer app. These routes will enable the consumer to make bookings against logistics companies.
+
+#### 1. user/logistics/find-nearby-trucks
+The `users` of the consumer app will call this route to find nearby trucks situtated within a specified radius.\
+[Reference](logistics.md#1-userlogisticsfind-nearby-trucks)
+
+#### 2. user/logistics/create-booking
+A `user` of the consumer app will user this route to create a `logistic-booking`.\
+[Reference](logistics.md#2-userlogisticscreate-booking)
+
+#### 3. user/logistics/update-booking/{logistics_service_booking_id}
+A `user` of the consumer app will use tis route to update a `logistic-booking`.\
+[Reference](logistics.md#3-userlogisticsupdate-bookinglogistics_service_booking_id)
+
+#### 4. user/logistics/get-booking
+This route will be used,
+- by a `user` of the consumer app to get all the `logistic-bookings` made by him.
+- by the `logistic_company` from the admin app to get all the `logistic-booking` that are made against that company.
+
+[Reference](logistics.md#4-userlogisticsget-booking)
 
 
 

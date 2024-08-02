@@ -2,13 +2,13 @@ from typing import Union
 
 from data.db import get_trainer_collection
 from logging_config import log
-from models.trainer.trainer import TrainerInternalWithID
+from models.trainer.trainer import TrainerInternalWithID, TrainerSlim
 
 trainer_collection = get_trainer_collection()
 
 
 def get_trainer_details_by_email_db(
-    email_address: str,
+        email_address: str,
 ) -> Union[TrainerInternalWithID, None]:
     """return trainer details based on email address
 
@@ -25,6 +25,26 @@ def get_trainer_details_by_email_db(
 
     response = trainer_collection.find_one(filter=filter)
     retval = TrainerInternalWithID(**response) if response else response
+
+    log.info(f"get_trainer_details_by_email_db returning {retval}")
+
+    return retval
+
+
+def get_trainer_by_club_id(club_id: str) -> Union[TrainerSlim, None]:
+    """return trainer details based on club id
+
+    Args:
+        club_id (str): id of the club
+
+    Returns:
+        Union[TrainerInternalWithID, None]
+    """
+
+    log.info(f"get_trainer_by_club_id() called {id}")
+
+    response = trainer_collection.find_one(filter={"club_id": club_id})
+    retval = TrainerSlim(**response) if response else response
 
     log.info(f"get_trainer_details_by_email_db returning {retval}")
 

@@ -4,7 +4,6 @@ from logging_config import log
 from models.clubs.clubs_internal import ClubInternal
 from fastapi import status
 
-
 club_collection = get_clubs_collection()
 
 
@@ -17,14 +16,14 @@ def save_club(new_club: ClubInternal) -> str:
     log.info(f"save_club invoked: {new_club}")
 
     # Check if a club with the same name and city already exists
-    existing_club = club_collection.find_one({"email_addrress": new_club.email_address})
+    existing_club = club_collection.find_one({"email_address": new_club.email_address})
 
     if existing_club is not None:
-        emsg = f"Club with name {new_club.name} and city {new_club.address.city} already exists."
+        emsg = f"Club with name {new_club.name} on {new_club.address} already exists."
         log.info(emsg)
         raise HTTPException(
-            status_code = status.HTTP_303_SEE_OTHER,
-            detail = emsg
+            status_code=status.HTTP_303_SEE_OTHER,
+            detail=emsg
         )
 
     club_id = (club_collection.insert_one(new_club.model_dump())).inserted_id

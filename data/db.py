@@ -94,9 +94,19 @@ def get_riding_lesson_bookings_collection():
     return get_database()["riding_lesson_bookings"]
 
 
+def get_horse_shoeing_service_bookings_collection():
+    log.info("inside get_clubs_collection()")
+    return get_database()["horse_shoeing_service_bookings"]
+
+
 def get_riding_lesson_collection():
     log.info("inside get_riding_lesson_collection()")
     return get_database()["riding_lesson_service"]
+
+
+def get_horse_shoeing_service_collection():
+    log.info("inside get_horse_shoeing_service_collection()")
+    return get_database()["horse_shoeing_service"]
 
 
 def get_horses_selling_collection():
@@ -157,6 +167,16 @@ def get_horse_renting_enquiry_collection():
 def get_trainer_collection():
     log.info("inside get_trainer_collection")
     return get_database()["trainer"]
+
+
+def get_generic_activity_service_collection():
+    log.info("inside get_generic_activity_service_collection")
+    return get_database()["generic_activity_service"]
+
+
+def get_reviews_collection():
+    log.info("inside get_reviews_collection")
+    return get_database()["reviews"]
 
 
 def convert_to_object_id(str_id: str) -> ObjectId:

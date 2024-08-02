@@ -1,14 +1,13 @@
 from api.riding_lesson_services.models.book_riding_lesson_request_model import BookRidinglessonRequest
 from bson import ObjectId
-from data.db import get_riding_lesson_collection, get_clubs_collection, get_users_collection, \
-    get_riding_lesson_bookings_collection
-from data.dbapis.riding_lessons.riding_lesson_logic import insert_riding_instance_to_club, get_riding_lesson_by_club_id, \
-    add_trainers_to_riding_service, check_existing_riding_service_for_club
+from data.db import get_riding_lesson_collection, get_clubs_collection, get_users_collection, get_riding_lesson_bookings_collection
+from data.dbapis.club_services_riding_lessons.read_queries import get_existing_riding_lesson_service_for_club, get_existing_riding_lesson_service_for_club
+from data.dbapis.club_services_riding_lessons.write_queries import insert_riding_instance_to_club, add_trainers_to_riding_service
 from fastapi import HTTPException
 from logging_config import log
-from models.riding_lession_services.riding_lession_booking_model import RidingLessonBooking
+from models.services_riding_lession.riding_lession_booking_model import RidingLessonBooking
 from models.logistics_company_services import Provider
-from models.riding_lession_services.riding_lesson_service_model import RidingLessonService
+from models.services_riding_lession.riding_lesson_service_model import RidingLessonService, RidingLessonServicePricingOption
 from models.user import UserRoles
 from models.user.user_external import UserExternal
 from starlette import status
@@ -19,34 +18,28 @@ users_collection = get_users_collection()
 riding_lesson_bookings_collection = get_riding_lesson_bookings_collection()
 
 
-def attach_riding_lesson_to_club_logic(club_id: str, price: float = 0.0, description = None):
+def attach_riding_lesson_to_club_logic(club_id: str, price: dict):
     log.info(f"attach riding lesson to club with id {club_id} with price: {price}")
 
-    res = check_existing_riding_service_for_club(club_id)
+    res = get_existing_riding_lesson_service_for_club(club_id)
     if res:
-        raise HTTPException(
-            status_code = status.HTTP_303_SEE_OTHER, detail = 'horse riding serice already attached for club'
-        )
+        raise HTTPException(status_code=status.HTTP_303_SEE_OTHER, detail='horse riding serice already attached for club')
     # make a provider instance
-    provider_instance = Provider(provider_id = club_id, provider_type = UserRoles.CLUB.value)
+    provider_instance = Provider(provider_id=club_id, provider_type=UserRoles.CLUB.value)
     # make a new riding lesson instance
-
-    new_riding_lesson_serivice_instance = RidingLessonService(
-        description = description,
-        provider = provider_instance,
-        price = price
-    )
-    res = insert_riding_instance_to_club(new_riding_lesson_serivice_instance)
+    price_instance = RidingLessonServicePricingOption(**price['pricing_options'][0])
+    new_riding_lesson_service_instance = RidingLessonService(provider=provider_instance, pricing_options=[price_instance])
+    res = insert_riding_instance_to_club(new_riding_lesson_service_instance)
     if res:
-        msg = f'riding lesson service attached to club {club_id}, res : {res}'
+        msg = f'riding lesson service attached to club : {club_id}, riding lession service id : {res.inserted_id}'
         log.info(msg)
         return msg
 
 
 def get_riding_lesson_by_club_id_logic(club_id):
-    res = get_riding_lesson_by_club_id(club_id)
+    res = get_existing_riding_lesson_service_for_club(club_id)
     if not res:
-        raise HTTPException(status_code = 404, detail = f'no riding lesson service found for club {club_id}')
+        raise HTTPException(status_code=404, detail=f'no riding lesson service found for club {club_id}')
     return res
 
 
@@ -93,5 +86,4 @@ def book_horse_riding_lesson(riding_lesson_instance: BookRidinglessonRequest):
         return {"id": str(result.inserted_id)}
     except Exception as e:
         log.error(e)
-        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)
-
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e)

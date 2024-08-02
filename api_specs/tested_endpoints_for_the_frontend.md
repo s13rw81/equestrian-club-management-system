@@ -37,6 +37,39 @@ After onboarding as a `logistic_company`, the user will use this route to upload
 After the user onboards himself as a `logistic-company`, he calls this route to get details about his `logistic-company`. \
 [Reference](onboarding_api.md#3-onboardingget-logistic-company)
 
+### Trainer
+
+#### 1. onboarding/create-trainer
+Once the user is created using the `auth` apis, the user 
+will call this api to onboard itself as a `trainer`. \
+
+[Reference](onboarding_api.md#1-onboardingcreate-trainer)
+
+#### 2. onboarding/update-trainer 
+After onboarding itself as a `trainer` the user may use this route to update the details about
+himself. \
+
+[Reference](onboarding_api.md#2-onboardingupdate-trainer)
+
+#### 3. onboarding/trainer/upload-certifications
+After onboarding as a `trainer`, the user will use this route to upload certifications. \
+
+[Reference](onboarding_api.md#3-onboardingtrainerupload-certifications)
+
+#### 4. onboarding/trainer/upload-profile-files
+After onboarding as a `trainer`, the user will use this route to upload profile files. \
+
+[Reference](onboarding_api.md#4-onboardingtrainerupload-profile-files)
+
+#### 5. onboarding/trainer/upload-profile-picture
+After onboarding as a `trainer`, the user will use this route to upload profile picture. \
+
+[Reference](onboarding_api.md#5-onboardingtrainerupload-profile-picture)
+
+#### 6. onboarding/get-trainer
+After the user onboards himself as a `trainer`, he calls this route to get details about the `trainer` data associated with him. \
+
+[Reference](onboarding_api.md#6-onboardingget-trainer)
 
 ## Horse Buy Sell Rent
 These routes facilitates the `horse-buy-sell-rent` functionalities. Currently, a `user` or a `club` lists a `horse`

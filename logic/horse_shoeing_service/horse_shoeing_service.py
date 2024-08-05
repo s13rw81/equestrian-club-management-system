@@ -58,7 +58,7 @@ def attach_trainers_to_riding_service_of_club_logic(club_id, trainers = None):
     return res
 
 
-def book_horse_riding_lesson(riding_lesson_instance: BookRidinglessonRequest):
+def book_horse_shoeing_service(riding_lesson_instance: BookRidinglessonRequest):
     log.info(f'creating a booking for horse riding lesson, {riding_lesson_instance}')
     # Fetch the corresponding data from the collections
     lesson = riding_lesson_collection.find_one({"_id": ObjectId(riding_lesson_instance.lesson_service)})

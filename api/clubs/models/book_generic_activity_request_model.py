@@ -11,10 +11,9 @@ from pydantic import BaseModel, field_validator
 from utils.date_time import get_current_utc_datetime
 
 
-class RidingLessonBookingRequest(BaseModel):
+class GenericActivityBookingRequest(BaseModel):
     trainer_id: str
     selected_date: datetime
-    pricing_option: dict
     number_of_visitors: int
 
     @field_validator('trainer_id')

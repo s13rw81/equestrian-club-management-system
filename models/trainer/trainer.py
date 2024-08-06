@@ -43,20 +43,19 @@ class TrainerInternal(BaseModel):
     levels_taught: Optional[List[str]]
     club_id: Optional[str]
     user_id: Optional[str]
-    created_at: datetime = Field(default_factory=get_current_utc_datetime)
-    updated_at: datetime = Field(default_factory=get_current_utc_datetime)
+    created_at: datetime = Field(default_factory = get_current_utc_datetime)
+    updated_at: datetime = Field(default_factory = get_current_utc_datetime)
     certifications: Optional[List[str]] = None
     profile_files: Optional[List[str]] = None
     profile_picture: Optional[str] = None
 
 
-
 class TrainerInternalWithID(TrainerInternal):
-    trainer_id: Annotated[PyObjectId, str] = Field(default=None, alias="_id")
+    trainer_id: Annotated[PyObjectId, str] = Field(default = None, alias = "_id")
 
 
 class TrainerSlim(BaseModel):
-    trainer_id: PyObjectId = Field(default=None, alias="_id")
+    trainer_id: PyObjectId = Field(default = None, alias = "_id")
     full_name: str
 
     class Config:

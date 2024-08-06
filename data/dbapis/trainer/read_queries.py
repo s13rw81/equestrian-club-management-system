@@ -1,5 +1,6 @@
 from typing import Union
 
+from bson import ObjectId
 from data.db import get_trainer_collection
 from logging_config import log
 from models.trainer.trainer import TrainerInternalWithID, TrainerSlim
@@ -41,11 +42,31 @@ def get_trainer_by_club_id(club_id: str) -> Union[TrainerSlim, None]:
         Union[TrainerInternalWithID, None]
     """
 
-    log.info(f"get_trainer_by_club_id() called {id}")
+    log.info(f"get_trainer_by_club_id() called {club_id}")
 
     response = trainer_collection.find_one(filter={"club_id": club_id})
     retval = TrainerSlim(**response) if response else response
 
-    log.info(f"get_trainer_details_by_email_db returning {retval}")
+    log.info(f"get_trainer_by_club_id returning {retval}")
+
+    return retval
+
+
+def get_trainer_by_trainer_id(trainer_id: str) -> Union[TrainerSlim, None]:
+    """return trainer details based on club id
+
+    Args:
+        trainer_id (str): id of the trainer
+
+    Returns:
+        Union[TrainerInternalWithID, None]
+    """
+
+    log.info(f"get_trainer_by_trainer_id() called {trainer_id}")
+
+    response = trainer_collection.find_one(filter={"_id": ObjectId(trainer_id)})
+    retval = TrainerSlim(**response) if response else response
+
+    log.info(f"get_trainer_by_trainer_id returning {retval}")
 
     return retval

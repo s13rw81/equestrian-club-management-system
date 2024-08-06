@@ -91,7 +91,7 @@ def get_logistics_company_collection():
 
 def get_riding_lesson_bookings_collection():
     log.info("inside get_clubs_collection()")
-    return get_database()["riding_lesson_bookings"]
+    return get_database()["riding_lesson_service_booking"]
 
 
 def get_horse_shoeing_service_bookings_collection():
@@ -172,6 +172,11 @@ def get_trainer_collection():
 def get_generic_activity_service_collection():
     log.info("inside get_generic_activity_service_collection")
     return get_database()["generic_activity_service"]
+
+
+def get_generic_activity_service_bookings_collection():
+    log.info("inside get_generic_activity_service_collection")
+    return get_database()["generic_activity_service_booking"]
 
 
 def get_reviews_collection():

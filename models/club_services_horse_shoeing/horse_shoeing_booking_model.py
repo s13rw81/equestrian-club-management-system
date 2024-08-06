@@ -25,10 +25,10 @@ from pydantic import BaseModel, Field
 #         json_encoders = {ObjectId: str}
 
 
-class RidingLessonBooking(BaseModel):
+class HorseShoeingBooking(BaseModel):
     id: Optional[PyObjectId] = Field(alias='_id', default=None)
     user_id: str
-    riding_lesson_service_id: str
+    horse_shoeing_service_id: str
     trainer_id: str
     selected_date: datetime
     pricing_option: dict

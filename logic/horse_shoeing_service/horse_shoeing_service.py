@@ -9,7 +9,7 @@ from data.dbapis.club_services_horse_shoeing.write_queries import insert_horse_s
 from data.dbapis.club_services_riding_lessons.write_queries import add_trainers_to_riding_service
 from fastapi import HTTPException
 from logging_config import log
-from models.services_horse_shoeing.horse_shoeing_service_model import HorseShoeingService
+from models.club_services_horse_shoeing.horse_shoeing_service_model import HorseShoeingService
 from models.logistics_company_services import Provider
 from models.services_riding_lession.riding_lession_booking_model import RidingLessonBooking
 from models.services_riding_lession.riding_lesson_service_model import RidingLessonService
@@ -58,7 +58,7 @@ def attach_trainers_to_riding_service_of_club_logic(club_id, trainers = None):
     return res
 
 
-def book_horse_riding_lesson(riding_lesson_instance: BookRidinglessonRequest):
+def book_horse_shoeing_service(riding_lesson_instance: BookRidinglessonRequest):
     log.info(f'creating a booking for horse riding lesson, {riding_lesson_instance}')
     # Fetch the corresponding data from the collections
     lesson = riding_lesson_collection.find_one({"_id": ObjectId(riding_lesson_instance.lesson_service)})

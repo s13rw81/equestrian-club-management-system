@@ -1,8 +1,8 @@
 from bson import ObjectId
-from data.db import get_generic_activity_service_collection, get_generic_activity_service_booking_collection
+from data.db import get_generic_activity_service_collection, get_generic_activity_service_bookings_collection
 
 generic_activity_service_collection = get_generic_activity_service_collection()
-generic_activity_service_booking_collection = get_generic_activity_service_booking_collection()
+generic_activity_service_booking_collection = get_generic_activity_service_bookings_collection()
 
 
 def insert_generic_activity_service_instance_to_club(generic_activity_instance):

@@ -152,3 +152,21 @@ def get_club_with_services_and_trainer(club_id: str):
     club_data = list(club_collection.aggregate(pipeline))
 
     return club_data[0] if club_data else None
+
+
+def get_club_by_user_id_logic(user_id: str) -> ClubInternal | None:
+    """
+    :param user_id: id of the user associated with the club
+    :return: instance of ClubInternal, details of the club
+    """
+
+    club = None
+
+    # fetch the club
+    try:
+        club = club_collection.find_one({"users.user_id": user_id})
+        club['id'] = str(club['_id'])
+    except InvalidId as e:
+        log.error(f'{e} :  user_id')
+    finally:
+        return club

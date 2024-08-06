@@ -174,7 +174,7 @@ def get_generic_activity_service_collection():
     return get_database()["generic_activity_service"]
 
 
-def get_generic_activity_service_booking_collection():
+def get_generic_activity_service_bookings_collection():
     log.info("inside get_generic_activity_service_collection")
     return get_database()["generic_activity_service_booking"]
 

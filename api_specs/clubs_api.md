@@ -1,7 +1,7 @@
 # Clubs APIs
 Primarily the consumer will use this set of apis. Ocassionaly, the admin app may also use the routes.
 
-### 1. `/user/clubs/get-clubs`
+### 1. `/user/club/get-clubs`
 
 The user will call this route from the consumer application to get a list of clubs with
 their basic details.
@@ -57,7 +57,7 @@ If everything goes well, return a response with a schema similar to the followin
 This route will need `pagination` and `filtering`. Don't worry about about it until the
 codebase wide `pagination-system` is implemented.
 
-### 2. `/user/clubs/get-club-details/{club_id}`
+### 2. `/user/club/get-club-details/{club_id}`
 The user will call this route from the consumer application to get the details of a 
 particular club.
 

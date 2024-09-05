@@ -21,10 +21,6 @@ class RoleBasedAccessControl:
             f"inside RoleBasedAccessControl; allowed_roles={self.allowed_roles}; user={user}"
         )
 
-        log.info(type(user.user_role))
-        a = list(self.allowed_roles)
-        log.info(type(a[0]))
-
         if user.user_role not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

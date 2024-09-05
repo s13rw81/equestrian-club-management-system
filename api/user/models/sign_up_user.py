@@ -12,35 +12,9 @@ class SignUpUser(BaseModel):
     email_address: Optional[str] = None
     phone_number: Optional[str] = None
     password: str = Field(exclude=True)
-    riding_stage: Optional[RidingStage]
-    horse_ownership_status: Optional[HorseOwnership]
-    equestrian_discipline: Optional[EquestrianDiscipline]
-
-    # TODO: remove the validators on riding_stage, horse_ownership_status and equestrian_discipline these are
-    # TODO: temporary hacks, make these fields properly nullable across all the stages
-    @field_validator("riding_stage")
-    @classmethod
-    def add_default_value_for_riding_stage(cls, riding_stage):
-        if riding_stage is None:
-            return RidingStage.BEGINNER
-
-        return riding_stage
-
-    @field_validator("horse_ownership_status")
-    @classmethod
-    def add_default_value_for_horse_ownership_status(cls, horse_ownership_status):
-        if horse_ownership_status is None:
-            return HorseOwnership.YES
-
-        return horse_ownership_status
-
-    @field_validator("equestrian_discipline")
-    @classmethod
-    def add_default_value_for_equestrian_discipline(cls, equestrian_discipline):
-        if equestrian_discipline is None:
-            return EquestrianDiscipline.RIDING_HORSE
-
-        return equestrian_discipline
+    riding_stage: Optional[RidingStage] = None
+    horse_ownership_status: Optional[HorseOwnership] = None
+    equestrian_discipline: Optional[EquestrianDiscipline] = None
 
     @field_validator("email_address")
     @classmethod

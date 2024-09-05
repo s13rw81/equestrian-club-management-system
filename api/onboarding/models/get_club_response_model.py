@@ -1,3 +1,6 @@
+from typing import Optional
+
+from api.onboarding.models import HorseShoeingService, RidingLessonService, GenericActivityService
 from pydantic import BaseModel
 
 
@@ -10,6 +13,9 @@ class GetClubResponse(BaseModel):
     address: str
     is_khayyal_verified: bool
     image_urls: list
+    horse_shoeing_service: Optional[HorseShoeingService] = None
+    riding_lesson_service: Optional[RidingLessonService] = None
+    generic_activity_service: Optional[GenericActivityService] = None
 
 
 # {

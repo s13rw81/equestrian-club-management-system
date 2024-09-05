@@ -17,6 +17,7 @@ class ClubInternal(BaseModel):
     email_address: str
     address: str
     phone_no: str
+    location: dict
     is_khayyal_verified: bool = False
 
     class Config:

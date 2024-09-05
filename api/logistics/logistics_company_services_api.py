@@ -54,7 +54,7 @@ from .models import (
     UpdateUserTransferService,
 )
 
-manage_service_router = APIRouter(prefix="/services", tags=["logistics-company"])
+manage_service_router = APIRouter(prefix="/services", tags=["logistic-company"])
 
 
 @manage_service_router.get("/get-club-to-club-service")

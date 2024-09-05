@@ -1,6 +1,7 @@
 from typing import Annotated, List
 
 from fastapi import Depends, HTTPException, UploadFile, status
+from pydantic_extra_types.coordinate import Latitude, Longitude
 
 from api.logistics.models.logistics_company_trucks import AddTruck, UpdateTruckDetails
 from data.dbapis.logistics.logistics_company.read_queries import (
@@ -16,6 +17,10 @@ from role_based_access_control import RoleBasedAccessControl
 user_dependency = Annotated[
     UserInternal,
     Depends(RoleBasedAccessControl(allowed_roles={UserRoles.LOGISTIC_COMPANY})),
+]
+
+consumer_app_user_dependency = Annotated[
+    UserInternal, Depends(RoleBasedAccessControl(allowed_roles={UserRoles.USER}))
 ]
 
 
@@ -84,10 +89,10 @@ class UploadTruckImagesValidator(BaseTruckValidator):
         self,
         user: user_dependency,
         truck_id: str,
-        files: List[UploadFile],
+        images: List[UploadFile],
     ) -> None:
         super().__init__(user)
-        self.files = files
+        self.files = images
         self.truck_id = truck_id
         trucks_owned_by_logistics_company = self.logistics_company_details.get("trucks")
 
@@ -153,3 +158,17 @@ class UpdateTruckDetailsValidator(BaseTruckValidator):
     def is_truck_already_registered(registration_number: str) -> bool:
         """returns if the registration number is already registered in khayyal"""
         return is_truck_registered(registration_number=registration_number)
+
+
+class FindNearbyTrucksValidator:
+    def __init__(
+        self,
+        user: consumer_app_user_dependency,
+        lat: Latitude,
+        long: Longitude,
+        radius: float = 10,
+    ) -> None:
+        self.user = user
+        self.lat = lat
+        self.long = long
+        self.radius = radius

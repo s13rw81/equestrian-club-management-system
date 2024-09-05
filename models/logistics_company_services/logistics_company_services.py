@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
+from models.user import UserRoles
 from pydantic import BaseModel, Field, field_serializer
 
 from data.db import PyObjectId
@@ -11,7 +12,14 @@ from .enums import ServiceAvailability
 
 class Provider(BaseModel):
     provider_id: str
-    provider_type: str  # later would be a user.enums.Enum
+    provider_type: UserRoles
+
+    @field_serializer("provider_type")
+    def enum_serializer(self, enum):
+        if not enum:
+            return
+
+        return enum.value
 
 
 class BaseLogisticsServiceInternal(BaseModel):

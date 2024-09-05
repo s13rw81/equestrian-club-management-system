@@ -1,13 +1,18 @@
 from typing import List
 
 from api.logistics.models.logistics_company_trucks import UpdateTruckDetails
-from data.db import convert_to_object_id, get_collection
+from data.db import (
+    convert_to_object_id,
+    get_collection,
+    get_logistics_company_collection,
+    get_truck_collection,
+)
 from logging_config import log
 from models.truck import TruckInternal
 from utils.logistics_utils import LOGISTICS_SERVICE_COLLECTION_MAPPING, LogisticsService
 
-truck_collection = get_collection(collection_name="trucks")
-company_collection = get_collection(collection_name="logistics_company")
+truck_collection = get_truck_collection()
+company_collection = get_logistics_company_collection()
 
 
 # TODO: Convert the below function to a transaction
@@ -105,7 +110,7 @@ def add_truck_db(truck: TruckInternal) -> bool:
 
         return False
 
-    return updated, truck_id
+    return True, truck_id
 
 
 def update_truck_images(truck_id: str, image_ids: List[str]) -> bool:
@@ -155,9 +160,7 @@ def update_truck_details(truck_id: str, truck_details: UpdateTruckDetails) -> bo
     log.info(f"update_truck_details() invoke : {truck_id} {truck_details}")
 
     filter = {"_id": convert_to_object_id(truck_id)}
-    update = {
-        k: v for k, v in truck_details.model_dump().items() if v != None and k != "_id"
-    }
+    update = truck_details.model_dump(exclude_none=True)
 
     updated = truck_collection.update_one(filter=filter, update={"$set": update})
 

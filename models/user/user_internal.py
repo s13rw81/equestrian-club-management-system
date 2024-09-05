@@ -38,9 +38,9 @@ class UserInternal(BaseModel):
     password_reset_verification_otp: Optional[PasswordResetVerificationOTP] = None
     sign_up_credential_type: Optional[SignUpCredentialType] = None
     user_role: UserRoles = UserRoles.USER
-    riding_stage: RidingStage
-    horse_ownership_status: HorseOwnership
-    equestrian_discipline: EquestrianDiscipline
+    riding_stage: Optional[RidingStage] = None
+    horse_ownership_status: Optional[HorseOwnership] = None
+    equestrian_discipline: Optional[EquestrianDiscipline] = None
 
     class Config:
         arbitrary_types_allowed = True

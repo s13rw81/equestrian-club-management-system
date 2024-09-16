@@ -1,50 +1,43 @@
-import re
 from functools import lru_cache
-from typing import List, Optional
-
-from bson import ObjectId
-from data.db import PyObjectId
+from pydantic import BaseModel, field_serializer
 from models.ratings.club_ratings_internal import ClubRatingsInternal
-from pydantic import BaseModel, Field, field_validator
+from ..common_base.common_base import CommonBase
+from ..location.location_internal import LocationInternal
+from .enums.verification_status import VerificationStatus
+from typing import Optional
 
 
-class ClubInternal(BaseModel):
-    id: Optional[PyObjectId] = Field(alias='_id', default=None)
-    name: str = Field(..., min_length=1)
-    description: Optional[str] = Field(None, max_length=500)
-    image_urls: Optional[List[str]] = list()
-    users: Optional[List[dict]] = list()
-    email_address: str
-    address: str
-    phone_no: str
-    location: dict
-    is_khayyal_verified: bool = False
 
-    class Config:
-        arbitrary_types_allowed = True
-        populate_by_name = True
-        json_encoders = {ObjectId: str}
+class ClubUser(BaseModel):
+    user_id: str
 
-    @field_validator('name')
-    def validate_name(cls, v):
-        pattern = r'^[A-Za-z0-9.\- ]+$'
-        if not re.match(pattern, v):
-            raise ValueError("Name can only contain alphabets, dots, and dashes")
-        return v.lower()
+class ClubInternal(CommonBase):
+    # user-fields
+    name: Optional[str] = None
+    owner_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email_id: Optional[str] = None
+    commercial_registration: Optional[str] = None
+    club_id: Optional[str] = None
+    iban: Optional[str] = None
+    description: Optional[str] = None
+    location: Optional[LocationInternal] = None
+    # system-fields
+    platform_id: Optional[str] = None
+    logo: Optional[str] = None
+    images: Optional[list[str]] = None
+    verification_status: VerificationStatus = VerificationStatus.PENDING
+    users: Optional[list[ClubUser]] = None
 
-    # @field_validator('location')
-    # def validate_location(cls, v):
-    #     coords = v
-    #     if not isinstance(coords, dict) or len(coords) != 2:
-    #         raise ValueError('location must be a dictionary with two keys: "lon" and "lat"')
-    #     lon, lat = coords.get('lon'), coords.get('lat')
-    #     if not (-180 <= lon <= 180) or not (-90 <= lat <= 90):
-    #         raise ValueError('location must be valid longitude and latitude. longitude must be between +/-180 and latitide must be between +/- 90')
-    #     return v
+    @field_serializer("verification_status")
+    def verification_status_serializer(self, verification_status):
+        return verification_status.value
 
-    @property
-    def rating(self):
-        return calculate_average_rating(self._id)
+
+
+
+
+
 
 
 @lru_cache(maxsize=64)

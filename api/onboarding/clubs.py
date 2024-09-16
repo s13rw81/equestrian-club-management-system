@@ -1,80 +1,70 @@
 from typing import Annotated
-
 from api.onboarding.models import CreateClubRequest
 from api.onboarding.models.get_club_response_model import GetClubResponse
 from api.onboarding.models.update_club_model import UpdateClubRequest
 from api.onboarding.onboarding_router import onboarding_api_router
-from api.user.models import UpdateUserRole
-from data.db import get_clubs_collection
 from data.dbapis.club_services_generic_activity.read_queries import get_existing_generic_activity_service_for_club
 from data.dbapis.club_services_horse_shoeing.read_queries import get_existing_horse_shoeing_service_for_club
 from data.dbapis.club_services_riding_lessons.read_queries import get_existing_riding_lesson_service_for_club
+from data.dbapis.user import update_user
 from data.dbapis.clubs import save_club
 from fastapi import Depends, UploadFile, HTTPException
 from fastapi import status
 from fastapi.requests import Request
 from logging_config import log
 from logic.auth import get_current_user
-from logic.club_services_generic_activity.generic_activity_service import attach_generic_activity_service_to_club_logic, update_generic_activity_service_by_club_id_logic
-from logic.horse_shoeing_service.horse_shoeing_service import attach_horse_shoeing_service_to_club_logic, update_horse_shoeing_service_by_club_id_logic
-from logic.onboarding.clubs import update_club_by_id_logic, get_club_id_of_user, update_riding_lesson_service_by_club_id_logic
-from logic.onboarding.upgrade_user import upgrade_user_role
-from logic.club_services_riding_lesson.riding_lesson_service_logic import attach_riding_lesson_to_club_logic
-from models.clubs import ClubInternal
-from models.user import UserInternal, UserRoles
+from logic.club_services_generic_activity.generic_activity_service import \
+    update_generic_activity_service_by_club_id_logic
+from logic.horse_shoeing_service.horse_shoeing_service import update_horse_shoeing_service_by_club_id_logic
+from logic.onboarding.clubs import update_club_by_id_logic, get_club_id_of_user, \
+    update_riding_lesson_service_by_club_id_logic
+from models.user import UserInternal, UserRoles, UpdateUserInternal
 from models.user.user_external import UserExternal
+from models.clubs import ClubInternal, ClubUser
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image, generate_image_url
-
-club_collection = get_clubs_collection()
+from models.http_responses import Success, Failed
 
 
 @onboarding_api_router.post("/create-club")
-async def create_club(create_new_club: CreateClubRequest, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.USER}))]) -> dict:
+async def create_club(
+        create_club_request: CreateClubRequest,
+        user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.USER}))]
+):
     """
     :param user: user invoking the api
-    :param create_new_club: instace of CreateClub dto
+    :param create_club_request: instance of CreateClub dto
     :return: instance of str, id of new club created
     """
-    # TODO: [phase ii] check if user has permission to add club
-    log.info(f"creating club, user: {user}")
-    user_ext = UserExternal(**user.model_dump())
-    request_dict = create_new_club.dict()
-    # Convert the request model to the DB model
-    new_club_internal = ClubInternal(**request_dict, users=[{"user_id": user.id}])
-    new_club_id = save_club(new_club_internal)
+    log.info(f"/create-club invoked (create_club_request={create_club_request}, user_id={user.id})")
 
-    # update user role to CLUB
-    user_role = UpdateUserRole(user_role=UserRoles.CLUB)
-    res = upgrade_user_role(user_role, user)
-    log.info(f'user upgraded {res}')
+    club = ClubInternal(
+        users=[
+            ClubUser(user_id=user.id)
+        ],
+        **create_club_request.model_dump()
+    )
 
-    # create riding_lesson_service
-    riding_lession_service = request_dict['riding_lesson_service']
-    if riding_lession_service:
-        res = attach_riding_lesson_to_club_logic(club_id=new_club_id, price=riding_lession_service)
-        log.info(f'riding lesson created for club with id {res}')
+    newly_created_club = save_club(new_club=club)
 
-    # create services_horse_shoeing
-    horse_shoeing_service = request_dict['horse_shoeing_service']
-    if horse_shoeing_service:
-        res = attach_horse_shoeing_service_to_club_logic(club_id=new_club_id, price=horse_shoeing_service)
-        log.info(f'horse shoeing service created for club with id {res}')
+    update_user_data = UpdateUserInternal(
+        user_role=UserRoles.CLUB
+    )
 
-    # create generic service
-    generic_activity_service = request_dict['generic_activity_service']
-    if generic_activity_service:
-        res = attach_generic_activity_service_to_club_logic(club_id=new_club_id, price=generic_activity_service)
-        log.info(f'generic activity service created for club with id {res}')
+    user_update_result = update_user(update_user_data=update_user_data, user=user)
 
-    msg = f"new club created with id: {new_club_id} by user: {user_ext}"
-    log.info(msg)
-    # return {'status_code': 201, 'details': msg, 'data': result}
-    return {"club_id": new_club_id}
+    return Success(
+        status=200,
+        message="club created successfully",
+        data={
+            "id": newly_created_club.id
+        }
+    )
 
 
 @onboarding_api_router.post("/club/upload-images")
-async def upload_images_for_club_by_id(images: list[UploadFile], request: Request, user: Annotated[UserInternal, Depends(get_current_user)]):
+async def upload_images_for_club_by_id(images: list[UploadFile], request: Request,
+                                       user: Annotated[UserInternal, Depends(get_current_user)]):
     club = get_club_id_of_user(user=user)
     if not club:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='no club assiocated with user')

@@ -38,6 +38,11 @@ app.include_router(logistics_user_router)
 app.include_router(horse_trade_services_router)
 
 
+# this exception handler will handle all the Exceptions
+# except for FastAPI's HTTPException
+# for HTTPExceptions the handler won't even get called
+# not sure why :(
+# but incidentally it's the expected behaviour anyway :)
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc):
     exception_id = uuid.uuid4().hex

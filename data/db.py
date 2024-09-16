@@ -1,10 +1,8 @@
 from typing import Annotated
 from urllib.parse import quote_plus
-
 from bson.objectid import ObjectId
 from pydantic import BeforeValidator
 from pymongo import MongoClient
-
 from config import (
     DATABASE_MAX_POOL_SIZE,
     DATABASE_NAME,
@@ -76,7 +74,9 @@ def get_company_collection():
 
 def get_clubs_collection():
     log.info("inside get_club_collection()")
-    return get_database()["club"]
+    club_collection = get_database()["club"]
+    club_collection.create_index([("id", 1)], unique=True)
+    return club_collection
 
 
 def get_horses_collection():

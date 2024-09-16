@@ -2,6 +2,7 @@ from data.db import convert_to_object_id, get_users_collection
 from logging_config import log
 from models.user import SignUpCredentialType, UpdateUserInternal, UserInternal
 from models.user.enums.user_roles import UserRoles
+from fastapi import HTTPException, status
 
 users_collection = get_users_collection()
 
@@ -26,14 +27,14 @@ def save_user(user: UserInternal) -> str:
     return retval
 
 
-def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> dict:
+def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> bool:
     """
     updates the user as per the data provided in the edit_user dict
 
     :param update_user_data: UpdateUserInternal
     :param user: str
 
-    :returns: True if successfully updated false otherwise
+    :returns: True if successfully updated. :raises: HttpException on failure of update.
 
     """
 
@@ -53,13 +54,17 @@ def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> dic
     )
 
     log.info(
-        f"matched_count={result.matched_count}, modified_count={result.modified_count}"
+        f"user update executed matched_count={result.matched_count}, modified_count={result.modified_count}"
     )
 
-    if result.modified_count == 1:
-        return {"status_code": 200, "detail": "password reset successful."}
-    else:
-        return {"status_code": 500, "detail": "password reset failed."}
+    if not result.modified_count == 1:
+        log.info("could not update user due to unknown reasons, raising exception")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="user cannot be updated in the database due to unknown reasons"
+        )
+
+    return True
 
 
 def update_user_role(user_role: UserRoles, user: UserInternal) -> bool:

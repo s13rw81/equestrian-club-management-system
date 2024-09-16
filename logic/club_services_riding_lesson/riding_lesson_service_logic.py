@@ -5,7 +5,8 @@ from fastapi import HTTPException
 from logging_config import log
 from models.logistics_company_services import Provider
 from models.services_riding_lession.riding_lession_booking_model import RidingLessonBooking
-from models.services_riding_lession.riding_lesson_service_model import RidingLessonService, RidingLessonServicePricingOption
+from models.services_riding_lession.riding_lesson_service_model import RidingLessonService
+from api.onboarding.models import RidingLessonServicePricingOption
 from models.user import UserRoles
 from starlette import status
 

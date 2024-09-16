@@ -16,7 +16,7 @@ LOG_FILE = os.path.join(WS_LOG_PATH, f"{TODAY}_logs.log")  # '.\\2023_03_11_10_1
 
 log = logging.getLogger("khayyal_logger")
 log.setLevel(logging.DEBUG)
-logFormatter = logging.Formatter('%(asctime)s - %(filename)s > %(funcName)s() # %(lineno)d [%(levelname)s] %(message)s')
+logFormatter = logging.Formatter('%(asctime)s - %(pathname)s > %(funcName)s() # %(lineno)d [%(levelname)s] %(message)s')
 
 consoleHandler = logging.StreamHandler(stream=sys.stderr)
 consoleHandler.setFormatter(logFormatter)

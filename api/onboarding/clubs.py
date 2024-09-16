@@ -23,7 +23,7 @@ from models.user.user_external import UserExternal
 from models.clubs import ClubInternal, ClubUser
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image, generate_image_url
-from models.http_responses import Success, Failed
+from models.http_responses import Success, Failure
 
 
 @onboarding_api_router.post("/create-club")

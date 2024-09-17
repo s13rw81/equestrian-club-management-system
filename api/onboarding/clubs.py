@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from typing import Annotated
 from api.onboarding.models import CreateClubRequest
 from api.onboarding.models.get_club_response_model import GetClubResponse
@@ -37,6 +38,11 @@ async def create_club(
     :return: instance of str, id of new club created
     """
     log.info(f"/create-club invoked (create_club_request={create_club_request}, user_id={user.id})")
+
+    return Success(
+        status=status.HTTP_207_MULTI_STATUS,
+        message="showing deployment process"
+    )
 
     club = ClubInternal(
         users=[

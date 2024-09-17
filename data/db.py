@@ -21,13 +21,16 @@ CONNECTION_STRING = (
     if ESCAPED_DATABASE_USERNAME != ""
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
+
+client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
+
 PyObjectId = Annotated[str, BeforeValidator(str)]
+
+
 
 
 def get_database():
     log.info("inside get_database()")
-    client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
-    log.info("returning from get_database()")
     return client[DATABASE_NAME]
 
 

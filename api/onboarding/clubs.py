@@ -18,7 +18,7 @@ from logic.club_services_generic_activity.generic_activity_service import \
     update_generic_activity_service_by_club_id_logic
 from logic.horse_shoeing_service.horse_shoeing_service import update_horse_shoeing_service_by_club_id_logic
 from logic.onboarding.clubs import update_club_by_id_logic, get_club_id_of_user, \
-    update_riding_lesson_service_by_club_id_logic
+    update_riding_lesson_service_by_club_id_logic, create_club as create_club_logic
 from models.user import UserInternal, UserRoles, UpdateUserInternal
 from models.user.user_external import UserExternal
 from models.clubs import ClubInternal, ClubUser
@@ -46,13 +46,7 @@ async def create_club(
         **create_club_request.model_dump()
     )
 
-    newly_created_club = save_club(new_club=club)
-
-    update_user_data = UpdateUserInternal(
-        user_role=UserRoles.CLUB
-    )
-
-    user_update_result = update_user(update_user_data=update_user_data, user=user)
+    newly_created_club = create_club_logic(club=club, user=user)
 
     return Success(
         status=200,

@@ -39,11 +39,6 @@ async def create_club(
     """
     log.info(f"/create-club invoked (create_club_request={create_club_request}, user_id={user.id})")
 
-    return Success(
-        status=status.HTTP_207_MULTI_STATUS,
-        message="showing deployment process"
-    )
-
     club = ClubInternal(
         users=[
             ClubUser(user_id=user.id)
@@ -124,7 +119,8 @@ async def get_club(user: Annotated[UserInternal, Depends(RoleBasedAccessControl(
 
 
 @onboarding_api_router.put("/update-club")
-async def update_club(user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))], update_club_request: UpdateClubRequest):
+async def update_club(user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))],
+                      update_club_request: UpdateClubRequest):
     log.info(f'updating club associated with user {user}')
 
     # get the club associated with user in request
@@ -136,15 +132,19 @@ async def update_club(user: Annotated[UserInternal, Depends(RoleBasedAccessContr
     log.info(f'club assotiated with user {user} is {club}')
 
     # update club document
-    res_update_club = update_club_by_id_logic(club_id=club_id, updated_club = update_club_request)
-    res_update_riding_lesson_service = update_riding_lesson_service_by_club_id_logic(club_id=club_id, updated_club = update_club_request)
-    res_update_horse_shoeing_service = update_horse_shoeing_service_by_club_id_logic(club_id=club_id, updated_club = update_club_request)
-    res_update_generic_activity_service = update_generic_activity_service_by_club_id_logic(club_id=club_id, updated_club = update_club_request)
-    if log.info(f'result of updates : res_update_club : {res_update_club}, res_update_riding_lesson_service: {res_update_riding_lesson_service}, res_update_horse_shoeing_service: {res_update_horse_shoeing_service}, res_update_generic_activity_service: {res_update_generic_activity_service}'):
+    res_update_club = update_club_by_id_logic(club_id=club_id, updated_club=update_club_request)
+    res_update_riding_lesson_service = update_riding_lesson_service_by_club_id_logic(club_id=club_id,
+                                                                                     updated_club=update_club_request)
+    res_update_horse_shoeing_service = update_horse_shoeing_service_by_club_id_logic(club_id=club_id,
+                                                                                     updated_club=update_club_request)
+    res_update_generic_activity_service = update_generic_activity_service_by_club_id_logic(club_id=club_id,
+                                                                                           updated_club=update_club_request)
+    if log.info(
+            f'result of updates : res_update_club : {res_update_club}, res_update_riding_lesson_service: {res_update_riding_lesson_service}, res_update_horse_shoeing_service: {res_update_horse_shoeing_service}, res_update_generic_activity_service: {res_update_generic_activity_service}'):
         return {"status": "OK"}
     else:
-        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = 'error updating club or its services')
-
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='error updating club or its services')
 
 # @onboarding_api_router.get("/onboarding/get-club-images/")
 # async def get_club_images_by_id(request: Request, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))]) -> dict:

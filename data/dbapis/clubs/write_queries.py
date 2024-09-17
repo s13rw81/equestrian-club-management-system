@@ -2,19 +2,22 @@ from data.db import get_clubs_collection
 from logging_config import log
 from models.clubs.clubs_internal import ClubInternal
 from fastapi import HTTPException, status
+from decorators import atomic_transaction
 
 club_collection = get_clubs_collection()
 
 
-def save_club(new_club: ClubInternal) -> ClubInternal:
+@atomic_transaction
+def save_club(new_club: ClubInternal, session=None) -> ClubInternal:
     """
         saves the new user in the database and returns the id
         :param new_club: ClubInternal
+        :param session: database transaction session
         :returns: ClubInternal
     """
     log.info(f"inside save_club(new_club={new_club})")
 
-    result = club_collection.insert_one(new_club.model_dump())
+    result = club_collection.insert_one(new_club.model_dump(), session=session)
 
     if not result.acknowledged:
         log.info("new club can't be inserted in the database, raising exception...")

@@ -3,6 +3,7 @@ from logging_config import log
 from models.user import SignUpCredentialType, UpdateUserInternal, UserInternal
 from models.user.enums.user_roles import UserRoles
 from fastapi import HTTPException, status
+from decorators import atomic_transaction
 
 users_collection = get_users_collection()
 
@@ -26,13 +27,14 @@ def save_user(user: UserInternal) -> str:
 
     return retval
 
-
-def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> bool:
+@atomic_transaction
+def update_user(update_user_data: UpdateUserInternal, user: UserInternal, session=None) -> bool:
     """
     updates the user as per the data provided in the edit_user dict
 
     :param update_user_data: UpdateUserInternal
     :param user: str
+    :param session: database transaction session
 
     :returns: True if successfully updated. :raises: HttpException on failure of update.
 
@@ -51,6 +53,7 @@ def update_user(update_user_data: UpdateUserInternal, user: UserInternal) -> boo
     result = users_collection.update_one(
         update_filter,
         {"$set": update_user_dict, "$currentDate": {"lastModified": True}},
+        session=session
     )
 
     log.info(

@@ -1,22 +1,29 @@
-from typing import Any
-
 from api.onboarding.models.update_club_model import UpdateClubRequest
-from bson import ObjectId
-from data.db import get_clubs_collection
 from data.dbapis.club_services_riding_lessons.read_queries import get_existing_riding_lesson_service_for_club
 from data.dbapis.club_services_riding_lessons.write_queries import update_riding_lesson_service
-from data.dbapis.clubs import get_club_by_id_logic
+from data.dbapis.clubs import get_club_by_id_logic, save_club
+from data.dbapis.user import update_user
 from data.dbapis.onboarding.onboarding_clubs.read_queries import get_clubs
 from data.dbapis.onboarding.onboarding_clubs.write_queries import update_club
 from fastapi import HTTPException
 from logging_config import log
 from models.clubs import ClubInternal
 from models.services_riding_lession.riding_lesson_service_model import RidingLessonService
-from models.user import UserInternal
-from fastapi import status
+from models.user import UserInternal, UpdateUserInternal, UserRoles
+from decorators import atomic_transaction
 
-clubs_collection = get_clubs_collection()
 
+@atomic_transaction
+def create_club(club: ClubInternal, user: UserInternal, session=None) -> ClubInternal:
+    newly_created_club = save_club(new_club=club, session=session)
+
+    update_user_data = UpdateUserInternal(
+        user_role=UserRoles.CLUB
+    )
+
+    update_user(update_user_data=update_user_data, user=user, session=session)
+
+    return newly_created_club
 
 def update_club_by_id_logic(updated_club: UpdateClubRequest, club_id: str = None) -> str:
     """

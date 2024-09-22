@@ -22,6 +22,8 @@ CONNECTION_STRING = (
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
 
+CONNECTION_STRING += "/?replicaSet=rs0"
+
 client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
 
 PyObjectId = Annotated[str, BeforeValidator(str)]

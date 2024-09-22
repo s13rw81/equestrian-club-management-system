@@ -13,15 +13,15 @@ class ClubUser(BaseModel):
 
 class ClubInternal(CommonBase):
     # user-fields
-    name: Optional[str] = None
-    owner_name: Optional[str] = None
-    phone_number: Optional[str] = None
-    email_id: Optional[str] = None
-    commercial_registration: Optional[str] = None
-    club_id: Optional[str] = None
-    iban: Optional[str] = None
-    description: Optional[str] = None
-    location: Optional[LocationInternal] = None
+    name: str
+    owner_name: str
+    phone_number: str
+    email_id: str
+    commercial_registration: str
+    club_id: str
+    iban: str
+    description: str
+    location: str
     # system-fields
     platform_id: Optional[str] = None
     logo: Optional[str] = None

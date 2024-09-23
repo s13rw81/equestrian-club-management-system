@@ -1,4 +1,3 @@
-from pyexpat.errors import messages
 from typing import Annotated
 from api.onboarding.models import CreateClubRequest
 from api.onboarding.models.get_club_response_model import GetClubResponse
@@ -18,12 +17,12 @@ from logic.club_services_generic_activity.generic_activity_service import \
 from logic.horse_shoeing_service.horse_shoeing_service import update_horse_shoeing_service_by_club_id_logic
 from logic.onboarding.clubs import update_club_by_id_logic, get_club_id_of_user, \
     update_riding_lesson_service_by_club_id_logic, create_club as create_club_logic
-from models.user import UserInternal, UserRoles, UpdateUserInternal
+from models.user import UserInternal, UserRoles
 from models.user.user_external import UserExternal
 from models.clubs import ClubInternal, ClubUser
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image, generate_image_url
-from models.http_responses import Success, Failure
+from models.http_responses import Success
 
 
 @onboarding_api_router.post("/create-club")
@@ -40,6 +39,7 @@ async def create_club(
 
     existing_club_count = get_club_count()
 
+    # TODO: add created_by id here after updating the user module to use uuid as id
     club = ClubInternal(
         users=[
             ClubUser(user_id=user.id)
@@ -51,10 +51,9 @@ async def create_club(
     newly_created_club = create_club_logic(club=club, user=user)
 
     return Success(
-        status=200,
         message="club created successfully",
         data={
-            "id": newly_created_club.id
+            "id": newly_created_club.id.hex
         }
     )
 

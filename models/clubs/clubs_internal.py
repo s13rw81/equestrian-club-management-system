@@ -23,11 +23,11 @@ class ClubInternal(CommonBase):
     description: str
     location: str
     # system-fields
-    platform_id: Optional[str] = None
+    platform_id: str
     logo: Optional[str] = None
     images: Optional[list[str]] = None
     verification_status: VerificationStatus = VerificationStatus.PENDING
-    users: Optional[list[ClubUser]] = None
+    users: list[ClubUser]
 
     @field_serializer("verification_status")
     def verification_status_serializer(self, verification_status):

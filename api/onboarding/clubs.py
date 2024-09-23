@@ -7,8 +7,7 @@ from api.onboarding.onboarding_router import onboarding_api_router
 from data.dbapis.club_services_generic_activity.read_queries import get_existing_generic_activity_service_for_club
 from data.dbapis.club_services_horse_shoeing.read_queries import get_existing_horse_shoeing_service_for_club
 from data.dbapis.club_services_riding_lessons.read_queries import get_existing_riding_lesson_service_for_club
-from data.dbapis.user import update_user
-from data.dbapis.clubs import save_club
+from data.dbapis.clubs import get_club_count
 from fastapi import Depends, UploadFile, HTTPException
 from fastapi import status
 from fastapi.requests import Request
@@ -39,10 +38,13 @@ async def create_club(
     """
     log.info(f"/create-club invoked (create_club_request={create_club_request}, user_id={user.id})")
 
+    existing_club_count = get_club_count()
+
     club = ClubInternal(
         users=[
             ClubUser(user_id=user.id)
         ],
+        platform_id=f"khayyal_{create_club_request.club_id}_{existing_club_count + 1}",
         **create_club_request.model_dump()
     )
 

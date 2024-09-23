@@ -63,6 +63,20 @@ class CreateClubRequest(BaseModel):
 
         return value
 
+    @field_validator("club_id")
+    def validate_club_id(cls, value):
+        log.info(f"inside validate_club_id(club_id={value})")
+
+        if not value:
+            return
+
+        if "_" in value:
+            log.info("club_id has underscores ('_') in it, raising ValueError...")
+            raise ValueError("club_id cannot have underscores ('_') in it...")
+
+        log.info("club_id validated successfully, returning...")
+        return value
+
     @model_validator(mode="after")
     def check_whether_club_already_exists(self) -> Self:
         log.info("inside validator check_whether_club_already_exists()")

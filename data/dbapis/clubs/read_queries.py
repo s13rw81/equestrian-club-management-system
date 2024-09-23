@@ -1,5 +1,6 @@
 from typing import Optional, List
 from data.db import get_clubs_collection
+from decorators import atomic_transaction
 from logging_config import log
 from models.clubs import ClubInternal
 
@@ -28,10 +29,11 @@ def get_club_count() -> int:
     log.info(f"returning {club_count}")
     return club_count
 
-def find_club(**kwargs) -> Optional[ClubInternal]:
+@atomic_transaction
+def find_club(session=None, **kwargs) -> Optional[ClubInternal]:
     log.info(f"inside find_club({kwargs})")
 
-    club = club_collection.find_one(kwargs)
+    club = club_collection.find_one(kwargs, session=session)
 
     if not club:
         log.info(f"No club exists with the provided attributes, returning None")

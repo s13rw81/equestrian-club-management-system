@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pydantic import BaseModel, field_serializer
 from models.ratings.club_ratings_internal import ClubRatingsInternal
-from ..common_base.common_base import CommonBase
+from ..common_base import CommonBase
 from ..location.location_internal import LocationInternal
 from .enums.verification_status import VerificationStatus
 from typing import Optional

@@ -10,6 +10,7 @@ from config import (
     DATABASE_PORT,
     DATABASE_URL,
     DATABASE_USER,
+    DATABASE_REPLICA_SET_NAME
 )
 from logging_config import log
 
@@ -22,7 +23,7 @@ CONNECTION_STRING = (
     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
 
-CONNECTION_STRING += "/?replicaSet=rs0"
+CONNECTION_STRING += f"/?replicaSet={DATABASE_REPLICA_SET_NAME}&directConnection=true"
 
 client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
 

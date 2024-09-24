@@ -1,4 +1,3 @@
-from pyexpat.errors import messages
 from typing import Annotated
 from api.onboarding.models import CreateClubRequest
 from api.onboarding.models.get_club_response_model import GetClubResponse
@@ -7,8 +6,7 @@ from api.onboarding.onboarding_router import onboarding_api_router
 from data.dbapis.club_services_generic_activity.read_queries import get_existing_generic_activity_service_for_club
 from data.dbapis.club_services_horse_shoeing.read_queries import get_existing_horse_shoeing_service_for_club
 from data.dbapis.club_services_riding_lessons.read_queries import get_existing_riding_lesson_service_for_club
-from data.dbapis.user import update_user
-from data.dbapis.clubs import save_club
+from data.dbapis.clubs import get_club_count
 from fastapi import Depends, UploadFile, HTTPException
 from fastapi import status
 from fastapi.requests import Request
@@ -18,13 +16,13 @@ from logic.club_services_generic_activity.generic_activity_service import \
     update_generic_activity_service_by_club_id_logic
 from logic.horse_shoeing_service.horse_shoeing_service import update_horse_shoeing_service_by_club_id_logic
 from logic.onboarding.clubs import update_club_by_id_logic, get_club_id_of_user, \
-    update_riding_lesson_service_by_club_id_logic
-from models.user import UserInternal, UserRoles, UpdateUserInternal
+    update_riding_lesson_service_by_club_id_logic, create_club as create_club_logic
+from models.user import UserInternal, UserRoles
 from models.user.user_external import UserExternal
 from models.clubs import ClubInternal, ClubUser
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import save_image, generate_image_url
-from models.http_responses import Success, Failure
+from models.http_responses import Success
 
 
 @onboarding_api_router.post("/create-club")
@@ -39,31 +37,23 @@ async def create_club(
     """
     log.info(f"/create-club invoked (create_club_request={create_club_request}, user_id={user.id})")
 
-    return Success(
-        status=status.HTTP_207_MULTI_STATUS,
-        message="showing deployment process"
-    )
+    existing_club_count = get_club_count()
 
+    # TODO: add created_by id here after updating the user module to use uuid as id
     club = ClubInternal(
         users=[
             ClubUser(user_id=user.id)
         ],
+        platform_id=f"khayyal_{create_club_request.club_id}_{existing_club_count + 1}",
         **create_club_request.model_dump()
     )
 
-    newly_created_club = save_club(new_club=club)
-
-    update_user_data = UpdateUserInternal(
-        user_role=UserRoles.CLUB
-    )
-
-    user_update_result = update_user(update_user_data=update_user_data, user=user)
+    newly_created_club = create_club_logic(club=club, user=user)
 
     return Success(
-        status=200,
         message="club created successfully",
         data={
-            "id": newly_created_club.id
+            "id": newly_created_club.id.hex
         }
     )
 
@@ -124,7 +114,8 @@ async def get_club(user: Annotated[UserInternal, Depends(RoleBasedAccessControl(
 
 
 @onboarding_api_router.put("/update-club")
-async def update_club(user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))], update_club_request: UpdateClubRequest):
+async def update_club(user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))],
+                      update_club_request: UpdateClubRequest):
     log.info(f'updating club associated with user {user}')
 
     # get the club associated with user in request
@@ -136,15 +127,19 @@ async def update_club(user: Annotated[UserInternal, Depends(RoleBasedAccessContr
     log.info(f'club assotiated with user {user} is {club}')
 
     # update club document
-    res_update_club = update_club_by_id_logic(club_id=club_id, updated_club = update_club_request)
-    res_update_riding_lesson_service = update_riding_lesson_service_by_club_id_logic(club_id=club_id, updated_club = update_club_request)
-    res_update_horse_shoeing_service = update_horse_shoeing_service_by_club_id_logic(club_id=club_id, updated_club = update_club_request)
-    res_update_generic_activity_service = update_generic_activity_service_by_club_id_logic(club_id=club_id, updated_club = update_club_request)
-    if log.info(f'result of updates : res_update_club : {res_update_club}, res_update_riding_lesson_service: {res_update_riding_lesson_service}, res_update_horse_shoeing_service: {res_update_horse_shoeing_service}, res_update_generic_activity_service: {res_update_generic_activity_service}'):
+    res_update_club = update_club_by_id_logic(club_id=club_id, updated_club=update_club_request)
+    res_update_riding_lesson_service = update_riding_lesson_service_by_club_id_logic(club_id=club_id,
+                                                                                     updated_club=update_club_request)
+    res_update_horse_shoeing_service = update_horse_shoeing_service_by_club_id_logic(club_id=club_id,
+                                                                                     updated_club=update_club_request)
+    res_update_generic_activity_service = update_generic_activity_service_by_club_id_logic(club_id=club_id,
+                                                                                           updated_club=update_club_request)
+    if log.info(
+            f'result of updates : res_update_club : {res_update_club}, res_update_riding_lesson_service: {res_update_riding_lesson_service}, res_update_horse_shoeing_service: {res_update_horse_shoeing_service}, res_update_generic_activity_service: {res_update_generic_activity_service}'):
         return {"status": "OK"}
     else:
-        raise HTTPException(status_code = status.HTTP_500_INTERNAL_SERVER_ERROR, detail = 'error updating club or its services')
-
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail='error updating club or its services')
 
 # @onboarding_api_router.get("/onboarding/get-club-images/")
 # async def get_club_images_by_id(request: Request, user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.CLUB}))]) -> dict:

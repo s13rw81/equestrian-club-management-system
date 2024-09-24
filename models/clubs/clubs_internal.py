@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pydantic import BaseModel, field_serializer
 from models.ratings.club_ratings_internal import ClubRatingsInternal
-from ..common_base.common_base import CommonBase
+from ..common_base import CommonBase
 from ..location.location_internal import LocationInternal
 from .enums.verification_status import VerificationStatus
 from typing import Optional
@@ -13,21 +13,21 @@ class ClubUser(BaseModel):
 
 class ClubInternal(CommonBase):
     # user-fields
-    name: Optional[str] = None
-    owner_name: Optional[str] = None
-    phone_number: Optional[str] = None
-    email_id: Optional[str] = None
-    commercial_registration: Optional[str] = None
-    club_id: Optional[str] = None
-    iban: Optional[str] = None
-    description: Optional[str] = None
-    location: Optional[LocationInternal] = None
+    name: str
+    owner_name: str
+    phone_number: str
+    email_id: str
+    commercial_registration: str
+    club_id: str
+    iban: str
+    description: str
+    location: LocationInternal
     # system-fields
-    platform_id: Optional[str] = None
+    platform_id: str
     logo: Optional[str] = None
     images: Optional[list[str]] = None
     verification_status: VerificationStatus = VerificationStatus.PENDING
-    users: Optional[list[ClubUser]] = None
+    users: list[ClubUser]
 
     @field_serializer("verification_status")
     def verification_status_serializer(self, verification_status):

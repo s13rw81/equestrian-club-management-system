@@ -1,7 +1,8 @@
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from role_based_access_control import RoleBasedAccessControl
-from models.user import UserRoles, UserInternal
+from models.user import UserInternal
+from models.user.enums import UserRoles
 from fastapi import Body
 from typing import Annotated
 

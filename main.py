@@ -17,6 +17,7 @@ from api.riding_lesson_services.riding_lesson_services_api import (
     riding_lesson_services_api_router,
 )
 from api.upload_images_demo import upload_images_demo_router
+from api.clubs import clubs_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
 from config import DEBUG, HOST, PORT
@@ -25,17 +26,18 @@ from logging_config import log
 app = FastAPI()
 
 app.include_router(onboarding_api_router)
-app.include_router(riding_lesson_services_api_router)
-app.include_router(clubs_api_router)
+# app.include_router(riding_lesson_services_api_router)
+# app.include_router(clubs_api_router)
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
 app.include_router(validators_api_router)
 app.include_router(demo_rbac_router)
-app.include_router(logistics_admin_router)
+# app.include_router(logistics_admin_router)
 app.include_router(images_router)
 app.include_router(upload_images_demo_router)
-app.include_router(logistics_user_router)
-app.include_router(horse_trade_services_router)
+# app.include_router(logistics_user_router)
+# app.include_router(horse_trade_services_router)
+app.include_router(clubs_api_router)
 
 
 # this exception handler will handle all the Exceptions

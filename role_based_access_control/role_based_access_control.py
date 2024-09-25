@@ -1,8 +1,6 @@
 from typing import Annotated
-
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
-
 from logging_config import log
 from logic.auth import get_current_user
 from models.user import UserInternal

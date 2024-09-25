@@ -2,9 +2,12 @@ from fastapi import APIRouter, Depends
 from .role_based_parameter_control.update_club_parameter_control import UpdateClubParameterControl
 from typing import Annotated
 from logging_config import log
-from data.dbapis.clubs import find_club, update_club as update_club_db
+from data.dbapis.clubs import find_club, update_club as update_club_db, find_club_by_user
 from models.clubs import UpdateClubInternal
+from models.user import UserInternal
+from logic.auth import get_current_user
 from models.http_responses import Success
+from .models import GetClub
 from datetime import datetime
 import pytz
 
@@ -52,6 +55,47 @@ async def update_club(
     return Success(
         message="club updated successfully...",
         data={
-            "updated_club": updated_club.model_dump()
+            "updated_club": GetClub(**updated_club.model_dump())
         }
     )
+
+
+@clubs_api_router.get("/get-club/{club_id}")
+async def get_club_by_id(
+        club_id: str,
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"inside /get-club/{club_id} (club_id={club_id}, user_id={user.id})")
+
+    club = find_club(id=club_id)
+
+    retval = Success(
+        message="club retrieved successfully...",
+        data=GetClub(**club.model_dump())
+    ) if club else Success(
+        message="no club exists with the provided id"
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
+@clubs_api_router.get("/get-your-club")
+async def get_club_by_id(
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"inside /get-your-club (user_id={user.id})")
+
+    club = find_club_by_user(user_id=user.id)
+
+    retval = Success(
+        message="club retrieved successfully...",
+        data=GetClub(**club.model_dump())
+    ) if club else Success(
+        message="no club exists with the provided id"
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval

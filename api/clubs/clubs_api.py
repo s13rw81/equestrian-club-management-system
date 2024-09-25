@@ -4,7 +4,6 @@ from api.clubs.models.book_generic_activity_request_model import GenericActivity
 from api.clubs.models.book_horse_shoeing_request_model import HorseShoeingBookingRequest
 from api.clubs.models.book_riding_lesson_request_model import RidingLessonBookingRequest
 from api.clubs.models.ratings_request_model import ClubReview
-from api.onboarding import UpdateClubRequest
 from data.dbapis.club_services_generic_activity.read_queries import get_all_existing_generic_activity_service, \
     get_existing_generic_activity_service_bookings_by_user_id, get_existing_generic_activity_service_for_club, \
     get_all_existing_generic_activity_service_bookings_for_club, get_all_existing_generic_activity_service_bookings
@@ -72,48 +71,6 @@ async def get_club_details_by_club_id(user: Annotated[UserInternal, Depends(Role
     club['generic_activity_service'] = club['generic_activity_service'][0]
     log.info(f"club fetched with id: {club_id} by user {user_ext}")
     return club
-
-
-@clubs_api_router.put("/{club_id}")
-async def update_club_by_id(club_id: str, user: Annotated[UserExternal, Depends(get_current_user)],
-                            update_club: UpdateClubRequest) -> dict[str, str | int]:
-    """
-    :param club_id: id of the club to be updated
-    :param user: user invoking the api
-    :param update_club: instance of UpdateClub dto
-    :return: instance of str, id of updated club
-    """
-
-    # TODO: check if user has permission to update club
-    # TODO: add apis to delete club images
-    user_ext = UserExternal(**user.model_dump())
-    log.info(f"updating club with id: {club_id}, user: {user_ext}")
-
-    existing_club = get_club_by_id_logic(club_id)
-    if not existing_club:
-        raise HTTPException(status_code=404, detail="Club not found")
-
-    # TODO: add check to allow only admins to update club details
-    # if existing_club.created_by.email_address != user.email_address:
-    #     raise HTTPException(status_code = 403, detail = "User does not have permission to update this club")
-
-    updated_club_details = ClubInternal(
-        name=update_club.name if update_club.name else existing_club.name,
-        description=update_club.description if update_club.description else existing_club.description,
-        price=update_club.price if update_club.price else existing_club.price,
-        image_urls=update_club.image_urls if update_club.image_urls else existing_club.image_urls,
-        address=update_club.address if update_club.address else existing_club.address,
-        contact=update_club.contact if update_club.contact else existing_club.contact,
-        admins=update_club.admins if update_club.admins else existing_club.admins
-    )
-    result = update_club(club_id=club_id, updated_club=updated_club_details)
-
-    if not result:
-        raise HTTPException(status_code=404, detail="Club not found or not updated")
-
-    msg = f"club with id: {club_id} updated by user: {user_ext}"
-    log.info(msg)
-    return {'status_code': 200, 'details': msg, 'data': result}
 
 
 @clubs_api_router.delete("/{club_id}")
@@ -311,7 +268,7 @@ async def get_riding_lesson_service_booking(user: Annotated[UserExternal, Depend
         res = get_existing_riding_lesson_service_bookings()
 
     if not res:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='no ridiing lesson service bookings associated with user')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='no ridiing lesson service bookings associated with user')
 
     return res
-

@@ -20,6 +20,7 @@ from api.upload_images_demo import upload_images_demo_router
 from api.clubs import clubs_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
+from api.payment_demo import payment_demo_router
 from config import DEBUG, HOST, PORT
 from logging_config import log
 
@@ -38,6 +39,7 @@ app.include_router(upload_images_demo_router)
 # app.include_router(logistics_user_router)
 # app.include_router(horse_trade_services_router)
 app.include_router(clubs_api_router)
+app.include_router(payment_demo_router)
 
 
 # this exception handler will handle all the Exceptions

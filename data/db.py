@@ -194,6 +194,9 @@ def get_logistic_service_booking_collection():
     log.info("inside get_logistic_service_booking_collection()")
     return get_database()["logistic_service_booking"]
 
+def get_payment_demo_collection():
+    log.info("inside get_payment_demo_collection()")
+    return get_database()["payment_demo"]
 
 def convert_to_object_id(str_id: str) -> ObjectId:
     """

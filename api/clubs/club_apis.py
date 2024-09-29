@@ -65,7 +65,7 @@ async def get_club_by_id(
         club_id: str,
         user: Annotated[UserInternal, Depends(get_current_user)]
 ):
-    log.info(f"inside /get-club/{club_id} (club_id={club_id}, user_id={user.id})")
+    log.info(f"inside /clubs/get-club/{club_id} (club_id={club_id}, user_id={user.id})")
 
     club = find_club(id=club_id)
 
@@ -85,7 +85,7 @@ async def get_club_by_id(
 async def get_club_by_id(
         user: Annotated[UserInternal, Depends(get_current_user)]
 ):
-    log.info(f"inside /get-your-club (user_id={user.id})")
+    log.info(f"inside /clubs/get-your-club (user_id={user.id})")
 
     club = find_club_by_user(user_id=user.id)
 
@@ -99,3 +99,7 @@ async def get_club_by_id(
     log.info(f"returning {retval}")
 
     return retval
+
+@clubs_api_router.post("/upload-logo")
+async def upload_logo():
+    log.info("inside /clubs/upload-logo")

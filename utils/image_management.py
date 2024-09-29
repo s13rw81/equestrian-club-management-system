@@ -1,8 +1,7 @@
 import hashlib
 import os
 import re
-from typing import List
-
+from typing import Optional
 import aiofiles
 import aiofiles.os
 from fastapi import Request, UploadFile, status
@@ -54,30 +53,45 @@ async def save_image(image_file: UploadFile) -> str:
     return uploaded_image_id
 
 
-def generate_image_url(image_id: str, request: Request) -> str:
+def generate_image_url(image_id: Optional[str], request: Request) -> Optional[str]:
     """
     returns the url for the image
     :param image_id: the id of the targeted image
     :param request: the fastapi Request
     :return: the generated URL of the image
     """
-    return f"{request.base_url}images/{image_id}"
+    log.info(f"inside generate_image_url(image_id={image_id})")
+
+    if not image_id:
+        return None
+
+    retval = f"{request.base_url}images/{image_id}"
+
+    log.info(f"returning {retval}")
+
+    return retval
 
 
-def generate_image_urls(image_ids: str, request: Request) -> List[str]:
+def generate_image_urls(image_ids: Optional[list[str]], request: Request) -> Optional[list[str]]:
     """given a list of image_ids returns the corresponding urls
 
     Args:
-        image_id (str)
+        image_ids (str)
         request (Request)
 
     Returns:
         List[str]
     """
 
-    image_urls = []
-    for image_id in image_ids:
-        image_urls.append(generate_image_url(image_id=image_id, request=request))
+    log.info(f"inside generate_image_urls(image_ids={image_ids})")
+
+    if not image_ids:
+        return None
+
+    image_urls = [generate_image_url(image_id=image_id, request=request) for image_id in image_ids]
+
+    log.info(f"returning {image_urls}")
+
     return image_urls
 
 

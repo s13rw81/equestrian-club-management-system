@@ -19,7 +19,7 @@ payment_demo_collection = get_payment_demo_collection()
 @payment_demo_router.post("/create-payment")
 def create_payment_demo(
         request: Request,
-        amount: str = Body(...)
+        amount: str = Body(embed=True)
 ):
     log.info(f"inside /payment-demo/create-payment(amount={amount})")
 
@@ -53,7 +53,7 @@ def create_payment_demo(
 
 @payment_demo_router.post("/verify-payment-status")
 def verify_payment_status(
-        id: str = Body(...)
+        id: str = Body(embed=True)
 ):
     log.info(f"inside /payment-demo/verify-payment-status(id={id})")
 

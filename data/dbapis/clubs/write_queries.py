@@ -10,12 +10,7 @@ club_collection = get_clubs_collection()
 
 @atomic_transaction
 def save_club(new_club: ClubInternal, session=None) -> ClubInternal:
-    """
-        saves the new user in the database and returns the id
-        :param new_club: ClubInternal
-        :param session: database transaction session
-        :returns: ClubInternal
-    """
+
     log.info(f"inside save_club(new_club={new_club})")
 
     result = club_collection.insert_one(new_club.model_dump(), session=session)

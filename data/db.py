@@ -84,6 +84,11 @@ def get_clubs_collection():
     club_collection.create_index([("id", 1)], unique=True)
     return club_collection
 
+def get_sign_up_otp_collection():
+    log.info("inside get_sign_up_otp_collection()")
+    sign_up_otp_collection = get_database()["sign_up_otp"]
+    sign_up_otp_collection.create_index([("id", 1)], unique=True)
+    return sign_up_otp_collection
 
 def get_horses_collection():
     log.info("inside get_horses_collection")

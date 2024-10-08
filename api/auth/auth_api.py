@@ -1,17 +1,21 @@
 from typing import Annotated, Optional
-
 from api.auth.models.reset_password_verify import ResetPasswordVerify
 from data.dbapis.user.read_queries import get_user_by_email, get_user_by_phone_number
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from logging_config import log
-from logic.auth import authenticate_user, create_access_token, get_current_user
-from logic.auth.otp_management import send_sign_up_otp, verify_sign_up_otp, send_reset_password_otp, \
+from logic.auth import (
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+    send_sign_up_otp,
+    verify_sign_up_otp,
+    send_reset_password_otp,
     verify_password_reset_otp
+)
 from models.user import UserInternal
 from validators.regex_validators import is_valid_email
-
-from .models import Token
+from .models import Token, GenerateSignUpOtpDTO
 
 user_auth_router = APIRouter(
     prefix="/auth",
@@ -53,10 +57,13 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
 
 @user_auth_router.post("/generate-sign-up-otp")
-async def send_otp_for_email_verification(user: Annotated[UserInternal, Depends(get_current_user)]):
-    log.info(f"inside auth/generate-sign-up-otp (user={user})")
+async def generate_sign_up_otp(generate_sign_up_otp_dto: GenerateSignUpOtpDTO):
+    log.info(f"inside auth/generate-sign-up-otp (generate_sign_up_otp_dto={generate_sign_up_otp_dto})")
 
-    result = send_sign_up_otp(user=user)
+    result = send_sign_up_otp(
+        email_address=generate_sign_up_otp_dto.email_address,
+        phone_number=generate_sign_up_otp_dto.phone_number
+    )
 
     if result:
         return {"status": "OK"}
@@ -198,7 +205,8 @@ async def reset_password_update_password(request: ResetPasswordVerify):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=emsg
         )
-    result = verify_password_reset_otp(user=user, user_provided_otp=user_provided_otp, new_password=new_password, update_password = True)
+    result = verify_password_reset_otp(user=user, user_provided_otp=user_provided_otp, new_password=new_password,
+                                       update_password=True)
 
     if result:
         return {"status_code": 200, "status": "OK", "detail": 'reset password success for user.'}

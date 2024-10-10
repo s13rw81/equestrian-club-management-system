@@ -38,9 +38,11 @@ def get_database():
 
 
 def get_users_collection():
-    # TODO: create a unique index in the email_address field
     log.info("inside get_users_collection()")
-    return get_database()["users"]
+    users_collection = get_database()["users"]
+    users_collection.create_index([("email_address", 1)], unique=True)
+    users_collection.create_index([("phone_number", 1)], unique=True)
+    return users_collection
 
 
 def get_collection(collection_name: str):
@@ -86,9 +88,26 @@ def get_clubs_collection():
 
 def get_sign_up_otp_collection():
     log.info("inside get_sign_up_otp_collection()")
+
     sign_up_otp_collection = get_database()["sign_up_otp"]
+
     sign_up_otp_collection.create_index([("id", 1)], unique=True)
+    sign_up_otp_collection.create_index([("email_address", 1)], unique=True, sparse=True)
+    sign_up_otp_collection.create_index([("phone_number", 1)], unique=True, sparse=True)
+
     return sign_up_otp_collection
+
+def get_reset_password_otp_collection():
+    log.info("inside get_reset_password_otp_collection()")
+
+    reset_password_otp_collection = get_database()["reset_password_otp"]
+
+    reset_password_otp_collection.create_index([("id", 1)], unique=True)
+    reset_password_otp_collection.create_index([("email_address", 1)], unique=True, sparse=True)
+    reset_password_otp_collection.create_index([("phone_number", 1)], unique=True, sparse=True)
+
+    return reset_password_otp_collection
+
 
 def get_horses_collection():
     log.info("inside get_horses_collection")

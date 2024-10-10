@@ -38,10 +38,11 @@ async def update_club(
         f"user={user})"
     )
 
-    existing_club = find_club(id=update_club_request.id.hex)
+    existing_club = find_club(id=str(update_club_request.id))
 
     # TODO: add last_updated_by id here after refactoring the user module to use uuid type id
     update_club_data = UpdateClubInternal(
+        last_updated_by=user.id,
         last_updated_on=datetime.now(pytz.utc),
         **update_club_request.model_dump(exclude_unset=True)
     )

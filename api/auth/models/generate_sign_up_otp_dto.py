@@ -29,7 +29,7 @@ class GenerateSignUpOtpDTO(BaseModel):
             log.info(f"phone number is not valid, raising error (phone_number={value})")
             raise error
 
-        return value
+        return phonenumbers.format_number(parsed_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
 
     @model_validator(mode="after")
     def check_whether_either_email_or_phone_provided(self) -> Self:

@@ -4,10 +4,10 @@ from models.user.enums import RidingStage, HorseOwnership, EquestrianDiscipline,
 
 
 class ResponseUser(BaseModel):
+    id: str
     full_name: str
-    email_address: Optional[str] = None
-    phone_number: Optional[str] = None
-    otp_verified: bool
+    email_address: str
+    phone_number: str
     user_role: UserRoles
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None

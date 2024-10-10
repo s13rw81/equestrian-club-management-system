@@ -29,7 +29,7 @@ def save_club(new_club: ClubInternal, session=None) -> ClubInternal:
 @atomic_transaction
 def update_club(update_club_data: UpdateClubInternal, session=None) -> ClubInternal:
     log.info(f"inside update_club(update_club_data={update_club_data})")
-    club_database_id = update_club_data.id.hex
+    club_database_id = str(update_club_data.id)
 
     update_club_dict = update_club_data.model_dump(exclude={"id"}, exclude_unset=True)
 

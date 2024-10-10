@@ -23,13 +23,13 @@ class UpdateClubParameterControl:
             ],
             update_club_request: UpdateClubRequest
     ):
-        club = find_club(id=update_club_request.id.hex)
+        club = find_club(id=str(update_club_request.id))
 
         if user.user_role == UserRoles.CLUB:
             validation_result = self.validate_club_user_parameters(
                 update_club_request=update_club_request,
                 club=club,
-                user_id=user.id
+                user_id=str(user.id)
             )
 
             if not validation_result:

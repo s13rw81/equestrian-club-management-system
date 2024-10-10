@@ -90,7 +90,7 @@ class UpdateClubRequest(BaseModel):
                  f"id={self.id}, email_id={self.email_id}, commercial_registration={self.commercial_registration},"
                  f"club_id={self.club_id})")
 
-        club = find_club(id=self.id.hex)
+        club = find_club(id=str(self.id))
 
         if not club:
             log.info(f"the provided id is invalid (id={self.id}), raising ValueError...")

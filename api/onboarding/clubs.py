@@ -27,6 +27,7 @@ async def create_club(
 
     # TODO: add created_by id here after updating the user module to use uuid as id
     club = ClubInternal(
+        created_by=user.id,
         users=[
             ClubUser(user_id=user.id)
         ],
@@ -39,6 +40,6 @@ async def create_club(
     return Success(
         message="club created successfully",
         data={
-            "id": newly_created_club.id.hex
+            "id": str(newly_created_club.id)
         }
     )

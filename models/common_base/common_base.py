@@ -28,4 +28,4 @@ class CommonBase(BaseModel):
         if not value:
             return
 
-        return value.hex
+        return str(value)

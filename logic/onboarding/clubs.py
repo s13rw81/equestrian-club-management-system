@@ -5,7 +5,6 @@ from data.dbapis.clubs import get_club_by_id_logic, save_club
 from data.dbapis.user import update_user
 from data.dbapis.onboarding.onboarding_clubs.read_queries import get_clubs
 from data.dbapis.onboarding.onboarding_clubs.write_queries import update_club
-from fastapi import HTTPException
 from logging_config import log
 from models.clubs import ClubInternal
 from models.services_riding_lession.riding_lesson_service_model import RidingLessonService
@@ -15,6 +14,9 @@ from decorators import atomic_transaction
 
 @atomic_transaction
 def create_club(club: ClubInternal, user: UserInternal, session=None) -> ClubInternal:
+
+    log.info(f"inside create_club(club={club}, user={user})")
+
     newly_created_club = save_club(new_club=club, session=session)
 
     update_user_data = UpdateUserInternal(
@@ -22,6 +24,8 @@ def create_club(club: ClubInternal, user: UserInternal, session=None) -> ClubInt
     )
 
     update_user(update_user_data=update_user_data, user=user, session=session)
+
+    log.info(f"returning {newly_created_club}")
 
     return newly_created_club
 

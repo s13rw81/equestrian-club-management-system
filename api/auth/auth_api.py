@@ -14,10 +14,10 @@ from logic.auth import (
 )
 from models.http_responses import Success
 from models.user import UpdateUserInternal
-from validators.regex_validators import is_valid_email
 from .models import Token, GenerateSignUpOtpDTO, GenerateResetPasswordOtpDTO
 from datetime import datetime
 import pytz
+import phonenumbers
 
 user_auth_router = APIRouter(
     prefix="/auth",
@@ -35,11 +35,16 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         headers={"WWW-Authenticate": "Bearer"}
     )
 
+    try:
+        log.info("trying to parse phone number")
+        phone_number = phonenumbers.parse(form_data.username)
+        phone_number = phonenumbers.format_number(phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+    except phonenumbers.NumberParseException:
+        log.info("failed to parse phone number, raising exception...")
+        raise credentials_exception
+
     user = authenticate_user(
-        email=form_data.username,
-        plain_password=form_data.password
-    ) if is_valid_email(email=form_data.username) else authenticate_user(
-        phone_number=form_data.username,
+        phone_number=phone_number,
         plain_password=form_data.password
     )
 
@@ -119,7 +124,6 @@ async def reset_password_verify_otp(reset_password_dto: ResetPasswordDTO):
             "is_valid_otp": verification_result
         }
     )
-
 
 
 @user_auth_router.put("/reset-password-update-password")

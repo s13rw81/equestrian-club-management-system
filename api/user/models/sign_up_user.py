@@ -14,16 +14,19 @@ from logging_config import log
 
 class SignUpUser(BaseModel):
     full_name: constr(min_length=1, max_length=200)
-    email_address: EmailStr
+    email_address: Optional[EmailStr] = None
     phone_number: str
     phone_otp: constr(min_length=6, max_length=6)
-    password: str = Field(exclude=True)
+    password: constr(strip_whitespace=True, min_length=6) = Field(exclude=True)
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
 
     @field_validator("email_address")
     def email_address_validator(cls, email):
+
+        if not email:
+            return email
 
         result = whether_user_exists(email=email)
 
@@ -55,13 +58,3 @@ class SignUpUser(BaseModel):
             raise ValueError("phone_number already exists...")
 
         return phonenumbers.format_number(parsed_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
-
-    @field_validator("password")
-    def password_validator(cls, password: str) -> str:
-        password = password.strip()
-
-        if len(password) < 6:
-            log.info("password length is less than 6 characters, raising ValueError")
-            raise ValueError("password should be more than 5 characters...")
-
-        return password

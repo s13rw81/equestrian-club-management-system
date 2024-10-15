@@ -6,7 +6,7 @@ from models.user.enums import RidingStage, HorseOwnership, EquestrianDiscipline,
 class ResponseUser(BaseModel):
     id: str
     full_name: str
-    email_address: str
+    email_address: Optional[str] = None
     phone_number: str
     user_role: UserRoles
     riding_stage: Optional[RidingStage] = None

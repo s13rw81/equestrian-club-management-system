@@ -12,7 +12,7 @@ from .enums import (
 
 class UserInternal(CommonBase):
     full_name: str
-    email_address: str
+    email_address: Optional[str] = None
     phone_number: str
     hashed_password: str
     user_role: UserRoles = UserRoles.USER

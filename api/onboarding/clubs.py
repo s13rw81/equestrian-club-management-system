@@ -1,5 +1,5 @@
 from typing import Annotated
-from api.onboarding.models import CreateClubRequest
+from api.onboarding.models import CreateTrainerDTO
 from api.onboarding.onboarding_router import onboarding_api_router
 from data.dbapis.clubs import get_club_count
 from fastapi import Depends
@@ -13,7 +13,7 @@ from models.http_responses import Success
 
 @onboarding_api_router.post("/create-club")
 async def create_club(
-        create_club_request: CreateClubRequest,
+        create_club_request: CreateTrainerDTO,
         user: Annotated[UserInternal, Depends(RoleBasedAccessControl({UserRoles.USER}))]
 ):
     """
@@ -25,7 +25,6 @@ async def create_club(
 
     existing_club_count = get_club_count()
 
-    # TODO: add created_by id here after updating the user module to use uuid as id
     club = ClubInternal(
         created_by=user.id,
         users=[

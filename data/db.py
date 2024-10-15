@@ -30,8 +30,6 @@ client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
-
-
 def get_database():
     log.info("inside get_database()")
     return client[DATABASE_NAME]
@@ -43,41 +41,6 @@ def get_users_collection():
     users_collection.create_index([("email_address", 1)], unique=True)
     users_collection.create_index([("phone_number", 1)], unique=True)
     return users_collection
-
-
-def get_collection(collection_name: str):
-    log.info(f"inside get_collection : {collection_name}")
-    return get_database()[collection_name]
-
-
-def get_transfer_collection():
-    log.info("inside get_transfer_collection()")
-    return get_database()["transfers"]
-
-
-def get_customer_transfer_collection():
-    log.info("inside get_customer_transfer_collection()")
-    return get_database()["customer_transfers"]
-
-
-def get_horse_profiles_collection():
-    log.info(f"inside get_horse_profile_collection()")
-    return get_database()["horse_profiles"]
-
-
-def get_groomers_info_collection():
-    log.info(f"inside get_groomers_info_collection()")
-    return get_database()["groomers"]
-
-
-def get_truck_collection():
-    log.info("inside get_truck_collection()")
-    return get_database()["trucks"]
-
-
-def get_company_collection():
-    log.info("inside get_company_collection()")
-    return get_database()["company"]
 
 
 def get_clubs_collection():
@@ -107,6 +70,29 @@ def get_reset_password_otp_collection():
     reset_password_otp_collection.create_index([("phone_number", 1)], unique=True, sparse=True)
 
     return reset_password_otp_collection
+
+def get_trainer_collection():
+    log.info("inside get_trainer_collection()")
+
+    trainer_collection = get_database()["trainers"]
+
+    trainer_collection.create_index([("id", 1)], unique=True)
+
+    return trainer_collection
+
+def get_uploaded_images_collection():
+    log.info("inside get_uploaded_images_collection")
+    return get_database()["uploaded_images_collection"]
+
+
+def get_upload_images_demo_collection():
+    log.info("inside get_upload_images_demo()")
+    return get_database()["upload_images_demo"]
+
+
+def get_payment_demo_collection():
+    log.info("inside get_payment_demo_collection()")
+    return get_database()["payment_demo"]
 
 
 def get_horses_collection():
@@ -159,16 +145,6 @@ def get_horses_renting_collection():
     return get_database()["horses_selling_collection"]
 
 
-def get_uploaded_images_collection():
-    log.info("inside get_uploaded_images_collection")
-    return get_database()["uploaded_images_collection"]
-
-
-def get_upload_images_demo_collection():
-    log.info("inside get_upload_images_demo()")
-    return get_database()["upload_images_demo"]
-
-
 def get_horse_collection():
     log.info("inside get_horse_collection()")
     return get_database()["horses"]
@@ -179,24 +155,6 @@ def get_horse_selling_service_collection():
     return get_database()["horse_selling_service"]
 
 
-def get_horse_selling_enquiry_collection():
-    log.info("inside get_horse_renting_enquiry_collection()")
-    return get_database()["horse_selling_enquiry"]
-
-
-def get_horse_renting_service_collection():
-    log.info("inside get_horse_renting_service_collection()")
-    return get_database()["horse_renting_service"]
-
-
-def get_horse_renting_enquiry_collection():
-    log.info("inside get_horse_renting_enquiry_collection()")
-    return get_database()["horse_renting_enquiry"]
-
-
-def get_trainer_collection():
-    log.info("inside get_trainer_collection")
-    return get_database()["trainer"]
 
 
 def get_generic_activity_service_collection():
@@ -218,9 +176,7 @@ def get_logistic_service_booking_collection():
     log.info("inside get_logistic_service_booking_collection()")
     return get_database()["logistic_service_booking"]
 
-def get_payment_demo_collection():
-    log.info("inside get_payment_demo_collection()")
-    return get_database()["payment_demo"]
+
 
 def convert_to_object_id(str_id: str) -> ObjectId:
     """

@@ -40,7 +40,6 @@ async def update_club(
 
     existing_club = find_club(id=str(update_club_request.id))
 
-    # TODO: add last_updated_by id here after refactoring the user module to use uuid type id
     update_club_data = UpdateClubInternal(
         last_updated_by=user.id,
         last_updated_on=datetime.now(pytz.utc),
@@ -106,13 +105,7 @@ async def get_your_club(
 ):
     log.info(f"inside /clubs/get-your-club (user_id={user.id})")
 
-    club = find_club_by_user(user_id=user.id)
-
-    if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"no club is associated with the user"
-        )
+    club = find_club_by_user(user_id=str(user.id))
 
     retval = Success(
         message="club retrieved successfully...",

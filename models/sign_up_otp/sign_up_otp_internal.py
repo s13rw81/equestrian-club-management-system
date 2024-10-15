@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 class SignUpOtpInternal(CommonBase):
+    # either email_address of phone_number must be present
     email_address: Optional[str] = None
     phone_number: Optional[str] = None
     otp: str

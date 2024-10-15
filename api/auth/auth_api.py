@@ -1,7 +1,7 @@
-from typing import Annotated, Optional
+from typing import Annotated
 from api.auth.models.reset_password_dto import ResetPasswordDTO
 from data.dbapis.user import find_user, update_user
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from logging_config import log
 from logic.auth import (

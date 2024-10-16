@@ -90,5 +90,5 @@ async def update_user_api(
 
     return Success(
         message="user has been successfully updated...",
-        data=ResponseUser(**update_user.model_dump())
+        data=ResponseUser(**result.model_dump())
     )

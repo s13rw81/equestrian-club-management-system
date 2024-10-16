@@ -10,7 +10,7 @@ class UpdateTrainerDTO(BaseModel):
     club_affiliation: str = Field(None, description="associated club_id")
 
     @field_validator("id")
-    def validate_id(self, trainer_id):
+    def validate_id(cls, trainer_id):
         log.info(f"inside validate_id(trainer_id={trainer_id})")
 
         trainer = find_trainer(id=str(trainer_id))

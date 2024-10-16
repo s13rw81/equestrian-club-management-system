@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, status
 from role_based_access_control import RoleBasedAccessControl
 from fastapi import Depends
 from typing import Annotated
-from models.user import UserInternal, UserRoles
+from models.user import UserInternal
+from models.user.enums import UserRoles
 from models.trainers import UpdateTrainerInternal
 from models.http_responses import Success
 from .models import GetTrainerDTO

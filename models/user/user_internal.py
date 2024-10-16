@@ -25,8 +25,7 @@ class UserInternal(CommonBase):
         "user_role",
         "riding_stage",
         "horse_ownership_status",
-        "equestrian_discipline",
-        "sign_up_credential_type",
+        "equestrian_discipline"
     )
     def enum_serializer(self, enum):
         if not enum:

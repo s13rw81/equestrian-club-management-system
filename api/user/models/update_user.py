@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from models.user import RidingStage, HorseOwnership, EquestrianDiscipline
+from models.user.enums import RidingStage, HorseOwnership, EquestrianDiscipline
 
 
 class UpdateUser(BaseModel):

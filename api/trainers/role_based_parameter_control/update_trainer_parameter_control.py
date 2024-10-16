@@ -1,6 +1,7 @@
 from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
-from models.user import UserInternal, UserRoles
+from models.user import UserInternal
+from models.user.enums import UserRoles
 from role_based_access_control import RoleBasedAccessControl
 from ..models import UpdateTrainerDTO
 from data.dbapis.trainers import find_trainer

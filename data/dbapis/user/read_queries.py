@@ -54,7 +54,7 @@ def get_user_by_phone_number(phone_number: str) -> UserInternal | None:
     :returns: User if exists otherwise None
     """
 
-    log.info(f"get_user_by_phone_number invoked: email={phone_number}")
+    log.info(f"get_user_by_phone_number invoked: phone_number={phone_number}")
 
     user = users_collection.find_one({"phone_number": phone_number})
 

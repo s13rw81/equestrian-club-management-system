@@ -1,2 +1,2 @@
-from .update_user_internal import *
-from .user_internal import *
+from .update_user_internal import UpdateUserInternal
+from .user_internal import UserInternal

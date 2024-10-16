@@ -1,3 +1,2 @@
-from models.clubs.clubs_external import *
-from models.clubs.clubs_internal import *
+from .clubs_internal import ClubInternal, ClubUser
 from .update_club_internal import UpdateClubInternal

@@ -1,1 +1,1 @@
-from .role_based_access_control import *
+from .role_based_access_control import RoleBasedAccessControl

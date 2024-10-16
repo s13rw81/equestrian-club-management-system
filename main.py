@@ -1,44 +1,33 @@
 import uuid
-
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
-
 from api.auth import user_auth_router
-from api.clubs.clubs_api import clubs_api_router
-from api.horses.routers import horse_trade_services_router
 from api.image_management import images_router
-from api.logistics import logistics_admin_router, logistics_user_router
-from api.onboarding import onboarding_api_router
+from api.onboarding.onboarding_router import onboarding_api_router
 from api.rbac_demo import demo_rbac_router
-from api.riding_lesson_services.riding_lesson_services_api import (
-    riding_lesson_services_api_router,
-)
 from api.upload_images_demo import upload_images_demo_router
 from api.clubs import clubs_api_router
 from api.user import user_api_router
 from api.validators import validators_api_router
 from api.payment_demo import payment_demo_router
+from api.trainers import trainers_api_router
 from config import DEBUG, HOST, PORT
 from logging_config import log
 
 app = FastAPI()
 
-app.include_router(onboarding_api_router)
-# app.include_router(riding_lesson_services_api_router)
-# app.include_router(clubs_api_router)
 app.include_router(user_api_router)
 app.include_router(user_auth_router)
-app.include_router(validators_api_router)
-app.include_router(demo_rbac_router)
-# app.include_router(logistics_admin_router)
-app.include_router(images_router)
-app.include_router(upload_images_demo_router)
-# app.include_router(logistics_user_router)
-# app.include_router(horse_trade_services_router)
+app.include_router(onboarding_api_router)
 app.include_router(clubs_api_router)
+app.include_router(trainers_api_router)
+app.include_router(validators_api_router)
+app.include_router(images_router)
+app.include_router(demo_rbac_router)
+app.include_router(upload_images_demo_router)
 app.include_router(payment_demo_router)
 
 

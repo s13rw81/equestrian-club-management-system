@@ -3,7 +3,7 @@ from .role_based_parameter_control.update_club_parameter_control import UpdateCl
 from .role_based_parameter_control.upload_images_parameter_control import UploadImagesParameterControl
 from typing import Annotated
 from logging_config import log
-from data.dbapis.clubs import find_club, update_club as update_club_db, find_club_by_user
+from data.dbapis.clubs import find_club, update_club as update_club_db, find_club_by_user, find_many_clubs
 from models.clubs import UpdateClubInternal
 from models.user import UserInternal
 from logic.auth import get_current_user
@@ -88,6 +88,31 @@ async def get_club_by_id(
             images=generate_image_urls(image_ids=club.images, request=request),
             **club.model_dump(exclude={"logo", "images"})
         )
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
+@clubs_api_router.get("/get-clubs")
+async def get_clubs(
+        request: Request,
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"inside /clubs/get-clubs (user_id={user.id})")
+
+    clubs = find_many_clubs()
+
+    retval = Success(
+        message="club retrieved successfully...",
+        data=[
+            GetClub(
+                logo=generate_image_url(image_id=club.logo, request=request),
+                images=generate_image_urls(image_ids=club.images, request=request),
+                **club.model_dump(exclude={"logo", "images"})
+            ) for club in clubs
+        ]
     )
 
     log.info(f"returning {retval}")

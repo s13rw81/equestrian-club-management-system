@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 from role_based_access_control import RoleBasedAccessControl
 from typing import Annotated
-from models.user import UserInternal, UserRoles
+from models.user import UserInternal
+from models.user.enums import UserRoles
 from .role_based_parameter_control import DifferentRolesDifferentParameters
 
 demo_rbac_router = APIRouter(

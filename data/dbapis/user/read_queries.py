@@ -1,9 +1,26 @@
 from models.user import UserInternal
 from data.db import get_users_collection, convert_to_object_id
 from logging_config import log
+from decorators import atomic_transaction
+from typing import Optional
 
 users_collection = get_users_collection()
 
+@atomic_transaction
+def find_user(session=None, **kwargs) -> Optional[UserInternal]:
+    log.info(f"inside find_user({kwargs})")
+
+    user = users_collection.find_one(kwargs, session=session)
+
+    if not user:
+        log.info(f"No user exists with the provided attributes, returning None")
+        return None
+
+    retval = UserInternal(**user)
+
+    log.info(f"returning user = {retval}")
+
+    return retval
 
 def get_user_by_email(email: str) -> UserInternal | None:
     """
@@ -37,7 +54,7 @@ def get_user_by_phone_number(phone_number: str) -> UserInternal | None:
     :returns: User if exists otherwise None
     """
 
-    log.info(f"get_user_by_phone_number invoked: email={phone_number}")
+    log.info(f"get_user_by_phone_number invoked: phone_number={phone_number}")
 
     user = users_collection.find_one({"phone_number": phone_number})
 
@@ -50,30 +67,3 @@ def get_user_by_phone_number(phone_number: str) -> UserInternal | None:
 
     return retval
 
-
-def get_user_by_object_id(user_id: str) -> UserInternal:
-    # TODO : can add alias in the UserInternal model.
-    """checks if the provided customer id is valid
-
-    Args:
-        user_id (str)
-
-    Returns:
-        UserInternal: User if exists else None
-    """
-
-    log.info(f"get_user_by_object_id invoked: user_id={user_id}")
-    try:
-        user = users_collection.find_one({"_id": convert_to_object_id(user_id)})
-    except Exception as e:
-        log.error(msg=f"Exception : get_user_by_object_id {str(e)}")
-        user = None
-
-    if user is None:
-        retval = None
-    else:
-        retval = UserInternal(**user)
-
-    log.info(f"returning {retval}")
-
-    return retval

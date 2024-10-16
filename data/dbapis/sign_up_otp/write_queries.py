@@ -29,9 +29,9 @@ def save_sign_up_otp(new_sign_up_otp: SignUpOtpInternal, session=None) -> SignUp
 
 @atomic_transaction
 def update_sign_up_otp(update_sign_up_otp_data: UpdateSignUpOtpInternal, session=None) -> SignUpOtpInternal:
-    log.info(f"inside update_club(update_sign_up_otp_data={update_sign_up_otp_data})")
+    log.info(f"inside update_sign_up_otp(update_sign_up_otp_data={update_sign_up_otp_data})")
 
-    sign_up_otp_database_id = update_sign_up_otp_data.id.hex
+    sign_up_otp_database_id = str(update_sign_up_otp_data.id)
 
     update_sign_up_otp_dict = update_sign_up_otp_data.model_dump(exclude={"id"}, exclude_unset=True)
 

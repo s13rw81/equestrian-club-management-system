@@ -19,12 +19,6 @@ class RoleBasedAccessControl:
             f"inside RoleBasedAccessControl; allowed_roles={self.allowed_roles}; user={user}"
         )
 
-        if not user.otp_verified:
-            log.info(f"user is not otp_verified; raising exception; user={user}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="user is not OTP verified"
-            )
 
         if user.user_role not in self.allowed_roles:
             log.info(f"user does not have the required role, raising exception; user={user}")

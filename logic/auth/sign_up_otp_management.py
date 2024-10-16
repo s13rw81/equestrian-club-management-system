@@ -1,14 +1,10 @@
-from data.dbapis.user.write_queries import update_user
 from data.dbapis.sign_up_otp import save_sign_up_otp, update_sign_up_otp, find_sign_up_otp
 from decorators import atomic_transaction
 from external_services.otp_service import send_otp_email, send_otp_phone
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from logging_config import log
-from logic.auth import generate_password_hash
 from models.sign_up_otp import SignUpOtpInternal, UpdateSignUpOtpInternal
-from models.user import UpdateUserInternal, UserInternal, PasswordResetVerificationOTP
-from models.user.enums import SignUpCredentialType
 from datetime import datetime, timedelta
 import pytz
 
@@ -186,62 +182,3 @@ def verify_sign_up_otp(
     log.info("returning False...")
     return False
 
-
-def send_reset_password_otp(user: UserInternal) -> bool:
-    log.info(f"inside send_reset_password_otp(user={user})")
-
-    sent_otp = (send_otp_email(email_address=user.email_address)
-                if user.sign_up_credential_type == SignUpCredentialType.EMAIL_ADDRESS
-                else send_otp_phone(phone_number=user.phone_number))
-
-    update_user_data = UpdateUserInternal(
-        password_reset_verification_otp=PasswordResetVerificationOTP(otp=sent_otp))
-
-    result = update_user(update_user_data=update_user_data, user=user)
-
-    return result
-
-
-def verify_password_reset_otp(user: UserInternal, user_provided_otp: str, new_password: str = None,
-                              update_password: bool = False) -> bool | dict[str, str | int]:
-    """
-        matches user provided OTP with password reset otp for user,
-        if its a match, updatehashed password for user
-
-        :param update_password:
-        :param user: UserInternal
-        :param user_provided_otp: the user provided OTP
-        :param new_password: new plain text password
-
-        :returns: boolean indicating whether if update hashed password was a success or not
-    """
-
-    log.info(f"verify_password_reset_otp(user={user}, user_provided_otp={user_provided_otp})")
-
-    if not user.password_reset_verification_otp:
-        raise HTTPException(
-            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-            detail='password reset otp not generated for user.'
-        )
-
-    if user.password_reset_verification_otp.otp != user_provided_otp:
-        emsg = f"user provided OTP {user_provided_otp} and password reset OTP sent to user do not match."
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=emsg
-        )
-    log.info(f'USER FOUND: {user}, user provided TOP and user OTP matched.')
-    if update_password is True:
-        if not new_password:
-            emsg = 'new password missing in request.'
-            log.error(emsg)
-            raise HTTPException(
-                status_code=status.HTTP_206_PARTIAL_CONTENT,
-                detail=emsg
-            )
-        log.info(f'update_password is {update_password}, changing users password and setting new password')
-        new_hashed_password = generate_password_hash(new_password)
-        update_user_data = UpdateUserInternal(hashed_password=new_hashed_password)
-        return update_user(update_user_data, user)
-    else:
-        return {'status_code': 200, 'detail': 'OTP matched.'}

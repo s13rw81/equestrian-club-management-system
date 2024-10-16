@@ -1,4 +1,3 @@
-from typing import List
 from pydantic import BaseModel, EmailStr, constr, field_validator, model_validator
 from data.dbapis.clubs import find_club
 from typing_extensions import Self
@@ -10,27 +9,6 @@ class LocationIn(BaseModel):
     lat: constr(min_length=1, max_length=200, pattern=r"^-?(?:90(\.0+)?|[0-8]?\d(\.\d+)?)[NS]?$")
     long: constr(min_length=1, max_length=200, pattern=r"^-?(?:180(\.0+)?|(?:1[0-7]\d|\d{1,2})(\.\d+)?)[EW]?$")
 
-
-class HorseShoeingServicePricingOption(BaseModel):
-    price: int
-    number_of_horses: int
-
-
-class RidingLessonServicePricingOption(BaseModel):
-    price: int
-    number_of_lessons: int
-
-
-class RidingLessonService(BaseModel):
-    pricing_options: List[RidingLessonServicePricingOption]
-
-
-class HorseShoeingService(BaseModel):
-    pricing_options: List[HorseShoeingServicePricingOption]
-
-
-class GenericActivityService(BaseModel):
-    price: int
 
 
 class CreateClubRequest(BaseModel):

@@ -1,4 +1,3 @@
-from api.onboarding.clubs import *
-from api.onboarding.logistic_company import *
-from api.onboarding.onboarding_router import *
-from api.onboarding.trainer import *
+from .onboarding_router import onboarding_api_router
+from .clubs import create_club
+from .trainers import create_trainer

@@ -1,16 +1,18 @@
 from pydantic import BaseModel, field_serializer
 from typing import Optional
-from .user_internal import SignUpVerificationOTP, PasswordResetVerificationOTP
-from .enums import RidingStage, HorseOwnership, EquestrianDiscipline, UserRoles
+from .enums import (
+    RidingStage,
+    HorseOwnership,
+    EquestrianDiscipline,
+    UserRoles
+)
+from ..common_base import CommonBase
 
 
-class UpdateUserInternal(BaseModel):
-    full_name: Optional[str] = None
-    hashed_password: Optional[str] = None
-    otp_verified: Optional[bool] = None
-    sign_up_verification_otp: Optional[SignUpVerificationOTP] = None
-    password_reset_verification_otp: Optional[PasswordResetVerificationOTP] = None
-    user_role: Optional[UserRoles] = None
+class UpdateUserInternal(CommonBase):
+    full_name: str = None
+    hashed_password: str = None
+    user_role: UserRoles = None
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None

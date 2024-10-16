@@ -5,7 +5,11 @@ from typing import Annotated
 from .models import SignUpUser, ResponseUser, UpdateUser
 from models.user import UserInternal, UpdateUserInternal
 from data.dbapis.user.write_queries import save_user, update_user as update_user_db
-from logic.auth import generate_password_hash, get_current_user
+from logic.auth import generate_password_hash, get_current_user, verify_sign_up_otp
+from models.http_responses import Success
+from datetime import datetime
+import pytz
+
 
 user_api_router = APIRouter(
     prefix="/user",
@@ -16,6 +20,18 @@ user_api_router = APIRouter(
 @user_api_router.post("/signup")
 async def signup(sign_up_user: SignUpUser):
     log.info(f"/signup invoked: sign_up_user = {sign_up_user}")
+
+    verification_result = verify_sign_up_otp(
+        user_provided_otp=sign_up_user.phone_otp,
+        phone_number=sign_up_user.phone_number
+    )
+
+    if not verification_result:
+        log.info("OTP verification failed, raising HTTPException...")
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="invalid OTP, please try again..."
+        )
 
     user = UserInternal(
         full_name=sign_up_user.full_name,
@@ -35,18 +51,24 @@ async def signup(sign_up_user: SignUpUser):
             detail="could not save the user in the database"
         )
 
-    return {"id": result}
+    return Success(
+        message="user created successfully...",
+        data=ResponseUser(**result.model_dump())
+    )
 
 
 @user_api_router.get("/me")
-async def me(user: Annotated[UserInternal, Depends(get_current_user)]) -> ResponseUser:
+async def me(user: Annotated[UserInternal, Depends(get_current_user)]):
     log.info(f"/me invoked")
 
     response_user = ResponseUser(**user.model_dump())
 
     log.info(f"returning {response_user}")
 
-    return response_user
+    return Success(
+        message="user fetched successfully",
+        data=response_user
+    )
 
 
 @user_api_router.put("/update")
@@ -56,14 +78,17 @@ async def update_user_api(
 ):
     log.info(f"/user/update (update_user={update_user}, user={user})")
 
-    update_user = UpdateUserInternal(**update_user.model_dump())
+    update_user_dto = UpdateUserInternal(
+        id=user.id,
+        last_updated_on=datetime.now(pytz.utc),
+        **update_user.model_dump(exclude_unset=True)
+    )
 
-    result = update_user_db(update_user_data=update_user, user=user)
+    result = update_user_db(update_user_dto=update_user_dto)
 
-    if result:
-        return {"status": "OK"}
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="could not update user"
-        )
+    log.info(f"update completed, updated_user={result}")
+
+    return Success(
+        message="user has been successfully updated...",
+        data=ResponseUser(**result.model_dump())
+    )

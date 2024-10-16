@@ -3,7 +3,7 @@ from .role_based_parameter_control.update_club_parameter_control import UpdateCl
 from .role_based_parameter_control.upload_images_parameter_control import UploadImagesParameterControl
 from typing import Annotated
 from logging_config import log
-from data.dbapis.clubs import find_club, update_club as update_club_db, find_club_by_user
+from data.dbapis.clubs import find_club, update_club as update_club_db, find_club_by_user, find_many_clubs
 from models.clubs import UpdateClubInternal
 from models.user import UserInternal
 from logic.auth import get_current_user
@@ -38,10 +38,10 @@ async def update_club(
         f"user={user})"
     )
 
-    existing_club = find_club(id=update_club_request.id.hex)
+    existing_club = find_club(id=str(update_club_request.id))
 
-    # TODO: add last_updated_by id here after refactoring the user module to use uuid type id
     update_club_data = UpdateClubInternal(
+        last_updated_by=user.id,
         last_updated_on=datetime.now(pytz.utc),
         **update_club_request.model_dump(exclude_unset=True)
     )
@@ -95,6 +95,31 @@ async def get_club_by_id(
     return retval
 
 
+@clubs_api_router.get("/get-clubs")
+async def get_clubs(
+        request: Request,
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"inside /clubs/get-clubs (user_id={user.id})")
+
+    clubs = find_many_clubs()
+
+    retval = Success(
+        message="club retrieved successfully...",
+        data=[
+            GetClub(
+                logo=generate_image_url(image_id=club.logo, request=request),
+                images=generate_image_urls(image_ids=club.images, request=request),
+                **club.model_dump(exclude={"logo", "images"})
+            ) for club in clubs
+        ]
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
 @clubs_api_router.get("/get-your-club")
 async def get_your_club(
         request: Request,
@@ -105,13 +130,7 @@ async def get_your_club(
 ):
     log.info(f"inside /clubs/get-your-club (user_id={user.id})")
 
-    club = find_club_by_user(user_id=user.id)
-
-    if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"no club is associated with the user"
-        )
+    club = find_club_by_user(user_id=str(user.id))
 
     retval = Success(
         message="club retrieved successfully...",

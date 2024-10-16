@@ -4,7 +4,8 @@ from pydantic import (
     EmailStr,
     field_serializer,
     field_validator,
-    model_validator
+    model_validator,
+    Field
 )
 from uuid import UUID
 import phonenumbers
@@ -21,7 +22,7 @@ class LocationUpdate(BaseModel):
 
 class UpdateClubRequest(BaseModel):
     # user-fields
-    id: UUID
+    id: UUID = Field(..., description="club_id")
     name: constr(min_length=1, max_length=200) = None
     owner_name: constr(min_length=1, max_length=200) = None
     phone_number: constr(min_length=1, max_length=20) = None
@@ -83,22 +84,22 @@ class UpdateClubRequest(BaseModel):
         log.info("club_id validated successfully, returning...")
         return value
 
-
     @model_validator(mode="after")
     def validate_constraints(self) -> Self:
         log.info("inside validate_constraints("
                  f"id={self.id}, email_id={self.email_id}, commercial_registration={self.commercial_registration},"
                  f"club_id={self.club_id})")
 
-        club = find_club(id=self.id.hex)
+        club = find_club(id=str(self.id))
 
         if not club:
             log.info(f"the provided id is invalid (id={self.id}), raising ValueError...")
             raise ValueError(f"the provided id is invalid(id={self.id})")
 
         if not (self.email_id or self.commercial_registration or self.club_id):
-            log.info("neither email_id nor commercial_registration nor club_id is provided, hence no further validation "
-                     "is required... returning...")
+            log.info(
+                "neither email_id nor commercial_registration nor club_id is provided, hence no further validation "
+                "is required... returning...")
             return self
 
         email_id = self.email_id if self.email_id else club.email_id

@@ -14,7 +14,7 @@ class UploadImagesParameterControl:
                 UserInternal,
                 Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB, UserRoles.ADMIN}))
             ],
-            club_id: str = Form(...)
+            club_id: str = Form(..., description="the database uuid")
     ):
         log.info(f"inside __init__(user_id={user.id}, club_id={club_id})")
 
@@ -29,7 +29,7 @@ class UploadImagesParameterControl:
                     detail="user doest not have an associated club..."
                 )
 
-            if club.id.hex != club_id:
+            if str(club.id) != club_id:
                 log.info("user is not authorized to upload images for this club...")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

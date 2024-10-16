@@ -27,13 +27,13 @@ def atomic_transaction(func):
                 session.end_session()
 
             raise e
-        finally:
 
-            if not is_session_provided:
-                session.commit_transaction()
-                session.end_session()
 
-            return retval
+        if not is_session_provided:
+            session.commit_transaction()
+            session.end_session()
+
+        return retval
 
     return wrapper
 

@@ -34,20 +34,22 @@ def get_database():
     log.info("inside get_database()")
     return client[DATABASE_NAME]
 
-
 def get_users_collection():
     log.info("inside get_users_collection()")
     users_collection = get_database()["users"]
-    users_collection.create_index([("email_address", 1)], unique=True)
+
+    # TODO: figure out how to add indexes with unique constraint in nullable fields
+    users_collection.create_index([("email_address", 1)])
     users_collection.create_index([("phone_number", 1)], unique=True)
     return users_collection
 
 
 def get_clubs_collection():
     log.info("inside get_club_collection()")
-    club_collection = get_database()["club"]
+    club_collection = get_database()["clubs"]
     club_collection.create_index([("id", 1)], unique=True)
     return club_collection
+
 
 def get_sign_up_otp_collection():
     log.info("inside get_sign_up_otp_collection()")
@@ -55,8 +57,10 @@ def get_sign_up_otp_collection():
     sign_up_otp_collection = get_database()["sign_up_otp"]
 
     sign_up_otp_collection.create_index([("id", 1)], unique=True)
-    sign_up_otp_collection.create_index([("email_address", 1)], unique=True, sparse=True)
-    sign_up_otp_collection.create_index([("phone_number", 1)], unique=True, sparse=True)
+
+    # TODO: figure out how to add indexes with unique constraint in nullable fields
+    sign_up_otp_collection.create_index([("email_address", 1)])
+    sign_up_otp_collection.create_index([("phone_number", 1)])
 
     return sign_up_otp_collection
 
@@ -66,8 +70,10 @@ def get_reset_password_otp_collection():
     reset_password_otp_collection = get_database()["reset_password_otp"]
 
     reset_password_otp_collection.create_index([("id", 1)], unique=True)
-    reset_password_otp_collection.create_index([("email_address", 1)], unique=True, sparse=True)
-    reset_password_otp_collection.create_index([("phone_number", 1)], unique=True, sparse=True)
+
+    # TODO: figure out how to add indexes with unique constraint in nullable fields
+    reset_password_otp_collection.create_index([("email_address", 1)])
+    reset_password_otp_collection.create_index([("phone_number", 1)])
 
     return reset_password_otp_collection
 

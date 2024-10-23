@@ -38,6 +38,7 @@ async def signup(sign_up_user: SignUpUser):
         email_address=sign_up_user.email_address,
         phone_number=sign_up_user.phone_number,
         hashed_password=generate_password_hash(sign_up_user.password),
+        gender=sign_up_user.gender,
         riding_stage=sign_up_user.riding_stage,
         horse_ownership_status=sign_up_user.horse_ownership_status,
         equestrian_discipline=sign_up_user.equestrian_discipline

@@ -9,6 +9,16 @@ from typing import Optional
 class ClubUser(BaseModel):
     user_id: str
 
+class IndividualService(BaseModel):
+    name: str
+    description: str
+    trainers: list[str]
+
+class GroupService(BaseModel):
+    name: str
+    description: str
+    trainers: list[str]
+
 class ClubInternal(CommonBase):
     # user-fields
     name: str

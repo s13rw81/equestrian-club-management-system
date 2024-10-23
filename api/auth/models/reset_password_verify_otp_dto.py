@@ -1,26 +1,14 @@
-from typing import Optional
-from pydantic import BaseModel, Field, model_validator, field_validator
-from typing_extensions import Self
-from logging_config import log
+from pydantic import BaseModel, field_validator, model_validator
 from data.dbapis.reset_password_otp import find_reset_password_otp
+from config import log
+from typing import Optional
+from typing_extensions import Self
 import phonenumbers
 
-
-class ResetPasswordDTO(BaseModel):
+class ResetPasswordVerifyOtpDTO(BaseModel):
     email_address: Optional[str] = None
     phone_number: Optional[str] = None
     otp: str
-    new_password: Optional[str] = Field(default=None, exclude=True)
-
-    @field_validator("new_password")
-    def password_validator(cls, new_password):
-        password = new_password.strip()
-
-        if len(password) < 6:
-            log.info("password length is less than 6 characters, raising ValueError")
-            raise ValueError("password should be more than 5 characters...")
-
-        return password
 
     @field_validator("phone_number")
     def validate_phone_number(cls, phone_number):
@@ -28,7 +16,7 @@ class ResetPasswordDTO(BaseModel):
         if not phone_number:
             return phone_number
 
-        log.info(f"validating phone number in ResetPasswordDTO(phone_number={phone_number})")
+        log.info(f"validating phone number in ResetPasswordVerifyOtpDTO(phone_number={phone_number})")
 
         error = ValueError(f"invalid phone number (phone_number={phone_number})")
 
@@ -73,4 +61,3 @@ class ResetPasswordDTO(BaseModel):
             raise ValueError("please generate reset_password_otp first")
 
         return self
-

@@ -2,8 +2,8 @@ import uuid
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.exception_handlers import http_exception_handler
-from fastapi.exceptions import HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.exceptions import HTTPException, RequestValidationError
+from fastapi.responses import RedirectResponse, JSONResponse
 from api.auth import user_auth_router
 from api.image_management import images_router
 from api.onboarding.onboarding_router import onboarding_api_router
@@ -47,6 +47,22 @@ async def general_exception_handler(request: Request, exc):
         detail=f"something went wrong in our end [error_code: {exception_id}]",
     )
     return await http_exception_handler(request, exception_for_the_user)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    log.info(f"validation error occurred...")
+
+    error_messages = [error["msg"] for error in exc.errors()]
+
+    response = {
+        "message": "Validation Error",
+        "errors": error_messages
+    }
+
+    log.info(f"returning response={response}")
+
+    return JSONResponse(content=response, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 @app.get("/", include_in_schema=False)

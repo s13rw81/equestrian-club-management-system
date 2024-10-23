@@ -6,7 +6,12 @@ from pydantic import (
     EmailStr
 )
 from typing import Optional
-from models.user.enums import RidingStage, HorseOwnership, EquestrianDiscipline
+from models.user.enums import (
+    RidingStage,
+    HorseOwnership,
+    EquestrianDiscipline,
+    Gender
+)
 from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
@@ -18,9 +23,14 @@ class SignUpUser(BaseModel):
     phone_number: str
     phone_otp: constr(min_length=6, max_length=6)
     password: constr(strip_whitespace=True, min_length=6) = Field(exclude=True)
+    gender: Optional[Gender] = None
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
+
+    @field_validator("full_name")
+    def full_name_capitalize(cls, full_name):
+        return " ".join([item.capitalize() for item in full_name.split()])
 
     @field_validator("email_address")
     def email_address_validator(cls, email):
@@ -32,7 +42,7 @@ class SignUpUser(BaseModel):
 
         if result:
             log.info("an user with the same email_address already exists, raising ValueError")
-            raise ValueError("email already exists...")
+            raise ValueError(f"email already exists (email={email})")
 
         return email
 

@@ -1,5 +1,4 @@
 from typing import Annotated
-from api.auth.models.reset_password_dto import ResetPasswordDTO
 from data.dbapis.user import find_user, update_user
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -14,7 +13,13 @@ from logic.auth import (
 )
 from models.http_responses import Success
 from models.user import UpdateUserInternal
-from .models import Token, GenerateSignUpOtpDTO, GenerateResetPasswordOtpDTO
+from .models import (
+    Token,
+    GenerateSignUpOtpDTO,
+    GenerateResetPasswordOtpDTO,
+    ResetPasswordDTO,
+    ResetPasswordVerifyOtpDTO
+)
 from datetime import datetime
 import pytz
 import phonenumbers
@@ -108,13 +113,13 @@ async def generate_reset_password_otp(generate_reset_password_otp_dto: GenerateR
 
 
 @user_auth_router.post("/reset-password-verify-otp")
-async def reset_password_verify_otp(reset_password_dto: ResetPasswordDTO):
-    log.info(f"inside /auth/reset-password-verify-otp (reset_password_dto={reset_password_dto})")
+async def reset_password_verify_otp(reset_password_verify_otp_dto: ResetPasswordVerifyOtpDTO):
+    log.info(f"inside /auth/reset-password-verify-otp (reset_password_verify_otp_dto={reset_password_verify_otp_dto})")
 
     verification_result = verify_reset_password_otp(
-        user_provided_otp=reset_password_dto.otp,
-        email_address=reset_password_dto.email_address,
-        phone_number=reset_password_dto.phone_number
+        user_provided_otp=reset_password_verify_otp_dto.otp,
+        email_address=reset_password_verify_otp_dto.email_address,
+        phone_number=reset_password_verify_otp_dto.phone_number
     )
 
     log.info(f"otp verification result = {verification_result}")

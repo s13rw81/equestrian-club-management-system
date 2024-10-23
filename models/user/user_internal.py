@@ -6,6 +6,7 @@ from .enums import (
     HorseOwnership,
     RidingStage,
     UserRoles,
+    Gender
 )
 
 
@@ -15,6 +16,7 @@ class UserInternal(CommonBase):
     email_address: Optional[str] = None
     phone_number: str
     hashed_password: str
+    gender: Optional[Gender] = None
     user_role: UserRoles = UserRoles.USER
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
@@ -22,6 +24,7 @@ class UserInternal(CommonBase):
 
 
     @field_serializer(
+        "gender",
         "user_role",
         "riding_stage",
         "horse_ownership_status",

@@ -149,7 +149,7 @@ def verify_reset_password_otp(
             )
 
             result = update_reset_password_otp(
-                update_sign_up_otp_dto=update_reset_password_otp_dto,
+                update_reset_password_otp_dto=update_reset_password_otp_dto,
                 session=session
             )
 
@@ -173,7 +173,7 @@ def verify_reset_password_otp(
     )
 
     result = update_reset_password_otp(
-        update_sign_up_otp_dto=update_reset_password_otp_dto,
+        update_reset_password_otp_dto=update_reset_password_otp_dto,
         session=session
     )
 

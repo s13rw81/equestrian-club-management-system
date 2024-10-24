@@ -14,18 +14,34 @@ from config import (
 )
 from logging_config import log
 
+# ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
+# ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
+#
+# CONNECTION_STRING = (
+#     f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}"
+#     if ESCAPED_DATABASE_USERNAME != ""
+#     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
+# )
+#
+# CONNECTION_STRING += f"/?replicaSet={DATABASE_REPLICA_SET_NAME}&directConnection=true"
+#
+# client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
+
+# Ensure your username and password are set correctly
+
 ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
 ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
 
+# Update DATABASE_URL to localhost or 127.0.0.1
+DATABASE_URL = "localhost"  # Change this to localhost or 127.0.0.1
+
 CONNECTION_STRING = (
-    f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}"
+    f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}/?replicaSet={DATABASE_REPLICA_SET_NAME}"
     if ESCAPED_DATABASE_USERNAME != ""
-    else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
+    else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}/?replicaSet={DATABASE_REPLICA_SET_NAME}"
 )
 
-CONNECTION_STRING += f"/?replicaSet={DATABASE_REPLICA_SET_NAME}&directConnection=true"
-
-client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
+client = MongoClient(CONNECTION_STRING)
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
@@ -33,6 +49,7 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 def get_database():
     log.info("inside get_database()")
     return client[DATABASE_NAME]
+
 
 def get_users_collection():
     log.info("inside get_users_collection()")
@@ -64,6 +81,7 @@ def get_sign_up_otp_collection():
 
     return sign_up_otp_collection
 
+
 def get_reset_password_otp_collection():
     log.info("inside get_reset_password_otp_collection()")
 
@@ -77,6 +95,7 @@ def get_reset_password_otp_collection():
 
     return reset_password_otp_collection
 
+
 def get_trainer_collection():
     log.info("inside get_trainer_collection()")
 
@@ -85,6 +104,7 @@ def get_trainer_collection():
     trainer_collection.create_index([("id", 1)], unique=True)
 
     return trainer_collection
+
 
 def get_uploaded_images_collection():
     log.info("inside get_uploaded_images_collection")
@@ -161,8 +181,6 @@ def get_horse_selling_service_collection():
     return get_database()["horse_selling_service"]
 
 
-
-
 def get_generic_activity_service_collection():
     log.info("inside get_generic_activity_service_collection")
     return get_database()["generic_activity_service"]
@@ -183,7 +201,6 @@ def get_logistic_service_booking_collection():
     return get_database()["logistic_service_booking"]
 
 
-
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (
@@ -193,3 +210,8 @@ def convert_to_object_id(str_id: str) -> ObjectId:
     :returns: ObjectId
     """
     return ObjectId(str_id)
+
+
+def get_countries_collection():
+    log.info("Fetching countries collection...")
+    return get_database()["countries"]

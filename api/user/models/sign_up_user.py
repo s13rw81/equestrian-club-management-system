@@ -5,11 +5,23 @@ from pydantic import (
     constr,
     EmailStr
 )
-from typing import Optional
-from models.user.enums import RidingStage, HorseOwnership, EquestrianDiscipline
+from typing import Optional, List
+from models.user.enums import RidingStage, HorseOwnership, EquestrianDiscipline, UserRoles
 from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
+
+"""__________________________________________________________________________________________________________________"""
+
+
+# model for countries
+class Country(BaseModel):
+    country_name: str
+    country_code: str  # e.g., 'IN' for India
+    country_iso: Optional[str] = None  # Optional ISO code if needed
+
+
+"""__________________________________________________________________________________________________________________"""
 
 
 class SignUpUser(BaseModel):
@@ -21,6 +33,8 @@ class SignUpUser(BaseModel):
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
+    country: List[Country] = []  # List of countries available for selection
+    user_category: Optional[UserRoles] = None
 
     @field_validator("email_address")
     def email_address_validator(cls, email):

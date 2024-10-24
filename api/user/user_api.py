@@ -1,15 +1,16 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
+
+from data.db import get_countries_collection
 from logging_config import log
 from typing import Annotated
-from .models import SignUpUser, ResponseUser, UpdateUser
+from .models import SignUpUser, ResponseUser, UpdateUser, Country
 from models.user import UserInternal, UpdateUserInternal
 from data.dbapis.user.write_queries import save_user, update_user as update_user_db
 from logic.auth import generate_password_hash, get_current_user, verify_sign_up_otp
 from models.http_responses import Success
 from datetime import datetime
 import pytz
-
 
 user_api_router = APIRouter(
     prefix="/user",
@@ -92,3 +93,32 @@ async def update_user_api(
         message="user has been successfully updated...",
         data=ResponseUser(**result.model_dump())
     )
+
+
+"""__________________________________________________________________________________________________________________"""
+
+
+# Fetch all countries API
+@user_api_router.get("/countries")
+async def get_all_countries():
+    log.info("/countries invoked")
+
+    countries_collection = get_countries_collection()
+    countries = list(countries_collection.find({}, {"_id": 0}))
+
+    if not countries:
+        log.info("No countries found in the database.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No countries found"
+        )
+
+    log.info(f"Countries retrieved: {countries}")
+
+    return Success(
+        message="Countries fetched successfully.",
+        data=countries
+    )
+
+
+"""__________________________________________________________________________________________________________________"""

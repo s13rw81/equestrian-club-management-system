@@ -176,5 +176,5 @@ async def reset_password_update_password(reset_password_dto: ResetPasswordDTO):
     log.info(f"update executed, result = {update_result}")
 
     return Success(
-        message="OTP updated successfully"
+        message="password updated successfully"
     )

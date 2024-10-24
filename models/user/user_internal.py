@@ -12,15 +12,18 @@ from .enums import (
 
 
 class UserInternal(CommonBase):
+    # user-fields
     full_name: str
     email_address: Optional[str] = None
     phone_number: str
     hashed_password: str
     gender: Optional[Gender] = None
+    # system fields
     user_role: UserRoles = UserRoles.USER
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
+    image: Optional[str] = None
 
 
     @field_serializer(

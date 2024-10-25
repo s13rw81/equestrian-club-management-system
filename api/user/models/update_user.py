@@ -4,7 +4,8 @@ from models.user.enums import (
     RidingStage,
     HorseOwnership,
     EquestrianDiscipline,
-    Gender
+    Gender,
+    UserCategory
 )
 
 
@@ -14,6 +15,7 @@ class UpdateUser(BaseModel):
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
+    user_category: Optional[UserCategory] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):

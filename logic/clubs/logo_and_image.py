@@ -15,6 +15,7 @@ async def upload_logo_logic(club_id: str, logo: UploadFile) -> ClubInternal:
     existing_logo_id = club.logo
 
     if existing_logo_id:
+        log.info("logo already exists, deleting existing image...")
         await delete_image(image_id=existing_logo_id)
 
     new_logo_id = await save_image(image_file=logo)

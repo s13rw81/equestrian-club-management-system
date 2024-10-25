@@ -4,7 +4,7 @@ from fastapi.exceptions import HTTPException
 from data.db import get_countries_collection
 from logging_config import log
 from typing import Annotated
-from .models import SignUpUser, ResponseUser, UpdateUser, Country
+from .models import SignUpUser, ResponseUser, UpdateUser
 from models.user import UserInternal, UpdateUserInternal
 from data.dbapis.user.write_queries import save_user, update_user as update_user_db
 from logic.auth import generate_password_hash, get_current_user, verify_sign_up_otp
@@ -41,7 +41,8 @@ async def signup(sign_up_user: SignUpUser):
         hashed_password=generate_password_hash(sign_up_user.password),
         riding_stage=sign_up_user.riding_stage,
         horse_ownership_status=sign_up_user.horse_ownership_status,
-        equestrian_discipline=sign_up_user.equestrian_discipline
+        equestrian_discipline=sign_up_user.equestrian_discipline,
+        user_category=sign_up_user.user_category
     )
 
     result = save_user(user=user)
@@ -103,8 +104,7 @@ async def update_user_api(
 async def get_all_countries():
     log.info("/countries invoked")
 
-    countries_collection = get_countries_collection()
-    countries = list(countries_collection.find({}, {"_id": 0}))
+    countries = get_countries_collection()
 
     if not countries:
         log.info("No countries found in the database.")

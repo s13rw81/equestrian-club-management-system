@@ -14,34 +14,18 @@ from config import (
 )
 from logging_config import log
 
-# ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
-# ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
-#
-# CONNECTION_STRING = (
-#     f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}"
-#     if ESCAPED_DATABASE_USERNAME != ""
-#     else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
-# )
-#
-# CONNECTION_STRING += f"/?replicaSet={DATABASE_REPLICA_SET_NAME}&directConnection=true"
-#
-# client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
-
-# Ensure your username and password are set correctly
-
 ESCAPED_DATABASE_USERNAME = quote_plus(DATABASE_USER)
 ESCAPED_DATABASE_PASSWORD = quote_plus(DATABASE_PASSWORD)
 
-# Update DATABASE_URL to localhost or 127.0.0.1
-DATABASE_URL = "localhost"  # Change this to localhost or 127.0.0.1
-
 CONNECTION_STRING = (
-    f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}/?replicaSet={DATABASE_REPLICA_SET_NAME}"
+    f"mongodb://{ESCAPED_DATABASE_USERNAME}:{ESCAPED_DATABASE_PASSWORD}@{DATABASE_URL}:{DATABASE_PORT}"
     if ESCAPED_DATABASE_USERNAME != ""
-    else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}/?replicaSet={DATABASE_REPLICA_SET_NAME}"
+    else f"mongodb://{DATABASE_URL}:{DATABASE_PORT}"
 )
 
-client = MongoClient(CONNECTION_STRING)
+CONNECTION_STRING += f"/?replicaSet={DATABASE_REPLICA_SET_NAME}&directConnection=true"
+
+client = MongoClient(CONNECTION_STRING, maxPoolSize=DATABASE_MAX_POOL_SIZE)
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
@@ -213,5 +197,6 @@ def convert_to_object_id(str_id: str) -> ObjectId:
 
 
 def get_countries_collection():
-    log.info("Fetching countries collection...")
-    return get_database()["countries"]
+    log.info("Fetching all countries...")
+    countries_collection = get_database()["countries"]
+    return list(countries_collection.find({}, {"_id": 0}))

@@ -45,7 +45,8 @@ async def signup(request: Request, sign_up_user: SignUpUser):
         riding_stage=sign_up_user.riding_stage,
         horse_ownership_status=sign_up_user.horse_ownership_status,
         equestrian_discipline=sign_up_user.equestrian_discipline,
-        user_category=sign_up_user.user_category
+        user_category=sign_up_user.user_category,
+        country=sign_up_user.country
     )
 
     result = save_user(user=user)

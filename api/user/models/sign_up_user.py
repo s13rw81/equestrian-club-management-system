@@ -16,6 +16,7 @@ from models.user.enums import (
 from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
+from api.countries.models.country_model import Country
 
 
 class SignUpUser(BaseModel):
@@ -29,6 +30,7 @@ class SignUpUser(BaseModel):
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
+    country: Optional[Country] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):

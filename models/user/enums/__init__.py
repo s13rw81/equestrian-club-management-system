@@ -4,3 +4,4 @@ from .riding_stage import RidingStage
 from .user_roles import UserRoles
 from .user_category import UserCategory
 from .gender import Gender
+from .country import MiddleEastCountries

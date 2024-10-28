@@ -14,6 +14,7 @@ from api.user import user_api_router
 from api.validators import validators_api_router
 from api.payment_demo import payment_demo_router
 from api.trainers import trainers_api_router
+from api.countries.country_api import country_api_router
 from config import DEBUG, HOST, PORT
 from logging_config import log
 
@@ -29,7 +30,7 @@ app.include_router(images_router)
 app.include_router(demo_rbac_router)
 app.include_router(upload_images_demo_router)
 app.include_router(payment_demo_router)
-
+app.include_router(country_api_router)
 
 # this exception handler will handle all the Exceptions
 # except for FastAPI's HTTPException

@@ -1,5 +1,7 @@
 from pydantic import BaseModel, field_serializer
 from typing import Optional
+
+from api.countries.models.country_model import Country
 from models.user.enums import (
     RidingStage,
     HorseOwnership,
@@ -21,6 +23,7 @@ class ResponseUser(BaseModel):
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
     image: Optional[str] = None
+    country: Optional[Country] = None
 
     @field_serializer(
         "gender",
@@ -28,7 +31,8 @@ class ResponseUser(BaseModel):
         "horse_ownership_status",
         "equestrian_discipline",
         "user_role",
-        "user_category"
+        "user_category",
+        "country"
     )
     def enum_serializer(self, enum):
         if not enum:

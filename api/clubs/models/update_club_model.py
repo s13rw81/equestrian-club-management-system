@@ -13,6 +13,7 @@ from models.clubs.enums import VerificationStatus
 from logging_config import log
 from typing_extensions import Self
 from data.dbapis.clubs import find_club
+from typing import Optional
 
 
 class LocationUpdate(BaseModel):
@@ -32,6 +33,7 @@ class UpdateClubRequest(BaseModel):
     iban: constr(min_length=1, max_length=200) = None
     description: constr(min_length=1, max_length=1000) = None
     location: LocationUpdate = None
+    about: Optional[str] = None
     # system-fields
     verification_status: VerificationStatus = None
 

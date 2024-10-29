@@ -24,6 +24,7 @@ class UserInternal(CommonBase):
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     image: Optional[str] = None
+    cover_image: Optional[str]=None
 
 
     @field_serializer(

@@ -25,6 +25,7 @@ class GetClubDetailedDTO(BaseModel):
     average_rating: Optional[str] = None
     services: Optional[list[str]] = None
     reviews: Optional[list[str]] = None
+    about: Optional[str] = None
 
     @field_serializer("verification_status")
     def verification_status_serializer(self, verification_status):

@@ -5,10 +5,8 @@ from .enums import (
     EquestrianDiscipline,
     HorseOwnership,
     RidingStage,
-    UserRoles,
-    Gender
+    UserRoles, UserCategory, Gender
 )
-
 
 
 class UserInternal(CommonBase):
@@ -23,16 +21,16 @@ class UserInternal(CommonBase):
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
+    user_category: Optional[UserCategory] = None
     image: Optional[str] = None
-    cover_image: Optional[str]=None
-
 
     @field_serializer(
         "gender",
         "user_role",
         "riding_stage",
         "horse_ownership_status",
-        "equestrian_discipline"
+        "equestrian_discipline",
+        "user_category"
     )
     def enum_serializer(self, enum):
         if not enum:

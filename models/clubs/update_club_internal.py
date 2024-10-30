@@ -17,7 +17,6 @@ class UpdateClubInternal(CommonBase):
     club_id: str = None
     iban: str = None
     description: str = None
-    about: Optional[str] = None
     location: UpdateLocationInternal = None
     # system-fields
     platform_id: str = None

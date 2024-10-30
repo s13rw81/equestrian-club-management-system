@@ -10,13 +10,11 @@ from models.user.enums import (
     RidingStage,
     HorseOwnership,
     EquestrianDiscipline,
-    Gender,
-    UserCategory
+    Gender
 )
 from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
-from api.countries.models.country_model import CreateCountryDTO
 
 
 class SignUpUser(BaseModel):
@@ -29,8 +27,6 @@ class SignUpUser(BaseModel):
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
-    user_category: Optional[UserCategory] = None
-    country: Optional[CreateCountryDTO] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):

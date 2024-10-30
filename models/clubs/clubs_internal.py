@@ -29,6 +29,7 @@ class ClubInternal(CommonBase):
     club_id: str
     iban: str
     description: str
+    about: Optional[str] = None
     location: LocationInternal
     # system-fields
     platform_id: str

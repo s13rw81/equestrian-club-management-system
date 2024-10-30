@@ -14,12 +14,12 @@ from logic.auth import (
 from models.http_responses import Success
 from models.user import UpdateUserInternal
 from .models import (
+    Token,
     GenerateSignUpOtpDTO,
     GenerateResetPasswordOtpDTO,
     ResetPasswordDTO,
     ResetPasswordVerifyOtpDTO
 )
-from api.auth.models.token import Token
 from datetime import datetime
 import pytz
 import phonenumbers

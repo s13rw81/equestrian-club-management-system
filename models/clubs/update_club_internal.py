@@ -3,9 +3,11 @@ from ..common_base import CommonBase
 from typing import Optional
 from .enums import VerificationStatus
 
+
 class UpdateLocationInternal(BaseModel):
     lat: str = None
     long: str = None
+
 
 class UpdateClubInternal(CommonBase):
     # user-fields
@@ -17,6 +19,7 @@ class UpdateClubInternal(CommonBase):
     club_id: str = None
     iban: str = None
     description: str = None
+    about: Optional[str] = None
     location: UpdateLocationInternal = None
     # system-fields
     platform_id: str = None

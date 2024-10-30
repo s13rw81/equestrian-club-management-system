@@ -9,7 +9,7 @@ from models.user import UserInternal
 from logic.auth import get_current_user
 from logic.clubs import upload_logo_logic, upload_images_logic
 from models.http_responses import Success
-from .models import GetClub
+from .models import GetClub, GetClubDetailedDTO
 from datetime import datetime
 import pytz
 from utils.image_management import generate_image_urls, generate_image_url
@@ -24,6 +24,7 @@ clubs_api_router = APIRouter(
 
 @clubs_api_router.put("/update-club")
 async def update_club(
+        request: Request,
         update_club_parameter_control: Annotated[
             UpdateClubParameterControl,
             Depends()
@@ -60,8 +61,11 @@ async def update_club(
     return Success(
         message="club updated successfully...",
         data={
-            "updated_club": GetClub(**updated_club.model_dump())
-        }
+            "updated_club": GetClub(
+                logo=generate_image_url(image_id=updated_club.logo, request=request),
+                images=generate_image_urls(image_ids=updated_club.images, request=request),
+                **updated_club.model_dump(exclude={"logo", "images"})
+            )}
     )
 
 
@@ -83,7 +87,7 @@ async def get_club_by_id(
 
     retval = Success(
         message="club retrieved successfully...",
-        data=GetClub(
+        data=GetClubDetailedDTO(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
             **club.model_dump(exclude={"logo", "images"})

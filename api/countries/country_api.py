@@ -1,12 +1,15 @@
 from uuid import UUID
-from fastapi import APIRouter, status, Request
+from fastapi import APIRouter, status, Request, Depends
 from fastapi.exceptions import HTTPException
 from api.countries.models.country_model import CreateCountryDTO
 from data.dbapis.country.read_queries import fetch_country_by_uuid, list_country
 from data.dbapis.country.write_queries import save_country
 from logging_config import log
+from logic.auth import get_current_user
 from models.http_responses import Success
+from models.user import UserInternal
 from models.user.country_internal import CountryInternal
+from typing import Annotated
 
 country_api_router = APIRouter(
     prefix="/country",
@@ -18,21 +21,23 @@ country_api_router = APIRouter(
 
 # Create country API
 @country_api_router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_country(request: Request, country: CreateCountryDTO):
-    log.info(f"/create invoked: country = {country}")
+async def create_country(request: Request, country: CreateCountryDTO,
+                         user: Annotated[UserInternal, Depends(get_current_user)]):
+    log.info(f"/create invoked by user {user.id}: country = {country}")
 
-    # Convert to internal country model for database
+    # Convert to internal country model for database, associating it with the user
     country = CountryInternal(
         country_name=country.country_name,
         country_code=country.country_code,
-        country_iso=country.country_iso
+        country_iso=country.country_iso,
+        created_by=user.id  # Assuming CountryInternal has a created_by field
     )
 
     # Save the country
     result = save_country(country=country)
 
     if not result:
-        log.error("Could not save the country in the database, raising HTTPException...")
+        log.error(f"User {user.id} could not save the country in the database, raising HTTPException...")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Could not save the country in the database"
@@ -44,11 +49,12 @@ async def create_country(request: Request, country: CreateCountryDTO):
         data={
             "country_name": country.country_name,
             "country_code": country.country_code,
-            "country_iso": country.country_iso
+            "country_iso": country.country_iso,
+            "created_by": user.id  # Optionally return the creator's ID in the response
         }
     )
 
-    log.info(f"Returning {retval}")
+    log.info(f"Returning {retval} for user {user.id}")
     return retval
 
 

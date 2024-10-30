@@ -1,7 +1,7 @@
 from uuid import UUID
 from fastapi import APIRouter, status, Request
 from fastapi.exceptions import HTTPException
-from api.countries.models.country_model import Country
+from api.countries.models.country_model import CreateCountryDTO
 from data.dbapis.country.read_queries import fetch_country_by_uuid, list_country
 from data.dbapis.country.write_queries import save_country
 from logging_config import log
@@ -18,7 +18,7 @@ country_api_router = APIRouter(
 
 # Create country API
 @country_api_router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_country(request: Request, country: Country):
+async def create_country(request: Request, country: CreateCountryDTO):
     log.info(f"/create invoked: country = {country}")
 
     # Convert to internal country model for database
@@ -70,7 +70,8 @@ async def get_all_countries():
 
     return Success(
         message="Countries fetched successfully.",
-        data=[country.dict() for country in countries]  # Use .dict() to convert Pydantic models to dict
+        data=[country.model_dump() for country in countries]  # Used model_dump to convert Pydantic models to dict(as
+        # recommended)
     )
 
 

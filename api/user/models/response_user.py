@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_serializer
 from typing import Optional
 
-from api.countries.models.country_model import Country
+from api.countries.models.country_model import CreateCountryDTO
 from models.user.enums import (
     RidingStage,
     HorseOwnership,
@@ -23,7 +23,7 @@ class ResponseUser(BaseModel):
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
     image: Optional[str] = None
-    country: Optional[Country] = None
+    country: Optional[CreateCountryDTO] = None
 
     @field_serializer(
         "gender",

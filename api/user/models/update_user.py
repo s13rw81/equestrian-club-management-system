@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator
 from typing import Optional
 
-from api.countries.models.country_model import Country
+from api.countries.models.country_model import CreateCountryDTO
 from models.user.enums import (
     RidingStage,
     HorseOwnership,
@@ -18,7 +18,7 @@ class UpdateUser(BaseModel):
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
-    country: Optional[Country] = None
+    country: Optional[CreateCountryDTO] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):

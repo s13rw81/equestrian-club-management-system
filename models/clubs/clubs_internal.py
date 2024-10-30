@@ -5,19 +5,21 @@ from .enums.verification_status import VerificationStatus
 from typing import Optional
 
 
-
 class ClubUser(BaseModel):
     user_id: str
+
 
 class IndividualService(BaseModel):
     name: str
     description: str
     trainers: list[str]
 
+
 class GroupService(BaseModel):
     name: str
     description: str
     trainers: list[str]
+
 
 class ClubInternal(CommonBase):
     # user-fields
@@ -30,6 +32,7 @@ class ClubInternal(CommonBase):
     iban: str
     description: str
     location: LocationInternal
+    about: Optional[str] = None
     # system-fields
     platform_id: str
     logo: Optional[str] = None

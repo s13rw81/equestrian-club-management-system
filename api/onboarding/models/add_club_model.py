@@ -3,12 +3,12 @@ from data.dbapis.clubs import find_club
 from typing_extensions import Self
 import phonenumbers
 from logging_config import log
+from typing import Optional
 
 
 class LocationIn(BaseModel):
     lat: constr(min_length=1, max_length=200, pattern=r"^-?(?:90(\.0+)?|[0-8]?\d(\.\d+)?)[NS]?$")
     long: constr(min_length=1, max_length=200, pattern=r"^-?(?:180(\.0+)?|(?:1[0-7]\d|\d{1,2})(\.\d+)?)[EW]?$")
-
 
 
 class CreateClubRequest(BaseModel):
@@ -21,6 +21,7 @@ class CreateClubRequest(BaseModel):
     iban: constr(min_length=1, max_length=200)
     description: constr(min_length=1, max_length=1000)
     location: LocationIn
+    about: Optional[str] = None
 
     @field_validator("phone_number")
     def validate_phone_number(cls, value):

@@ -8,7 +8,7 @@ from .models import SignUpUser, ResponseUser, UpdateUser
 from models.user import UserInternal, UpdateUserInternal
 from data.dbapis.user.write_queries import save_user, update_user as update_user_db
 from logic.auth import generate_password_hash, get_current_user, verify_sign_up_otp
-from logic.user import upload_image_user_logic
+from logic.user import upload_image_user_logic, upload_cover_image_user_logic
 from utils.image_management import generate_image_url
 from models.http_responses import Success
 from datetime import datetime
@@ -61,8 +61,9 @@ async def signup(request: Request, sign_up_user: SignUpUser):
     retval = Success(
         message="user created successfully...",
         data=ResponseUser(
-            image=generate_image_url(image_id=result.image, request=request),
-            **result.model_dump(exclude={"image"})
+            image=generate_image_url(image_id=user.image, request=request),
+            cover_image=generate_image_url(image_id=user.cover_image, request=request),
+            **user.model_dump(exclude={"image", "cover_image"})
         )
     )
 
@@ -76,8 +77,8 @@ async def me(request: Request, user: Annotated[UserInternal, Depends(get_current
     log.info(f"user/me invoked (user_id={user.id})")
 
     response_user = ResponseUser(
-        image=generate_image_url(image_id=user.image, request=request),
-        **user.model_dump(exclude={"image"})
+        cover_image=generate_image_url(image_id=user.cover_image, request=request),
+        **user.model_dump(exclude={"image", "cover_image"})
     )
 
     retval = Success(
@@ -111,8 +112,9 @@ async def update_user_api(
     retval = Success(
         message="user has been successfully updated...",
         data=ResponseUser(
-            image=generate_image_url(image_id=result.image, request=request),
-            **result.model_dump(exclude={"image"})
+            image=generate_image_url(image_id=user.image, request=request),
+            cover_image=generate_image_url(image_id=user.cover_image, request=request),
+            **user.model_dump(exclude={"image", "cover_image"})
         )
     )
 
@@ -137,11 +139,34 @@ async def upload_image(
     retval = Success(
         message="image uploaded successfully...",
         data=ResponseUser(
-            image=generate_image_url(image_id=user.image, request=request),
-            **user.model_dump(exclude={"image"})
+            cover_image=generate_image_url(image_id=user.cover_image, request=request),
+            **user.model_dump(exclude={"image", "cover_image"})
         )
     )
 
     log.info(f"returning {retval}")
 
     return retval
+
+
+@user_api_router.post("/upload-cover-image")
+async def upload_cover_image(
+        request: Request,
+        cover_image: UploadFile,
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"inside /user/upload-cover-image (user_id={user.id}, cover_image_filename={cover_image.filename})")
+
+    user = await upload_cover_image_user_logic(
+        user_id=str(user.id),
+        cover_image=cover_image
+    )
+
+    retval = Success(
+        message="cover image uploaded successfully...",
+        data=ResponseUser(
+            image=generate_image_url(image_id=user.image, request=request),
+            cover_image=generate_image_url(image_id=user.cover_image, request=request),
+            **user.model_dump(exclude={"image", "cover_image"})
+        )
+    )

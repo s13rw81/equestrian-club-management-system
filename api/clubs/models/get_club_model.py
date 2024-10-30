@@ -21,8 +21,6 @@ class GetClub(BaseModel):
     logo: Optional[str] = None
     images: Optional[list[str]] = None
     verification_status: VerificationStatus
-    approx_price: Optional[str] = None
-    average_rating: Optional[str] = None
 
     @field_serializer("verification_status")
     def verification_status_serializer(self, verification_status):
@@ -33,4 +31,4 @@ class GetClub(BaseModel):
         if not value:
             return
 
-        return str(value)
+        return value.hex

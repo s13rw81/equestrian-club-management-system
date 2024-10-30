@@ -20,7 +20,7 @@ class UploadImagesParameterControl:
 
         if user.user_role == UserRoles.CLUB:
             log.info("user role is club; validating club_id...")
-            club = find_club_by_user(user_id=str(user.id))
+            club = find_club_by_user(user_id=user.id)
 
             if not club:
                 log.info("user does not have an associated club... raising exception...")

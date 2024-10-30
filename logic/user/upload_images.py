@@ -30,25 +30,3 @@ async def upload_image_user_logic(user_id: str, image: UploadFile) -> UserIntern
 
     return updated_user
 
-async def upload_cover_image_user_logic(user_id: str, cover_image: UploadFile) -> UserInternal:
-    log.info(f"inside upload_cover_image_user_logic(user_id={user_id}, cover_image_filename={cover_image.filename}")
-
-    user = find_user(id=user_id)
-
-    existing_cover_image_id = user.cover_image
-
-    if existing_cover_image_id:
-        log.info("cover image already exists, deleting existing image...")
-        await delete_image(image_id=existing_cover_image_id)
-
-    new_cover_image_id = await save_image(image_file=cover_image)
-
-    update_user_dto = UpdateUserInternal(
-        id=user_id,
-        last_updated_on=datetime.now(pytz.utc),
-        cover_image=new_cover_image_id
-    )
-
-    updated_user = update_user(update_user_dto=update_user_dto)
-
-    return updated_user

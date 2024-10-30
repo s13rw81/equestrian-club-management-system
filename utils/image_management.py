@@ -65,7 +65,10 @@ def generate_image_url(image_id: Optional[str], request: Request) -> Optional[st
     if not image_id:
         return None
 
-    retval = f"{request.base_url}images/{image_id}"
+    image_path = get_image_file_path(image_id)
+    file_extension = image_path.split(".")[+1]
+
+    retval = f"{request.base_url}images/{image_id}/image.{file_extension}"
 
     log.info(f"returning {retval}")
 
@@ -142,7 +145,9 @@ def generate_secure_filename(filename):
 
     filename_splitted = filename.split(".")
 
-    filename = "".join(filename_splitted[:-1]) + hash_str + "." + filename_splitted[-1]
+    file_extension = filename_splitted[-1]
+
+    filename = "".join(filename_splitted[:-1]) + hash_str
 
     # Replace spaces with underscores
     filename = filename.replace(" ", "_")
@@ -153,5 +158,8 @@ def generate_secure_filename(filename):
     # Limit the filename length
     max_filename_length = 255  # Example maximum length
     filename = filename[:max_filename_length]
+
+    # append the extension
+    filename = filename + "." + file_extension
 
     return filename

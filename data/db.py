@@ -34,7 +34,6 @@ def get_database():
     log.info("inside get_database()")
     return client[DATABASE_NAME]
 
-
 def get_users_collection():
     log.info("inside get_users_collection()")
     users_collection = get_database()["users"]
@@ -65,7 +64,6 @@ def get_sign_up_otp_collection():
 
     return sign_up_otp_collection
 
-
 def get_reset_password_otp_collection():
     log.info("inside get_reset_password_otp_collection()")
 
@@ -79,7 +77,6 @@ def get_reset_password_otp_collection():
 
     return reset_password_otp_collection
 
-
 def get_trainer_collection():
     log.info("inside get_trainer_collection()")
 
@@ -88,7 +85,6 @@ def get_trainer_collection():
     trainer_collection.create_index([("id", 1)], unique=True)
 
     return trainer_collection
-
 
 def get_uploaded_images_collection():
     log.info("inside get_uploaded_images_collection")
@@ -165,6 +161,8 @@ def get_horse_selling_service_collection():
     return get_database()["horse_selling_service"]
 
 
+
+
 def get_generic_activity_service_collection():
     log.info("inside get_generic_activity_service_collection")
     return get_database()["generic_activity_service"]
@@ -185,6 +183,7 @@ def get_logistic_service_booking_collection():
     return get_database()["logistic_service_booking"]
 
 
+
 def convert_to_object_id(str_id: str) -> ObjectId:
     """
     converts the provided id in string into bson.ObjectId (
@@ -194,10 +193,3 @@ def convert_to_object_id(str_id: str) -> ObjectId:
     :returns: ObjectId
     """
     return ObjectId(str_id)
-
-
-def get_countries_collection():
-    log.info("Fetching countries collection...")
-    countries_collection = get_database()["countries"]
-    return countries_collection
-

@@ -3,6 +3,7 @@ from data.dbapis.clubs import find_club
 from typing_extensions import Self
 import phonenumbers
 from logging_config import log
+from typing import Optional
 
 
 class LocationIn(BaseModel):
@@ -21,6 +22,7 @@ class CreateClubRequest(BaseModel):
     iban: constr(min_length=1, max_length=200)
     description: constr(min_length=1, max_length=1000)
     location: LocationIn
+    about: Optional[str] = None
 
     @field_validator("phone_number")
     def validate_phone_number(cls, value):

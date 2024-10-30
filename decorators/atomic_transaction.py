@@ -2,6 +2,7 @@ from functools import wraps
 from data.db import client
 from pymongo import errors
 
+
 def atomic_transaction(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -28,7 +29,6 @@ def atomic_transaction(func):
 
             raise e
 
-
         if not is_session_provided:
             session.commit_transaction()
             session.end_session()
@@ -36,8 +36,3 @@ def atomic_transaction(func):
         return retval
 
     return wrapper
-
-
-
-
-

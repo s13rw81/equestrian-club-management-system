@@ -10,11 +10,13 @@ from models.user.enums import (
     RidingStage,
     HorseOwnership,
     EquestrianDiscipline,
-    Gender
+    Gender,
+    UserCategory
 )
 from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
+from api.countries.models.country_model import CreateCountryDTO
 
 
 class SignUpUser(BaseModel):
@@ -27,6 +29,8 @@ class SignUpUser(BaseModel):
     riding_stage: Optional[RidingStage] = None
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
+    user_category: Optional[UserCategory] = None
+    country: Optional[CreateCountryDTO] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):
@@ -61,10 +65,15 @@ class SignUpUser(BaseModel):
             log.info(f"phone number is not valid, raising error (phone_number={phone_number})")
             raise error
 
-        result = whether_user_exists(phone=phone_number)
+        formatted_phone_number = phonenumbers.format_number(
+            parsed_phone_number,
+            phonenumbers.PhoneNumberFormat.INTERNATIONAL
+        )
+
+        result = whether_user_exists(phone=formatted_phone_number)
 
         if result:
             log.info("an user with the same phone_number already exists, raising ValueError")
             raise ValueError("phone_number already exists...")
 
-        return phonenumbers.format_number(parsed_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+        return formatted_phone_number

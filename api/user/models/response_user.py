@@ -23,7 +23,7 @@ class ResponseUser(BaseModel):
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
     image: Optional[str] = None
-    country: Optional[CreateCountryDTO] = None
+    country_id: Optional[str] = None
     cover_image: Optional[str] = None
 
     @field_serializer(
@@ -33,7 +33,7 @@ class ResponseUser(BaseModel):
         "equestrian_discipline",
         "user_role",
         "user_category",
-        "country"
+        "country_id"
     )
     def enum_serializer(self, enum):
         if not enum:

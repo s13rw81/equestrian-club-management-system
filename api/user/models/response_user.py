@@ -25,6 +25,8 @@ class ResponseUser(BaseModel):
     image: Optional[str] = None
     country_id: Optional[str] = None
     cover_image: Optional[str] = None
+    country: Optional[CreateCountryDTO] = None
+
 
     @field_serializer(
         "gender",

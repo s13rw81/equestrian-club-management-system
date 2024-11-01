@@ -157,9 +157,6 @@ def generate_secure_filename(filename):
 
     # Limit the filename length
     max_filename_length = 255  # Example maximum length
-    filename = filename[:max_filename_length]
-
-    # append the extension
-    filename = filename + "." + file_extension
+    filename = filename[:max_filename_length] + "." + file_extension
 
     return filename

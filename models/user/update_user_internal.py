@@ -23,6 +23,7 @@ class UpdateUserInternal(CommonBase):
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
     image: Optional[str] = None
+    cover_image: Optional[str] = None
 
     @field_serializer(
         "gender",

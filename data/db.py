@@ -89,6 +89,17 @@ def get_trainer_collection():
 
     return trainer_collection
 
+def get_trainer_affiliation_collection():
+    log.info("inside get_trainer_collection()")
+
+    trainer_affiliation_collection = get_database()["trainer_affiliations"]
+
+    trainer_affiliation_collection.create_index([("id", 1)], unique=True)
+
+    trainer_affiliation_collection.create_index([("email_address", 1)])
+    trainer_affiliation_collection.create_index([("phone_number", 1)])
+
+    return trainer_affiliation_collection
 
 def get_uploaded_images_collection():
     log.info("inside get_uploaded_images_collection")

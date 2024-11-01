@@ -30,7 +30,7 @@ class SignUpUser(BaseModel):
     horse_ownership_status: Optional[HorseOwnership] = None
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
-    country: Optional[CreateCountryDTO] = None
+    country_id: Optional[str] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):

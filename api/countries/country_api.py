@@ -20,42 +20,38 @@ country_api_router = APIRouter(
 
 
 # Create country API
-@country_api_router.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_country(request: Request, country: CreateCountryDTO,
-                         user: Annotated[UserInternal, Depends(get_current_user)]):
-    log.info(f"/create invoked by user {user.id}: country = {country}")
+@country_api_router.post("/create-multiple", status_code=status.HTTP_201_CREATED)
+async def create_multiple_countries(request: Request, countries: list[CreateCountryDTO],
+                                    user: Annotated[UserInternal, Depends(get_current_user)]):
+    log.info(f"/create-multiple invoked by user {user.id}")
 
-    # Convert to internal country model for database, associating it with the user
-    country = CountryInternal(
-        country_name=country.country_name,
-        country_code=country.country_code,
-        country_iso=country.country_iso,
-        created_by=user.id  # Assuming CountryInternal has a created_by field
-    )
-
-    # Save the country
-    result = save_country(country=country)
-
-    if not result:
-        log.error(f"User {user.id} could not save the country in the database, raising HTTPException...")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Could not save the country in the database"
+    created_countries = []
+    for country in countries:
+        country_internal = CountryInternal(
+            country_name=country.country_name,
+            country_code=country.country_code,
+            country_iso=country.country_iso,
+            created_by=user.id
         )
-
-    # Create response with success message and saved country data
-    retval = Success(
-        message="Country created successfully",
-        data={
+        result = save_country(country=country_internal)
+        if not result:
+            log.error(f"User {user.id} could not save the country {country.country_name} in the database.")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Could not save the country {country.country_name} in the database"
+            )
+        created_countries.append({
             "country_name": country.country_name,
             "country_code": country.country_code,
             "country_iso": country.country_iso,
-            "created_by": user.id  # Optionally return the creator's ID in the response
-        }
-    )
+            "created_by": user.id
+        })
 
-    log.info(f"Returning {retval} for user {user.id}")
-    return retval
+    log.info(f"Returning created countries for user {user.id}")
+    return Success(
+        message="Countries created successfully",
+        data=created_countries
+    )
 
 
 @country_api_router.get("/all")

@@ -23,8 +23,8 @@ class ResponseUser(BaseModel):
     equestrian_discipline: Optional[EquestrianDiscipline] = None
     user_category: Optional[UserCategory] = None
     image: Optional[str] = None
-    country_id: Optional[str] = None
     cover_image: Optional[str] = None
+    country_id: Optional[str] = None
     country: Optional[CreateCountryDTO] = None
 
 

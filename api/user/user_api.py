@@ -24,6 +24,7 @@ user_api_router = APIRouter(
 async def signup(request: Request, sign_up_user: SignUpUser):
     log.info(f"/signup invoked: sign_up_user = {sign_up_user}")
 
+    # OTP Verification
     verification_result = verify_sign_up_otp(
         user_provided_otp=sign_up_user.phone_otp,
         phone_number=sign_up_user.phone_number
@@ -33,9 +34,21 @@ async def signup(request: Request, sign_up_user: SignUpUser):
         log.info("OTP verification failed, raising HTTPException...")
         raise HTTPException(
             status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail="invalid OTP, please try again..."
+            detail="Invalid OTP, please try again..."
         )
 
+    # Country retrieval by country_id
+    countries_collection = get_countries_collection()
+    country = countries_collection.find_one({"_id": sign_up_user.country_id})
+
+    if not country:
+        log.info("Country not found, raising HTTPException...")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Country not found"
+        )
+
+    # Creating the User object
     user = UserInternal(
         full_name=sign_up_user.full_name,
         email_address=sign_up_user.email_address,
@@ -46,20 +59,22 @@ async def signup(request: Request, sign_up_user: SignUpUser):
         horse_ownership_status=sign_up_user.horse_ownership_status,
         equestrian_discipline=sign_up_user.equestrian_discipline,
         user_category=sign_up_user.user_category,
-        country=sign_up_user.country
+        country_id=sign_up_user.country_id  # Using only country_id
     )
 
+    # Saving the User
     result = save_user(user=user)
 
     if not result:
-        log.info("could not save the user in the database, raising HTTPException...")
+        log.info("Could not save the user in the database, raising HTTPException...")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="could not save the user in the database"
+            detail="Could not save the user in the database"
         )
 
+    # Preparing the response
     retval = Success(
-        message="user created successfully...",
+        message="User created successfully...",
         data=ResponseUser(
             image=generate_image_url(image_id=user.image, request=request),
             cover_image=generate_image_url(image_id=user.cover_image, request=request),
@@ -67,7 +82,7 @@ async def signup(request: Request, sign_up_user: SignUpUser):
         )
     )
 
-    log.info(f"returning {retval}")
+    log.info(f"Returning {retval}")
 
     return retval
 

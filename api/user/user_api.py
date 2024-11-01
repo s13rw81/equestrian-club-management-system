@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from bson import ObjectId
 from fastapi import APIRouter, Depends, status, Request, UploadFile
 from fastapi.exceptions import HTTPException
 
@@ -37,16 +40,19 @@ async def signup(request: Request, sign_up_user: SignUpUser):
             detail="Invalid OTP, please try again..."
         )
 
-    # Country retrieval by country_id
-    countries_collection = get_countries_collection()
-    country = countries_collection.find_one({"_id": sign_up_user.country_id})
-
-    if not country:
-        log.info("Country not found, raising HTTPException...")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Country not found"
-        )
+    # Country retrieval by country_id (if provided)
+    if sign_up_user.country_id:
+        countries_collection = get_countries_collection()
+        try:
+            # Convert to string for UUID type IDs in MongoDB
+            country_id = str(UUID(sign_up_user.country_id))
+            country = countries_collection.find_one({"_id": country_id})
+        except ValueError as e:
+            log.info(f"Invalid country_id format: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid country_id format"
+            )
 
     # Creating the User object
     user = UserInternal(
@@ -59,7 +65,7 @@ async def signup(request: Request, sign_up_user: SignUpUser):
         horse_ownership_status=sign_up_user.horse_ownership_status,
         equestrian_discipline=sign_up_user.equestrian_discipline,
         user_category=sign_up_user.user_category,
-        country_id=sign_up_user.country_id  # Using only country_id
+        country_id=sign_up_user.country_id
     )
 
     # Saving the User

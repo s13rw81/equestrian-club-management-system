@@ -7,7 +7,7 @@ from typing import Annotated
 from logging_config import log
 
 
-class UploadImagesParameterControl:
+class ClubIdParameterControlForm:
     def __init__(
             self,
             user: Annotated[
@@ -30,10 +30,10 @@ class UploadImagesParameterControl:
                 )
 
             if str(club.id) != club_id:
-                log.info("user is not authorized to upload images for this club...")
+                log.info("user is not authorized to modify this club...")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="user is not authorized to upload images for this club..."
+                    detail="user is not authorized to modify this club..."
                 )
 
         if user.user_role == UserRoles.ADMIN:

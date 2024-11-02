@@ -1,0 +1,2 @@
+from .read_queries import find_trainer_affiliation
+from .write_queries import save_trainer_affiliation

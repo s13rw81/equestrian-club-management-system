@@ -1,20 +1,20 @@
 from role_based_access_control import RoleBasedAccessControl
 from models.user.enums import UserRoles
 from models.user import UserInternal
-from fastapi import Form, Depends, HTTPException, status
+from fastapi import Body, Depends, HTTPException, status
 from data.dbapis.clubs import find_club_by_user, find_club
 from typing import Annotated
 from logging_config import log
 
 
-class UploadImagesParameterControl:
+class ClubIdParameterControlBody:
     def __init__(
             self,
             user: Annotated[
                 UserInternal,
                 Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB, UserRoles.ADMIN}))
             ],
-            club_id: str = Form(..., description="the database uuid")
+            club_id: str = Body(..., description="the database uuid")
     ):
         log.info(f"inside __init__(user_id={user.id}, club_id={club_id})")
 
@@ -30,10 +30,10 @@ class UploadImagesParameterControl:
                 )
 
             if str(club.id) != club_id:
-                log.info("user is not authorized to upload images for this club...")
+                log.info("user is not authorized to modify this club...")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="user is not authorized to upload images for this club..."
+                    detail="user is not authorized to modify this club..."
                 )
 
         if user.user_role == UserRoles.ADMIN:

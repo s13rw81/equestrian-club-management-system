@@ -1,35 +1,17 @@
 from pydantic import (
     BaseModel,
-    field_validator,
-    Field,
     constr,
-    EmailStr
+    EmailStr,
+    field_validator
 )
-from typing import Optional
-from models.user.enums import (
-    RidingStage,
-    HorseOwnership,
-    EquestrianDiscipline,
-    Gender,
-    UserCategory
-)
-from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
+from data.dbapis.trainer_affiliation import find_trainer_affiliation
 
-
-class SignUpUser(BaseModel):
+class GenerateTrainerAffiliationDTO(BaseModel):
     full_name: constr(min_length=1, max_length=200)
-    email_address: Optional[EmailStr] = None
+    email_address: EmailStr
     phone_number: str
-    phone_otp: constr(min_length=6, max_length=6)
-    password: constr(strip_whitespace=True, min_length=6) = Field(exclude=True)
-    gender: Optional[Gender] = None
-    riding_stage: Optional[RidingStage] = None
-    horse_ownership_status: Optional[HorseOwnership] = None
-    equestrian_discipline: Optional[EquestrianDiscipline] = None
-    user_category: Optional[UserCategory] = None
-    country_id: Optional[str] = None
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):
@@ -41,10 +23,10 @@ class SignUpUser(BaseModel):
         if not email:
             return email
 
-        result = whether_user_exists(email=email)
+        result = find_trainer_affiliation(email_address=email)
 
         if result:
-            log.info("a user with the same email_address already exists, raising ValueError")
+            log.info("a trainer_affiliation with the same email_address already exists, raising ValueError")
             raise ValueError(f"email already exists (email={email})")
 
         return email
@@ -69,10 +51,10 @@ class SignUpUser(BaseModel):
             phonenumbers.PhoneNumberFormat.INTERNATIONAL
         )
 
-        result = whether_user_exists(phone=formatted_phone_number)
+        result = find_trainer_affiliation(phone_number=formatted_phone_number)
 
         if result:
-            log.info("a user with the same phone_number already exists, raising ValueError")
+            log.info("a trainer_affiliation with the same phone_number already exists, raising ValueError")
             raise ValueError("phone_number already exists...")
 
         return formatted_phone_number

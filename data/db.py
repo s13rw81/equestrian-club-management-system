@@ -209,6 +209,6 @@ def convert_to_object_id(str_id: str) -> ObjectId:
 
 def get_countries_collection():
     log.info("Fetching countries collection...")
-    countries_collection = get_database()["createcountrydto"]
+    countries_collection = get_database()["countries"]
     return countries_collection
 

@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, status, Request, UploadFile
 from fastapi.exceptions import HTTPException
 
 from data.db import get_countries_collection
+from data.dbapis.country.read_queries import fetch_country_by_uuid
 from logging_config import log
 from typing import Annotated
 from .models import SignUpUser, ResponseUser, UpdateUser
@@ -40,18 +41,15 @@ async def signup(request: Request, sign_up_user: SignUpUser):
             detail="Invalid OTP, please try again..."
         )
 
-    # Country retrieval by country_id (if provided)
+    # Fetch country if country_id is provided
+    country = None
     if sign_up_user.country_id:
-        countries_collection = get_countries_collection()
-        try:
-            # Convert to string for UUID type IDs in MongoDB
-            country_id = str(UUID(sign_up_user.country_id))
-            country = countries_collection.find_one({"_id": country_id})
-        except ValueError as e:
-            log.info(f"Invalid country_id format: {e}")
+        country = fetch_country_by_uuid(UUID(sign_up_user.country_id))
+        if not country:
+            log.info("Invalid country ID, raising HTTPException...")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid country_id format"
+                detail="Invalid country_id"
             )
 
     # Creating the User object
@@ -70,7 +68,6 @@ async def signup(request: Request, sign_up_user: SignUpUser):
 
     # Saving the User
     result = save_user(user=user)
-
     if not result:
         log.info("Could not save the user in the database, raising HTTPException...")
         raise HTTPException(
@@ -89,7 +86,6 @@ async def signup(request: Request, sign_up_user: SignUpUser):
     )
 
     log.info(f"Returning {retval}")
-
     return retval
 
 

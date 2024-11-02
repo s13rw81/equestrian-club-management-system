@@ -16,7 +16,6 @@ from models.user.enums import (
 from validators.user import whether_user_exists
 import phonenumbers
 from logging_config import log
-from api.countries.models.country_model import CreateCountryDTO
 
 
 class SignUpUser(BaseModel):
@@ -45,7 +44,7 @@ class SignUpUser(BaseModel):
         result = whether_user_exists(email=email)
 
         if result:
-            log.info("an user with the same email_address already exists, raising ValueError")
+            log.info("a user with the same email_address already exists, raising ValueError")
             raise ValueError(f"email already exists (email={email})")
 
         return email
@@ -73,7 +72,7 @@ class SignUpUser(BaseModel):
         result = whether_user_exists(phone=formatted_phone_number)
 
         if result:
-            log.info("an user with the same phone_number already exists, raising ValueError")
+            log.info("a user with the same phone_number already exists, raising ValueError")
             raise ValueError("phone_number already exists...")
 
         return formatted_phone_number

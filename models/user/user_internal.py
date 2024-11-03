@@ -24,6 +24,7 @@ class UserInternal(CommonBase):
     user_category: Optional[UserCategory] = None
     image: Optional[str] = None
     cover_image: Optional[str] = None
+    country_id: Optional[str] = None
 
     @field_serializer(
         "gender",

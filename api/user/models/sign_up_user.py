@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import (
     BaseModel,
     field_validator,
@@ -6,6 +8,8 @@ from pydantic import (
     EmailStr
 )
 from typing import Optional
+
+from data.dbapis.country.read_queries import fetch_country_by_uuid
 from models.user.enums import (
     RidingStage,
     HorseOwnership,
@@ -76,3 +80,12 @@ class SignUpUser(BaseModel):
             raise ValueError("phone_number already exists...")
 
         return formatted_phone_number
+
+    @field_validator("country_id")
+    def country_id_validator(cls, country_id):
+        if country_id:
+            country = fetch_country_by_uuid(UUID(country_id))
+            if not country:
+                log.info("Invalid country ID, raising ValidationError")
+                raise ValueError("Invalid country_id")
+        return country_id

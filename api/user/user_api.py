@@ -1,7 +1,7 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends, status, Request, UploadFile
 from fastapi.exceptions import HTTPException
-
-from data.db import get_countries_collection
+from data.dbapis.country.read_queries import fetch_country_by_uuid
 from logging_config import log
 from typing import Annotated
 from .models import SignUpUser, ResponseUser, UpdateUser
@@ -37,17 +37,6 @@ async def signup(request: Request, sign_up_user: SignUpUser):
             detail="Invalid OTP, please try again..."
         )
 
-    # Country retrieval by country_id
-    countries_collection = get_countries_collection()
-    country = countries_collection.find_one({"_id": sign_up_user.country_id})
-
-    if not country:
-        log.info("Country not found, raising HTTPException...")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Country not found"
-        )
-
     # Creating the User object
     user = UserInternal(
         full_name=sign_up_user.full_name,
@@ -59,12 +48,11 @@ async def signup(request: Request, sign_up_user: SignUpUser):
         horse_ownership_status=sign_up_user.horse_ownership_status,
         equestrian_discipline=sign_up_user.equestrian_discipline,
         user_category=sign_up_user.user_category,
-        country_id=sign_up_user.country_id  # Using only country_id
+        country_id=sign_up_user.country_id
     )
 
     # Saving the User
     result = save_user(user=user)
-
     if not result:
         log.info("Could not save the user in the database, raising HTTPException...")
         raise HTTPException(
@@ -83,7 +71,6 @@ async def signup(request: Request, sign_up_user: SignUpUser):
     )
 
     log.info(f"Returning {retval}")
-
     return retval
 
 

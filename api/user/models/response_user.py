@@ -34,8 +34,7 @@ class ResponseUser(BaseModel):
         "horse_ownership_status",
         "equestrian_discipline",
         "user_role",
-        "user_category",
-        "country_id"
+        "user_category"
     )
     def enum_serializer(self, enum):
         if not enum:

@@ -24,7 +24,8 @@ import pytz
 from utils.image_management import generate_image_urls, generate_image_url
 from role_based_access_control import RoleBasedAccessControl
 from models.user.enums import UserRoles
-from data.dbapis.trainer_affiliation import save_trainer_affiliation, find_many_trainer_affiliations
+from data.dbapis.trainer_affiliation import save_trainer_affiliation, find_many_trainer_affiliations, \
+    find_trainer_affiliation
 import phonenumbers
 
 clubs_api_router = APIRouter(
@@ -304,6 +305,26 @@ async def get_trainer_affiliation(
         GetTrainerAffiliationDTO(**trainer_affiliation.model_dump())
         for trainer_affiliation in trainer_affiliation_list
     ]
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
+@clubs_api_router.get("/get-your-affiliation-number")
+async def get_your_affiliation(
+        user: Annotated[UserInternal, Depends(get_current_user)]
+):
+    log.info(f"inside /clubs/get-your-trainer-affiliation-number (user_id={user.id})")
+
+    trainer_affiliation = find_trainer_affiliation(phone_number=user.phone_number)
+
+    retval = Success(
+        message="trainer_affiliation_number found for the user",
+        data=GetTrainerAffiliationDTO(**trainer_affiliation.model_dump())
+    ) if trainer_affiliation else Success(
+        message="no trainer_affiliation_number found for the user"
+    )
 
     log.info(f"returning {retval}")
 

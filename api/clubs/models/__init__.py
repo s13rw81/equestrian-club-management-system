@@ -1,4 +1,5 @@
-from api.clubs.models.delete_club_model import *
 from .update_club_model import UpdateClubRequest
 from .get_club_model import GetClub
 from .get_club_detailed_dto import GetClubDetailedDTO
+from .generate_trainer_affiliation_dto import GenerateTrainerAffiliationDTO
+from .get_trainer_affiliation_dto import GetTrainerAffiliationDTO

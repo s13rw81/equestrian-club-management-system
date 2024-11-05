@@ -5,7 +5,7 @@ from models.user.enums.country import MiddleEastCountries
 
 class CreateCountryDTO(BaseModel):
     country_name: Union[str, MiddleEastCountries]  # Accepts either a string or an enum
-    country_code: str
+    country_code: Optional[str] = None
     country_iso: Optional[str] = None
 
     @field_serializer("country_name")

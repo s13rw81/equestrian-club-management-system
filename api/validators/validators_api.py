@@ -18,14 +18,16 @@ async def whether_user_exists_api(
     log.info(f"/validators/whether-user-exists (email_address={email_address}, phone_number={phone_number})")
 
     if email_address and phone_number:
+        log.info("email_address and phone_number cannot be present simultaneously, raising ValueError")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail="either email or phone should be passed not both"
         )
 
     if not (email_address or phone_number):
+        log.info("either email_address or phone_number must be present, raising ValueError")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
             detail="either email or phone must be passed"
         )
 

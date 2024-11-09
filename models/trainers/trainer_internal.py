@@ -15,10 +15,11 @@ class TrainerInternal(CommonBase):
     email_address: str
     bio: str
     club_affiliation_number: str
-    available_services: list[AvailableService]
-    availability: list[WeekDay]
-    preferred_time_slot: TimeSlot
-    specializations: list[Specialization]
+    # available_services: list[AvailableService]
+    # availability: list[WeekDay]
+    # preferred_time_slot: TimeSlot
+    # specializations: list[Specialization]
+    is_visible: bool = True
 
     # system-fields
     # the id of the user that manages this Trainer entity

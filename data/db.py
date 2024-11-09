@@ -94,12 +94,32 @@ def get_trainer_affiliation_collection():
 
     trainer_affiliation_collection = get_database()["trainer_affiliations"]
 
+    # primary-key field
     trainer_affiliation_collection.create_index([("id", 1)], unique=True)
 
+    # indices to boost read query efficiencies
     trainer_affiliation_collection.create_index([("email_address", 1)])
     trainer_affiliation_collection.create_index([("phone_number", 1)])
 
+    # indices for foreign key fields
+    trainer_affiliation_collection.create_index([("user_id", 1)])
+    trainer_affiliation_collection.create_index([("club_id", 1)])
+
     return trainer_affiliation_collection
+
+def get_trainer_certification_collection():
+    log.info("inside get_trainer_certification_collection()")
+
+    trainer_certification_collection = get_database()["trainer_certifications"]
+
+    # primary-key field
+    trainer_certification_collection.create_index([("id", 1)], unique=True)
+
+    # indices for foreign key fields
+    trainer_certification_collection.create_index([("trainer_id", 1)])
+
+    return trainer_certification_collection
+
 
 def get_uploaded_images_collection():
     log.info("inside get_uploaded_images_collection")

@@ -297,14 +297,17 @@ async def get_trainer_affiliation(
         filter_dict["email_address"] = email_address
 
     if formatted_phone_number:
-        filter_dict["phone_number"] = phone_number
+        filter_dict["phone_number"] = formatted_phone_number
 
     trainer_affiliation_list = find_many_trainer_affiliations(**filter_dict)
 
-    retval = [
-        GetTrainerAffiliationDTO(**trainer_affiliation.model_dump())
-        for trainer_affiliation in trainer_affiliation_list
-    ]
+    retval = Success(
+        message="trainer affiliation numbers fetched successfully...",
+        data=[
+            GetTrainerAffiliationDTO(**trainer_affiliation.model_dump())
+            for trainer_affiliation in trainer_affiliation_list
+        ]
+    )
 
     log.info(f"returning {retval}")
 

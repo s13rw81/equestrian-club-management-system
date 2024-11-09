@@ -1,15 +1,22 @@
-from .models import GenericGetQueryWithPaginationDTO
+from models.generic_get_query_with_pagination import GenericGetQueryWithPaginationDTO
 from decorators import atomic_transaction
 from logging_config import log
 
 
+# NOTE ON POTENTIAL PERFORMANCE OPTIMIZATION:
+#  A possible way of performance improvement is to apply the filters before the lookups,
+# thus limiting the number of documents for joins to be made. However, filters on fields which
+# become available only after a lookup cannot be applied this way. To take advantage of this
+# procedure, in filter predicates, there should be a way to differentiate between fields which
+# belong to the primary collection and which become accessible only after the lookups; potentially
+# passing the info from the logic layer through dtos.
 @atomic_transaction
 def generic_get_query_with_pagination(
         primary_collection,
         generic_get_query_dto: GenericGetQueryWithPaginationDTO,
         session=None
 ):
-    log.info(f"inside generic_get_query_with_pagination(primary_collection={primary_collection},"
+    log.info(f"inside generic_get_query_with_pagination(primary_collection={primary_collection}, "
              f"generic_get_query_dto={generic_get_query_dto})")
 
     pipeline = []

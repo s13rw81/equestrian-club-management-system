@@ -31,19 +31,6 @@ class GenerateTrainerAffiliationDTO(BaseModel):
     def full_name_capitalize(cls, full_name):
         return " ".join([item.capitalize() for item in full_name.split()])
 
-    @field_validator("email_address")
-    def email_address_validator(cls, email):
-
-        if not email:
-            return email
-
-        result = find_trainer_affiliation(email_address=email)
-
-        if result:
-            log.info("a trainer_affiliation with the same email_address already exists, raising ValueError")
-            raise ValueError(f"email already exists (email={email})")
-
-        return email
 
     @model_validator(mode="after")
     def model_validator(self) -> Self:
@@ -81,5 +68,7 @@ class GenerateTrainerAffiliationDTO(BaseModel):
                      "already exists, raising ValueError")
             raise ValueError("a club cannot generate an affiliation number with the same phone_number "
                              "more than once")
+
+        self.phone_number = formatted_phone_number
 
         return self

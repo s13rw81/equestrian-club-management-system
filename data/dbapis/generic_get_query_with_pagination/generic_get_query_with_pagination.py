@@ -68,10 +68,9 @@ def generic_get_query_with_pagination(
     # append the stage to the pipeline
     # if the DTO includes sorts
     if generic_get_query_dto.sorts:
-        sort_dict = {}
+        log.debug(f"sorts: {generic_get_query_dto.sorts}")
 
-        for sort_predicate in generic_get_query_dto.sorts:
-            sort_dict[sort_predicate.field_name] = 1 if sort_predicate.operator == "asc" else -1
+        sort_dict = {sort.field_name: 1 if sort.operator == "asc" else -1 for sort in generic_get_query_dto.sorts}
 
         pipeline.append({
             "$sort": sort_dict

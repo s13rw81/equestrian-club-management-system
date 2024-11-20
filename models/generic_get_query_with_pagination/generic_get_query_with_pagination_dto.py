@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator, model_validator, ConfigDict, GetCoreSchemaHandler
 from pydantic_core import CoreSchema
 from pydantic._internal._model_construction import ModelMetaclass
-from typing import Any, Optional
+from typing import Any, Optional, Union, Iterable, get_origin, get_args
 from types import GenericAlias
 from logging_config import log
 from uuid import UUID
@@ -14,6 +14,8 @@ class Lookup(BaseModel):
     as_key_name: str
     is_one_to_one: bool
 
+    # this code is to get rid of the checks of pydantic when an instantiation of this class
+    # is used as metadata in Annotated
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: type[BaseModel], handler: GetCoreSchemaHandler) -> CoreSchema:
         if cls is not source_type:
@@ -91,12 +93,10 @@ class GenericGetQueryWithPaginationDTO(BaseModel):
             if data.get("sorts"):
                 field_name_check_sorts(data["sorts"], fields)
 
-
         return data
 
 
 def field_name_check_sorts(sorts, fields):
-
     """
     Checks the accuracy of the field_names in the sort directives. For non-nested fields,
     it simply checks for the existence of the field in the `fields`. Otherwise, it affirms
@@ -152,10 +152,10 @@ def type_check_filters(filters, fields):
     """
     Type checks all the filters by using either `type_check_ordinary_filter_predicate` or
     `type_check_nested_filter_predicate`
-    :param filters: a list of dict containing three fields: field_name, value, operator
+    :param filters: a list of dicts containing three fields: field_name, value, operator
     :param fields: {field_name: FieldInfo} dict of the final_output_model, can be obtained by using
-    final_output_model.model_class
-    :return: a list of typed checked dict conforming to the type of param `filters`
+    final_output_model.model_fields
+    :return: a list of type checked dict conforming to the type of param `filters`
     """
     log.info(f"inside type_check_filters(filters={filters}, fields={fields})")
 
@@ -164,17 +164,17 @@ def type_check_filters(filters, fields):
     type_checked_filters = []
 
     nested_filter_predicates = []
-
     ordinary_filter_predicates = []
 
     for filter_predicate in filters:
         if "." in filter_predicate["field_name"]:
             nested_filter_predicates.append(filter_predicate)
+
         else:
             ordinary_filter_predicates.append(filter_predicate)
 
     for filter_predicate in ordinary_filter_predicates:
-        type_checked_filter = type_check_ordinary_filter_predicate(filter_predicate, fields)
+        type_checked_filter = type_check_ordinary_filter_predicate_wrapper(filter_predicate, fields)
         type_checked_filters.append(type_checked_filter)
 
     for filter_predicate in nested_filter_predicates:
@@ -219,13 +219,14 @@ def type_check_nested_filter_predicates(filter_predicate, fields):
         log.info(f"invalid filter_field_name={filter_field_name}")
         raise ValueError(f"invalid filter_field_name={filter_field_name}")
 
+    # FieldInfo.annotation returns the type of the field
     if not isinstance(field_info_former_field.annotation, ModelMetaclass):
         log.info("for nested filters, the type of the former field must be ModelMetaClass...")
         raise TypeError("for nested filters, the type of the former field must be ModelMetaClass("
                         f"filter_field_name={filter_field_name})")
 
     # type check the nested field
-    nested_filter_type_checked = type_check_ordinary_filter_predicate(
+    nested_filter_type_checked = type_check_ordinary_filter_predicate_wrapper(
         filter_predicate={
             "field_name": filter_field_names[1],
             "operator": filter_operator,
@@ -245,20 +246,74 @@ def type_check_nested_filter_predicates(filter_predicate, fields):
     return retval
 
 
+def type_check_ordinary_filter_predicate_wrapper(filter_predicate, fields):
+    """
+    This is a wrapper around the type_check_ordinary_filter_predicate to incorporate `in` operators.
+    In cases of filter_predicates having an `in` operator, this function will verify whether the corresponding
+    value is iterable firstly. And secondly whether each element in the iterable conform to the `type`.
+
+    Otherwise, for filter_predicates that do to have the `in` operator, this function will serve as a proxy to the
+    type_check_ordinary_filter_predicate function.
+
+    :param filter_predicate: a dict containing three keys: field_name, value, operator
+    :param fields: {field_name: FieldInfo} doct of the final_output_model, can be obtained by
+    final_output_model.model_fields
+    :return: a type-checked dict in the same form as the filter_predicate param
+    """
+
+    log.info(f"inside type_check_ordinary_filter_predicate_wrapper({filter_predicate}, {fields})")
+
+    filter_operator = filter_predicate["operator"]
+    filter_value = filter_predicate["value"]
+
+    if filter_operator == "in":
+        if not isinstance(filter_value, Iterable):
+            log.info("when `in` operator is used, the filter_value must be an iterable... raising ValueError..")
+            raise ValueError(f"filter_value: {filter_value} must be an iterable to ba compatible with `in` operator")
+
+        type_checked_filter_predicates = [
+            type_check_ordinary_filter_predicate(
+                filter_predicate={
+                    "field_name": filter_predicate["field_name"],
+                    "operator": filter_operator,
+                    "value": element
+                },
+                fields=fields
+            )
+            for element in filter_value
+        ]
+
+        filter_predicate["value"] = [
+            type_checked_filter_predicate["value"] for type_checked_filter_predicate in type_checked_filter_predicates
+        ]
+
+        log.info(f"returning {filter_predicate}")
+
+        return filter_predicate
+
+    return type_check_ordinary_filter_predicate(filter_predicate, fields)
+
 # applicable for filter predicates having non-nested field_name
 def type_check_ordinary_filter_predicate(filter_predicate, fields):
     """
     This check is applicable for filter_predicates having non-nested field names e.g. field_name.
     This function checks whether the value in the filter_predicate conforms to the type of the corresponding
-    field of the final_output_class. The type will primarily fall in two categories: 1. a non-iterable type e.g.
-    str, int, float and 2. an iterable type predominantly list.
+    field of the final_output_class. The type will primarily fall in three categories: 1. a non-iterable type e.g.
+    str, int, float, 2. an iterable type, predominantly a list and 3. a Union type e.g. Union[int, None],
+    Union[list[int], None]. Union types are rarely explicitly used in database models. However, Optional[int]
+    is interpreted as Union[int, None] in the runtime.
 
     For a non-iterable type it simply attempts to cast the value in the filter_predicate to the associated type;
-    a success in this operation implies conformity in the type and vice versa.
+    a success in this operation implies conformity in the type and vice versa. (This operation is performed
+    by a helper function.)
 
     For an iterable type it runs the same operation specified for a non-iterable type for each element of the
     iterable provided as a value. Post that, it casts the iterable into a list. A success in this chain of
-    operations implies conformity in the type and vice versa.
+    operations implies conformity in the type and vice versa. (This operation is performed by a helper function.)
+
+    For a Union type, it extracts all the acceptable types, and runs the operations mentioned above, for the
+    corresponding types i.e. iterable or non-iterable. NoneType is covered under non-iterable. (This operation
+    is performed by a helper function)
 
     :param filter_predicate: a dict containing three keys: field_name, value, operator
     :param fields: {field_name: FieldInfo} dict of the final_output_model,
@@ -278,34 +333,25 @@ def type_check_ordinary_filter_predicate(filter_predicate, fields):
         log.info(f"invalid filter_field_name={filter_field_name}")
         raise ValueError(f"invalid filter_field_name={filter_field_name}")
 
+    # FieldInfo.annotation returns the type of the field
+    expected_field_type = field_info.annotation
+
     # being an instance of GenericAlias implies that the type is a list
-    if isinstance(field_info.annotation, GenericAlias):
-        # .__args__[0] on GenericAlias returns the value type of the list
-        value_type = field_info.annotation.__args__[0]
+    if isinstance(expected_field_type, GenericAlias):
+        filter_field_value = type_check_or_coerce_list(expected_field_type, filter_field_value)
 
-        if value_type == UUID:
-            value_type = str
+    # being an instance of type implies it's a primitive-like type e.g. str, int, float, None
+    elif isinstance(expected_field_type, type):
+        filter_field_value = type_check_or_coerce(expected_field_type, filter_field_value)
 
-        try:
-            filter_field_value = list(map(value_type, filter_field_value))
-        except (TypeError, Exception) as e:
-            log.exception(f"occurred exception = {e}")
-            raise ValueError(f"invalid filter_value (filter_field={filter_field_name}, "
-                             f"filter_field_value={filter_field_value})")
-
-    elif isinstance(field_info.annotation, type):
-        value_type = field_info.annotation
-        if value_type == UUID:
-            value_type = str
-        try:
-            filter_field_value = value_type(filter_field_value)
-        except (ValueError, Exception) as e:
-            log.exception(f"occurred exception = {e}")
-            raise ValueError(f"invalid filter_value (field_field={filter_field_name}, "
-                             f"filter_field_value={filter_field_value})")
+    # isinstance does not work on Union types
+    # (get_origin(expected_type) is Union) works
+    elif get_origin(expected_field_type) is Union:
+        filter_field_value = type_check_or_coerce_union(expected_field_type, filter_field_value)
 
     else:
         log.info("the type of the field is not handled, raising TypeError...")
+
         raise TypeError("invalid type configuration")
 
     retval = {"field_name": filter_field_name, "operator": filter_operator, "value": filter_field_value}
@@ -313,3 +359,110 @@ def type_check_ordinary_filter_predicate(filter_predicate, fields):
     log.info(f"returning {retval}")
 
     return retval
+
+
+def type_check_or_coerce_union(type_annotation, value):
+    """
+    This function takes a type_annotation that's a Union type. It checks whether the
+    value conforms to the acceptable types of the union. If it doesn't, it attempts coercion.
+    :param type_annotation: the expected type of the value, only Union types are handled
+    :param value: the value that needs to be type checked or coerced
+    :return: tye type checked or coerced value
+    :raises ValueError in cases of failure in the operation
+    :raises TypeError in cases it is provided a type that it does not support
+    """
+    log.info(f"inside type_check_or_coerce_a_union({type_annotation}, {value})")
+
+    if get_origin(type_annotation) is not Union:
+        log.info(f"provided type_annotation: {type_annotation} does not conform to type: Union, "
+                 f"raising TypeError...")
+        raise TypeError("invalid type configuration")
+
+    acceptable_types = get_args(type_annotation)
+
+    for acceptable_type in acceptable_types:
+
+        if isinstance(acceptable_type, GenericAlias):
+
+            log.info(f"acceptable_type={acceptable_type}, trying to coerce into a list...")
+
+            try:
+                return type_check_or_coerce_list(acceptable_type, value)
+            except (TypeError, ValueError, Exception) as e:
+                log.info(f"cannot coerce the value: {value} into a list, occurred exception: {e}, "
+                         f"continuing on the loop...")
+
+        elif isinstance(acceptable_type, type):
+
+            log.info(f"acceptable_type={acceptable_type}, trying to coerce into a {acceptable_type}...")
+
+            try:
+                return type_check_or_coerce(acceptable_type, value)
+            except (TypeError, ValueError, Exception) as e:
+                log.info(f"cannot coerce the value: {value} into a {acceptable_type}, occurred exception: {e}")
+
+    log.info(f"provided value: {value}, is incapable of being coerced into any of the acceptable_types: "
+             f"{acceptable_types}, raising ValueError...")
+
+
+def type_check_or_coerce_list(type_annotation, value):
+    """
+    This function takes a type_annotation that's of a list-like structure. It checks first whether the value is
+    iterable, and finally, whether each element in the iterable conforms to the element type of the list-like
+    structure. If the elements are not, it attempts coercion.
+    :param type_annotation: the expected type of the value, only list-like structures are handled
+    :param value: the value that needs to be type checked or coerced
+    :return: the type checked or coerced value
+    :raises ValueError in cases of failure in the operation
+    :raises TypeError in cases it is provided a type that it does not support
+    """
+    log.info(f"inside type_check_or_coerce_a_list({type_annotation}, {value})")
+
+    if not isinstance(type_annotation, GenericAlias):
+        log.info(f"provided type_annotation: {type_annotation} does not conform to type: GenericAlias, "
+                 f"raising TypeError...")
+        raise TypeError("invalid type configuration")
+
+    if not isinstance(value, Iterable):
+        log.info(f"provided value: {value} is not Iterable... raising ValueError..")
+        raise ValueError(f"provided value: {value} is not iterable...")
+
+    element_type = get_args(type_annotation)[0]
+
+    return [type_check_or_coerce(element_type, element) for element in value]
+
+
+def type_check_or_coerce(type_annotation, value):
+    """
+    This function checks whether a value conforms to the type_annotation. In cases, it doesn't,
+    the function attempts to coerce the value into the corresponding type; failure in which results in an
+    exception being raised.
+    :param type_annotation: the expected type of the value, only type instances (e.g. str, int, float) are handled
+    :param value: the value that need to be type checked or coerced
+    :return: the type checked or coerced value
+    :raises ValueError in cases of failure in the operation
+    :raises TypeError in cases it is provided a type that it does not support
+    """
+
+    log.info(f"inside type_check_or_coerce({type_annotation}, {value})")
+
+    if not isinstance(type_annotation, type):
+        log.info(f"provided type_annotation: {type_annotation} does not conform to type: type, "
+                 f"raising TypeError...")
+        raise TypeError("invalid type configuration")
+
+    # since mongodb does not accept UUID instances, UUID values are cast into a string
+    if type_annotation == UUID:
+        type_annotation = str
+
+    if isinstance(value, type_annotation):
+        log.info(f"value: {value} conforms to the type: {type_annotation}, returning...")
+        return value
+
+    try:
+        value = type_annotation(value)
+        log.info(f"successfully coerced value: {value} into type: {type_annotation}, returning...")
+        return value
+    except (ValueError, Exception) as e:
+        log.info(f"failed to coerce value: {value} into type: {type_annotation}, raising Exception...")
+        raise ValueError(f"invalid value: {value}, when considered in the context of type: {type_annotation}")

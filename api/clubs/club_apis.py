@@ -1,45 +1,48 @@
-from fastapi import APIRouter, Depends, Request, HTTPException, status, UploadFile
-from .role_based_parameter_control import (
-    ClubIdParameterControlForm,
-    ClubIdParameterControlBody,
-    UpdateClubParameterControl
-)
+from datetime import datetime
 from typing import Annotated, Optional
+
+import phonenumbers
+import pytz
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
+
+from data.dbapis.clubs import find_club, find_club_by_user, find_many_clubs
+from data.dbapis.clubs import update_club as update_club_db
+from data.dbapis.trainer_affiliation import (
+    find_many_trainer_affiliations,
+    save_trainer_affiliation,
+)
 from logging_config import log
-from data.dbapis.clubs import find_club, update_club as update_club_db, find_club_by_user, find_many_clubs
-from models.clubs import UpdateClubInternal
-from models.user import UserInternal
-from models.trainer_affiliation import TrainerAffiliationInternal
 from logic.auth import get_current_user
-from logic.clubs import upload_logo_logic, upload_images_logic
+from logic.clubs import add_club_service, upload_images_logic, upload_logo_logic
+from models.clubs import UpdateClubInternal
+from models.clubs.service_internal import ClubServiceInternal
 from models.http_responses import Success
+from models.trainer_affiliation import TrainerAffiliationInternal
+from models.user import UserInternal
+from models.user.enums import UserRoles
+from role_based_access_control import RoleBasedAccessControl
+from utils.image_management import generate_image_url, generate_image_urls
+
 from .models import (
+    GenerateTrainerAffiliationDTO,
     GetClub,
     GetClubDetailedDTO,
-    GenerateTrainerAffiliationDTO,
-    GetTrainerAffiliationDTO
+    GetTrainerAffiliationDTO,
 )
-from datetime import datetime
-import pytz
-from utils.image_management import generate_image_urls, generate_image_url
-from role_based_access_control import RoleBasedAccessControl
-from models.user.enums import UserRoles
-from data.dbapis.trainer_affiliation import save_trainer_affiliation, find_many_trainer_affiliations
-import phonenumbers
+from .role_based_parameter_control import (
+    ClubIdParameterControlBody,
+    ClubIdParameterControlForm,
+    ClubServiceParameterControl,
+    UpdateClubParameterControl,
+)
 
-clubs_api_router = APIRouter(
-    prefix="/clubs",
-    tags=["clubs"]
-)
+clubs_api_router = APIRouter(prefix="/clubs", tags=["clubs"])
 
 
 @clubs_api_router.put("/update-club")
 async def update_club(
-        request: Request,
-        update_club_parameter_control: Annotated[
-            UpdateClubParameterControl,
-            Depends()
-        ]
+    request: Request,
+    update_club_parameter_control: Annotated[UpdateClubParameterControl, Depends()],
 ):
     update_club_request = update_club_parameter_control.update_club_request
     user = update_club_parameter_control.user
@@ -55,7 +58,7 @@ async def update_club(
     update_club_data = UpdateClubInternal(
         last_updated_by=user.id,
         last_updated_on=datetime.now(pytz.utc),
-        **update_club_request.model_dump(exclude_unset=True)
+        **update_club_request.model_dump(exclude_unset=True),
     )
 
     if update_club_request.club_id:
@@ -74,17 +77,20 @@ async def update_club(
         data={
             "updated_club": GetClub(
                 logo=generate_image_url(image_id=updated_club.logo, request=request),
-                images=generate_image_urls(image_ids=updated_club.images, request=request),
-                **updated_club.model_dump(exclude={"logo", "images"})
-            )}
+                images=generate_image_urls(
+                    image_ids=updated_club.images, request=request
+                ),
+                **updated_club.model_dump(exclude={"logo", "images"}),
+            )
+        },
     )
 
 
 @clubs_api_router.get("/get-club/{club_id}")
 async def get_club_by_id(
-        request: Request,
-        club_id: str,
-        user: Annotated[UserInternal, Depends(get_current_user)]
+    request: Request,
+    club_id: str,
+    user: Annotated[UserInternal, Depends(get_current_user)],
 ):
     log.info(f"inside /clubs/get-club/{club_id} (club_id={club_id}, user_id={user.id})")
 
@@ -93,7 +99,7 @@ async def get_club_by_id(
     if not club:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"no club exists with the provided id (club_id={club_id})"
+            detail=f"no club exists with the provided id (club_id={club_id})",
         )
 
     retval = Success(
@@ -101,8 +107,8 @@ async def get_club_by_id(
         data=GetClubDetailedDTO(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
-            **club.model_dump(exclude={"logo", "images"})
-        )
+            **club.model_dump(exclude={"logo", "images"}),
+        ),
     )
 
     log.info(f"returning {retval}")
@@ -112,8 +118,7 @@ async def get_club_by_id(
 
 @clubs_api_router.get("/get-clubs")
 async def get_clubs(
-        request: Request,
-        user: Annotated[UserInternal, Depends(get_current_user)]
+    request: Request, user: Annotated[UserInternal, Depends(get_current_user)]
 ):
     log.info(f"inside /clubs/get-clubs (user_id={user.id})")
 
@@ -125,9 +130,10 @@ async def get_clubs(
             GetClub(
                 logo=generate_image_url(image_id=club.logo, request=request),
                 images=generate_image_urls(image_ids=club.images, request=request),
-                **club.model_dump(exclude={"logo", "images"})
-            ) for club in clubs
-        ]
+                **club.model_dump(exclude={"logo", "images"}),
+            )
+            for club in clubs
+        ],
     )
 
     log.info(f"returning {retval}")
@@ -137,11 +143,10 @@ async def get_clubs(
 
 @clubs_api_router.get("/get-your-club")
 async def get_your_club(
-        request: Request,
-        user: Annotated[
-            UserInternal,
-            Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB}))
-        ]
+    request: Request,
+    user: Annotated[
+        UserInternal, Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB}))
+    ],
 ):
     log.info(f"inside /clubs/get-your-club (user_id={user.id})")
 
@@ -152,8 +157,8 @@ async def get_your_club(
         data=GetClub(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
-            **club.model_dump(exclude={"logo", "images"})
-        )
+            **club.model_dump(exclude={"logo", "images"}),
+        ),
     )
 
     log.info(f"returning {retval}")
@@ -163,30 +168,24 @@ async def get_your_club(
 
 @clubs_api_router.post("/upload-logo")
 async def upload_logo(
-        request: Request,
-        logo: UploadFile,
-        club_id_parameter_control: Annotated[
-            ClubIdParameterControlForm,
-            Depends()
-        ]
+    request: Request,
+    logo: UploadFile,
+    club_id_parameter_control: Annotated[ClubIdParameterControlForm, Depends()],
 ):
     user = club_id_parameter_control.user
     club_id = club_id_parameter_control.club_id
 
     log.info(f"inside /clubs/upload-logo(user_id={user.id}, club_id={club_id})")
 
-    club = await upload_logo_logic(
-        club_id=club_id,
-        logo=logo
-    )
+    club = await upload_logo_logic(club_id=club_id, logo=logo)
 
     retval = Success(
         message="logo uploaded successfully...",
         data=GetClub(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
-            **club.model_dump(exclude={"logo", "images"})
-        )
+            **club.model_dump(exclude={"logo", "images"}),
+        ),
     )
 
     log.info(f"returning {retval}")
@@ -196,30 +195,24 @@ async def upload_logo(
 
 @clubs_api_router.post("/upload-images")
 async def upload_logo(
-        request: Request,
-        images: list[UploadFile],
-        club_id_parameter_control: Annotated[
-            ClubIdParameterControlForm,
-            Depends()
-        ]
+    request: Request,
+    images: list[UploadFile],
+    club_id_parameter_control: Annotated[ClubIdParameterControlForm, Depends()],
 ):
     user = club_id_parameter_control.user
     club_id = club_id_parameter_control.club_id
 
     log.info(f"inside /clubs/upload-images(user_id={user.id}, club_id={club_id})")
 
-    club = await upload_images_logic(
-        club_id=club_id,
-        images=images
-    )
+    club = await upload_images_logic(club_id=club_id, images=images)
 
     retval = Success(
         message="logo uploaded successfully...",
         data=GetClub(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
-            **club.model_dump(exclude={"logo", "images"})
-        )
+            **club.model_dump(exclude={"logo", "images"}),
+        ),
     )
 
     log.info(f"returning {retval}")
@@ -229,28 +222,29 @@ async def upload_logo(
 
 @clubs_api_router.post("/generate-trainer-affiliation")
 async def generate_trainer_affiliation(
-        generate_trainer_affiliation_dto: GenerateTrainerAffiliationDTO,
-        club_id_parameter_control: Annotated[
-            ClubIdParameterControlBody,
-            Depends()
-        ]
+    generate_trainer_affiliation_dto: GenerateTrainerAffiliationDTO,
+    club_id_parameter_control: Annotated[ClubIdParameterControlBody, Depends()],
 ):
     user = club_id_parameter_control.user
     club_id = club_id_parameter_control.club_id
 
-    log.info(f"inside /clubs/generate-trainer-affiliation (user={user}, club_id={club_id})")
+    log.info(
+        f"inside /clubs/generate-trainer-affiliation (user={user}, club_id={club_id})"
+    )
 
     new_trainer_affiliation = TrainerAffiliationInternal(
         created_by=user.id,
         club_id=club_id,
-        **generate_trainer_affiliation_dto.model_dump()
+        **generate_trainer_affiliation_dto.model_dump(),
     )
 
-    trainer_affiliation = save_trainer_affiliation(new_trainer_affiliation=new_trainer_affiliation)
+    trainer_affiliation = save_trainer_affiliation(
+        new_trainer_affiliation=new_trainer_affiliation
+    )
 
     retval = Success(
         message="trainer affiliation number generated successfully",
-        data=GetTrainerAffiliationDTO(**trainer_affiliation.model_dump())
+        data=GetTrainerAffiliationDTO(**trainer_affiliation.model_dump()),
     )
 
     log.info(f"returning {retval}")
@@ -260,15 +254,16 @@ async def generate_trainer_affiliation(
 
 @clubs_api_router.get("/get-trainer-affiliation")
 async def get_trainer_affiliation(
-        user: Annotated[
-            UserInternal,
-            Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB}))
-        ],
-        email_address: Optional[str] = None,
-        phone_number: Optional[str] = None,
+    user: Annotated[
+        UserInternal, Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB}))
+    ],
+    email_address: Optional[str] = None,
+    phone_number: Optional[str] = None,
 ):
-    log.info(f"inside /clubs/get-trainer-affiliation (user_id={user.id}, email_address={email_address}, "
-             f"phone_number={phone_number})")
+    log.info(
+        f"inside /clubs/get-trainer-affiliation (user_id={user.id}, email_address={email_address}, "
+        f"phone_number={phone_number})"
+    )
 
     club = find_club_by_user(user_id=str(user.id))
 
@@ -277,17 +272,20 @@ async def get_trainer_affiliation(
     formatted_phone_number = None
 
     if phone_number:
-        phone_number_error = ValueError(f"invalid phone number (phone_number={phone_number})")
+        phone_number_error = ValueError(
+            f"invalid phone number (phone_number={phone_number})"
+        )
 
         try:
             parsed_phone_number = phonenumbers.parse(phone_number)
         except phonenumbers.NumberParseException:
-            log.info(f"failed to parse phone number, raising error (phone_number={phone_number})")
+            log.info(
+                f"failed to parse phone number, raising error (phone_number={phone_number})"
+            )
             raise phone_number_error
 
         formatted_phone_number = phonenumbers.format_number(
-            parsed_phone_number,
-            phonenumbers.PhoneNumberFormat.INTERNATIONAL
+            parsed_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
         )
 
     filter_dict = {"club_id": str(club.id)}
@@ -308,3 +306,32 @@ async def get_trainer_affiliation(
     log.info(f"returning {retval}")
 
     return retval
+
+
+@clubs_api_router.post("/services")
+def add_a_new_club_service(
+    request: Request,
+    club_service_parameter_control: Annotated[ClubServiceParameterControl, Depends()],
+):
+    user = club_service_parameter_control.user
+    club_service = club_service_parameter_control.club_service
+
+    log.info(
+        f"inside {request.url} invoked (create_club_service_request={club_service}, user_id={user.id})"
+    )
+
+    club_service_internal = ClubServiceInternal(
+        created_by=user.id, **club_service.model_dump(exclude={"availability"})
+    )
+    service_availability = club_service.availability
+
+    newly_created_club_service = add_club_service(
+        club_service=club_service_internal,
+        user=user,
+        service_availability=service_availability,
+    )
+
+    return Success(
+        message="club service added successfully",
+        data={"id": newly_created_club_service.id},
+    )

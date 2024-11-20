@@ -1,16 +1,18 @@
 from typing import Annotated
 from urllib.parse import quote_plus
+
 from bson.objectid import ObjectId
 from pydantic import BeforeValidator
 from pymongo import MongoClient
+
 from config import (
     DATABASE_MAX_POOL_SIZE,
     DATABASE_NAME,
     DATABASE_PASSWORD,
     DATABASE_PORT,
+    DATABASE_REPLICA_SET_NAME,
     DATABASE_URL,
     DATABASE_USER,
-    DATABASE_REPLICA_SET_NAME
 )
 from logging_config import log
 
@@ -52,6 +54,18 @@ def get_clubs_collection():
     return club_collection
 
 
+def get_clubs_service_collection():
+    log.info(f"inside get_club_service_collection()")
+    club_service_collection = get_database()["club_service"]
+    return club_service_collection
+
+
+def get_club_service_availability_collection():
+    log.info(f"inside get_club_service_availability_collection()")
+    club_service_availability_collection = get_database()["club_service_availability"]
+    return club_service_availability_collection
+
+
 def get_sign_up_otp_collection():
     log.info("inside get_sign_up_otp_collection()")
 
@@ -89,6 +103,7 @@ def get_trainer_collection():
 
     return trainer_collection
 
+
 def get_trainer_affiliation_collection():
     log.info("inside get_trainer_collection()")
 
@@ -100,6 +115,7 @@ def get_trainer_affiliation_collection():
     trainer_affiliation_collection.create_index([("phone_number", 1)])
 
     return trainer_affiliation_collection
+
 
 def get_uploaded_images_collection():
     log.info("inside get_uploaded_images_collection")
@@ -211,4 +227,3 @@ def get_countries_collection():
     log.info("Fetching countries collection...")
     countries_collection = get_database()["countries"]
     return countries_collection
-

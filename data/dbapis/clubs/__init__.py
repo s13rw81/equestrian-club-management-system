@@ -1,10 +1,12 @@
 from data.dbapis.clubs.read_queries import (
-    get_club_count,
     find_club,
+    find_club_by_user,
     find_many_clubs,
-    find_club_by_user
+    get_club_count,
 )
 from data.dbapis.clubs.write_queries import (
     save_club,
-    update_club
+    save_club_service,
+    save_club_service_availability,
+    update_club,
 )

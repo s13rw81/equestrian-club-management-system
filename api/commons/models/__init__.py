@@ -1,0 +1,1 @@
+from .get_query_paginated import GetQueryPaginatedDTO

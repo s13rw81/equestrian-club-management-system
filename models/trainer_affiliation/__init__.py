@@ -1,1 +1,2 @@
 from .trainer_affiliation_internal import TrainerAffiliationInternal
+from .trainer_affiliation_detailed_internal import TrainerAffiliationDetailedInternal

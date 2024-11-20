@@ -29,10 +29,12 @@ def generic_get_query_with_pagination_logic(
              f"page_no={page_no}, "
              f"page_size={page_size})")
 
+    s = s + ["id$asc"] if s else ["id$asc"]
+
     generic_get_query_dto = GenericGetQueryWithPaginationDTO(
         final_output_model=final_output_model,
         filters=format_filter_strings(filter_strings=f) if f else None,
-        sorts=format_sort_strings(sort_strings=s) if s else None,
+        sorts=format_sort_strings(sort_strings=s),
         pagination=Pagination(
             page_no=page_no,
             page_size=page_size
@@ -75,7 +77,7 @@ def format_filter_strings(filter_strings: list[str]) -> list[Filter]:
                        f"the field_name, the operator, and the value (filter_string={filter_string})"
             )
 
-        field_name_regex = r'[\w\.]+'
+        field_name_regex = r'[\w.]+'
 
         if not re.fullmatch(field_name_regex, filter_splitted[0]):
             log.info("only alphanumeric characters, underscores, and a single dot are allowed as a "

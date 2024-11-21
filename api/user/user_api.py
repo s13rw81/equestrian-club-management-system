@@ -1,7 +1,5 @@
-from uuid import UUID
 from fastapi import APIRouter, Depends, status, Request, UploadFile
 from fastapi.exceptions import HTTPException
-from data.dbapis.country.read_queries import fetch_country_by_uuid
 from logging_config import log
 from typing import Annotated
 from .models import SignUpUser, ResponseUser, UpdateUser
@@ -22,7 +20,7 @@ user_api_router = APIRouter(
 
 @user_api_router.post("/signup")
 async def signup(request: Request, sign_up_user: SignUpUser):
-    log.info(f"/signup invoked: sign_up_user = {sign_up_user}")
+    log.info(f"/signup invoked: sign_up_user = {sign_up_user.model_dump()}")
 
     # OTP Verification
     verification_result = verify_sign_up_otp(

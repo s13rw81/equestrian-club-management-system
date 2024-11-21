@@ -18,7 +18,7 @@ def find_trainer(session=None, **kwargs) -> Optional[TrainerInternal]:
 
     retval = TrainerInternal(**trainer)
 
-    log.info(f"returning club = {retval}")
+    log.info(f"returning trainer = {retval}")
 
     return retval
 

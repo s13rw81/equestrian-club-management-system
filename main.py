@@ -32,6 +32,7 @@ app.include_router(upload_images_demo_router)
 app.include_router(payment_demo_router)
 app.include_router(country_api_router)
 
+
 # this exception handler will handle all the Exceptions
 # except for FastAPI's HTTPException
 # for HTTPExceptions the handler won't even get called
@@ -71,7 +72,6 @@ async def root(request: Request):
     log.info(
         f"method: {request.method}, headers: {request.headers}, client: {request.client}"
     )
-    return {"status": "Hello World"}
     return RedirectResponse(url="/docs")
 
 

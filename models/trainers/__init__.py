@@ -1,2 +1,2 @@
-from .trainer_internal import TrainerInternal
+from .trainer_internal import TrainerInternal, Specialization
 from .update_trainer_internal import UpdateTrainerInternal

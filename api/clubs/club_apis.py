@@ -4,6 +4,8 @@ from typing import Annotated
 import pytz
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 
+from data.dbapis.clubs import find_club, find_club_by_user, find_many_clubs
+from data.dbapis.clubs import update_club as update_club_db
 from data.dbapis.trainer_affiliation import save_trainer_affiliation
 from logging_config import log
 from logic.auth import get_current_user
@@ -20,14 +22,12 @@ from utils.image_management import generate_image_url, generate_image_urls
 
 from ..commons.models import GetQueryPaginatedDTO
 from .models import (
-    GenerateTrainerAffiliationDTO,
     GetClubDetailedDTO,
     GetClubDTO,
     GetTrainerAffiliationDetailedDTO,
     GetTrainerAffiliationDTO,
 )
 from .role_based_parameter_control import (
-    ClubIdParameterControlBody,
     ClubIdParameterControlForm,
     ClubServiceParameterControl,
     GenerateTrainerAffiliationParamControl,

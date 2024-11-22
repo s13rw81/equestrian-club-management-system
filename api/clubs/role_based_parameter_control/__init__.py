@@ -1,4 +1,10 @@
 from .club_id_parameter_control_body import ClubIdParameterControlBody
 from .club_id_parameter_control_form import ClubIdParameterControlForm
 from .club_service_parameter_control import ClubServiceParameterControl
+from .generate_trainer_affiliation_param_control import (
+    GenerateTrainerAffiliationParamControl,
+)
+from .get_trainer_affiliation_paginated_param_ctrl import (
+    GetTrainerAffiliationPaginatedParamCtrl,
+)
 from .update_club_parameter_control import UpdateClubParameterControl

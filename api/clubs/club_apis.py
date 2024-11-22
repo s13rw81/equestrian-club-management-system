@@ -1,19 +1,14 @@
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated
 
-import phonenumbers
 import pytz
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 
-from data.dbapis.clubs import find_club, find_club_by_user, find_many_clubs
-from data.dbapis.clubs import update_club as update_club_db
-from data.dbapis.trainer_affiliation import (
-    find_many_trainer_affiliations,
-    save_trainer_affiliation,
-)
+from data.dbapis.trainer_affiliation import save_trainer_affiliation
 from logging_config import log
 from logic.auth import get_current_user
 from logic.clubs import add_club_service, upload_images_logic, upload_logo_logic
+from logic.trainer_affiliation import trainer_affiliation_get_query_with_pagination
 from models.clubs import UpdateClubInternal
 from models.clubs.service_internal import ClubServiceInternal
 from models.http_responses import Success
@@ -23,16 +18,20 @@ from models.user.enums import UserRoles
 from role_based_access_control import RoleBasedAccessControl
 from utils.image_management import generate_image_url, generate_image_urls
 
+from ..commons.models import GetQueryPaginatedDTO
 from .models import (
     GenerateTrainerAffiliationDTO,
-    GetClub,
     GetClubDetailedDTO,
+    GetClubDTO,
+    GetTrainerAffiliationDetailedDTO,
     GetTrainerAffiliationDTO,
 )
 from .role_based_parameter_control import (
     ClubIdParameterControlBody,
     ClubIdParameterControlForm,
     ClubServiceParameterControl,
+    GenerateTrainerAffiliationParamControl,
+    GetTrainerAffiliationPaginatedParamCtrl,
     UpdateClubParameterControl,
 )
 
@@ -75,7 +74,7 @@ async def update_club(
     return Success(
         message="club updated successfully...",
         data={
-            "updated_club": GetClub(
+            "updated_club": GetClubDTO(
                 logo=generate_image_url(image_id=updated_club.logo, request=request),
                 images=generate_image_urls(
                     image_ids=updated_club.images, request=request
@@ -127,7 +126,7 @@ async def get_clubs(
     retval = Success(
         message="club retrieved successfully...",
         data=[
-            GetClub(
+            GetClubDTO(
                 logo=generate_image_url(image_id=club.logo, request=request),
                 images=generate_image_urls(image_ids=club.images, request=request),
                 **club.model_dump(exclude={"logo", "images"}),
@@ -154,7 +153,7 @@ async def get_your_club(
 
     retval = Success(
         message="club retrieved successfully...",
-        data=GetClub(
+        data=GetClubDTO(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
             **club.model_dump(exclude={"logo", "images"}),
@@ -181,7 +180,7 @@ async def upload_logo(
 
     retval = Success(
         message="logo uploaded successfully...",
-        data=GetClub(
+        data=GetClubDTO(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
             **club.model_dump(exclude={"logo", "images"}),
@@ -208,7 +207,7 @@ async def upload_logo(
 
     retval = Success(
         message="logo uploaded successfully...",
-        data=GetClub(
+        data=GetClubDTO(
             logo=generate_image_url(image_id=club.logo, request=request),
             images=generate_image_urls(image_ids=club.images, request=request),
             **club.model_dump(exclude={"logo", "images"}),
@@ -222,20 +221,22 @@ async def upload_logo(
 
 @clubs_api_router.post("/generate-trainer-affiliation")
 async def generate_trainer_affiliation(
-    generate_trainer_affiliation_dto: GenerateTrainerAffiliationDTO,
-    club_id_parameter_control: Annotated[ClubIdParameterControlBody, Depends()],
+    generate_trainer_affiliation_param_control: Annotated[
+        GenerateTrainerAffiliationParamControl, Depends()
+    ]
 ):
-    user = club_id_parameter_control.user
-    club_id = club_id_parameter_control.club_id
+    user = generate_trainer_affiliation_param_control.user
+    generate_trainer_affiliation_dto = (
+        generate_trainer_affiliation_param_control.generate_trainer_affiliation_dto
+    )
 
     log.info(
-        f"inside /clubs/generate-trainer-affiliation (user={user}, club_id={club_id})"
+        f"inside /clubs/generate-trainer-affiliation (user={user}, "
+        f"generate_trainer_affiliation_dto={generate_trainer_affiliation_dto})"
     )
 
     new_trainer_affiliation = TrainerAffiliationInternal(
-        created_by=user.id,
-        club_id=club_id,
-        **generate_trainer_affiliation_dto.model_dump(),
+        created_by=user.id, **generate_trainer_affiliation_dto.model_dump()
     )
 
     trainer_affiliation = save_trainer_affiliation(
@@ -252,56 +253,35 @@ async def generate_trainer_affiliation(
     return retval
 
 
-@clubs_api_router.get("/get-trainer-affiliation")
-async def get_trainer_affiliation(
-    user: Annotated[
-        UserInternal, Depends(RoleBasedAccessControl(allowed_roles={UserRoles.CLUB}))
-    ],
-    email_address: Optional[str] = None,
-    phone_number: Optional[str] = None,
+@clubs_api_router.get("/get-trainer-affiliation-paginated")
+async def get_trainer_affiliation_paginated(
+    get_trainer_affiliation_param_ctrl: Annotated[
+        GetTrainerAffiliationPaginatedParamCtrl, Depends()
+    ]
 ):
+    user = get_trainer_affiliation_param_ctrl.user
+    get_query_paginated_dto = get_trainer_affiliation_param_ctrl.get_query_paginated_dto
+
+    f = get_query_paginated_dto.f
+    s = get_query_paginated_dto.s
+    page_no = get_query_paginated_dto.page_no
+    page_size = get_query_paginated_dto.page_size
+
     log.info(
-        f"inside /clubs/get-trainer-affiliation (user_id={user.id}, email_address={email_address}, "
-        f"phone_number={phone_number})"
+        f"inside /clubs/get-trainer-affiliation-paginated ("
+        f"f={f}, s={s}, page_no={page_no}, page_size={page_size}, user_id={user.id})"
     )
 
-    club = find_club_by_user(user_id=str(user.id))
+    result = trainer_affiliation_get_query_with_pagination(
+        f=f, s=s, page_no=page_no, page_size=page_size
+    )
 
-    # TODO: design a generic query dbapi with filtering, ordering and pagination and replace the following code
+    log.info(f"received data = {result}")
 
-    formatted_phone_number = None
-
-    if phone_number:
-        phone_number_error = ValueError(
-            f"invalid phone number (phone_number={phone_number})"
-        )
-
-        try:
-            parsed_phone_number = phonenumbers.parse(phone_number)
-        except phonenumbers.NumberParseException:
-            log.info(
-                f"failed to parse phone number, raising error (phone_number={phone_number})"
-            )
-            raise phone_number_error
-
-        formatted_phone_number = phonenumbers.format_number(
-            parsed_phone_number, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-        )
-
-    filter_dict = {"club_id": str(club.id)}
-
-    if email_address:
-        filter_dict["email_address"] = email_address
-
-    if formatted_phone_number:
-        filter_dict["phone_number"] = phone_number
-
-    trainer_affiliation_list = find_many_trainer_affiliations(**filter_dict)
-
-    retval = [
-        GetTrainerAffiliationDTO(**trainer_affiliation.model_dump())
-        for trainer_affiliation in trainer_affiliation_list
-    ]
+    retval = Success(
+        message="trainer affiliation details fetched successfully",
+        data=[GetTrainerAffiliationDetailedDTO(**data.model_dump()) for data in result],
+    )
 
     log.info(f"returning {retval}")
 

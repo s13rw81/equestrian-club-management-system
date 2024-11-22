@@ -13,6 +13,8 @@ with open("secrets.json", "r") as f:
 # CONSTANTS
 HOST = SECRETS.get('HOST', '0.0.0.0')
 PORT = SECRETS.get('PORT', 8000)
+PROTOCOL = SECRETS.get('PROTOCOL', 'http') # possible values: http or https
+BASE_URL = f"{PROTOCOL}://{HOST}:{PORT}"
 DEBUG = False if ENV == 'PROD' else True
 DATABASE_NAME = SECRETS['DATABASE_NAME']
 DATABASE_MAX_POOL_SIZE = SECRETS['DATABASE_MAX_POOL_SIZE']

@@ -6,8 +6,7 @@ import aiofiles
 import aiofiles.os
 from fastapi import Request, UploadFile, status
 from fastapi.exceptions import HTTPException
-
-from config import IMAGES_UPLOAD_FOLDER
+from config import IMAGES_UPLOAD_FOLDER, BASE_URL
 from data.dbapis.uploaded_imges.read_queries import get_uploaded_image_by_id
 from data.dbapis.uploaded_imges.write_queries import (
     delete_uploaded_image,
@@ -53,7 +52,11 @@ async def save_image(image_file: UploadFile) -> str:
     return uploaded_image_id
 
 
-def generate_image_url(image_id: Optional[str], request: Request) -> Optional[str]:
+def generate_image_url(
+        image_id: Optional[str] = None,
+        # the request parameter is irrelevant, it is only kept for backward compatibility
+        request: Optional[Request] = None
+) -> Optional[str]:
     """
     returns the url for the image
     :param image_id: the id of the targeted image
@@ -66,16 +69,20 @@ def generate_image_url(image_id: Optional[str], request: Request) -> Optional[st
         return None
 
     image_path = get_image_file_path(image_id)
-    file_extension = image_path.split(".")[+1]
+    file_extension = image_path.split(".")[-1]
 
-    retval = f"{request.base_url}images/{image_id}/image.{file_extension}"
+    retval = f"{BASE_URL}/images/{image_id}/image.{file_extension}"
 
     log.info(f"returning {retval}")
 
     return retval
 
 
-def generate_image_urls(image_ids: Optional[list[str]], request: Request) -> Optional[list[str]]:
+def generate_image_urls(
+        image_ids: Optional[list[str]],
+        # the request parameter is irrelevant, it is only kept for backward compatibility
+        request: Optional[Request] = None
+) -> Optional[list[str]]:
     """given a list of image_ids returns the corresponding urls
 
     Args:
@@ -91,7 +98,7 @@ def generate_image_urls(image_ids: Optional[list[str]], request: Request) -> Opt
     if not image_ids:
         return None
 
-    image_urls = [generate_image_url(image_id=image_id, request=request) for image_id in image_ids]
+    image_urls = [generate_image_url(image_id=image_id) for image_id in image_ids]
 
     log.info(f"returning {image_urls}")
 

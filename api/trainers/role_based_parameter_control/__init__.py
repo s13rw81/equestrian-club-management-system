@@ -1,1 +1,1 @@
-from .update_trainer_parameter_control import UpdateTrainerParameterControl
+from .get_trainers_paginated_param_ctrl import GetTrainersPaginatedParamCtrl

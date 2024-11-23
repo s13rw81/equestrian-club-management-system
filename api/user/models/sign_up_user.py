@@ -1,5 +1,4 @@
 from uuid import UUID
-
 from pydantic import (
     BaseModel,
     field_validator,
@@ -8,7 +7,6 @@ from pydantic import (
     EmailStr
 )
 from typing import Optional
-
 from data.dbapis.country.read_queries import fetch_country_by_uuid
 from models.user.enums import (
     RidingStage,

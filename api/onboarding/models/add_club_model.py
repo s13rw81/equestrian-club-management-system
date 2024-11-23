@@ -40,7 +40,12 @@ class CreateClubRequest(BaseModel):
             log.info(f"phone number is not valid, raising error (phone_number={value})")
             raise error
 
-        return value
+        formatter_phone_number = phonenumbers.format_number(
+            parsed_phone_number,
+            phonenumbers.PhoneNumberFormat.INTERNATIONAL
+        )
+
+        return formatter_phone_number
 
     @field_validator("club_id")
     def validate_club_id(cls, value):

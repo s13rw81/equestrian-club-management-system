@@ -1,2 +1,3 @@
 from .update_trainer_dto import UpdateTrainerDTO
 from .get_trainer_dto import GetTrainerDTO
+from .get_trainer_detailed_dto import GetTrainerDetailedDTO

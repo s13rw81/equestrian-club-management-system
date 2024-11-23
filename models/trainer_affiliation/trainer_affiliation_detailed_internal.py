@@ -14,4 +14,4 @@ class TrainerAffiliationDetailedInternal(TrainerAffiliationInternal):
             as_key_name="club",
             is_one_to_one=True
         )
-    ]
+    ] = None

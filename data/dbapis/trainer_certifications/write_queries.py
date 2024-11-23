@@ -1,4 +1,4 @@
-from data.db import get_trainer_certification_collection
+from data.db import get_trainer_certifications_collection
 from logging_config import log
 from models.trainer_certification import TrainerCertificationInternal, UpdateTrainerCertificationInternal
 from fastapi import HTTPException, status
@@ -6,7 +6,7 @@ from decorators import atomic_transaction
 from pymongo import UpdateOne
 from . import find_trainer_certifications_with_ids
 
-trainer_certification_collection = get_trainer_certification_collection()
+trainer_certification_collection = get_trainer_certifications_collection()
 
 
 @atomic_transaction
@@ -15,6 +15,10 @@ def save_trainer_certifications_bulk(
         session=None
 ) -> list[TrainerCertificationInternal]:
     log.info(f"inside save_many_trainer_certifications(new_trainer_certifications={new_trainer_certifications})")
+
+    if not new_trainer_certifications:
+        log.info(f"returning {new_trainer_certifications}")
+        return new_trainer_certifications
 
     new_trainer_certifications_dumped = [
         new_trainer_certification.model_dump() for new_trainer_certification in new_trainer_certifications
@@ -62,15 +66,15 @@ def update_trainer_certifications_bulk(
     )
 
     log.info(
-        f"trainers update executed, matched_count={result.matched_count}, "
+        f"trainer certification update executed, matched_count={result.matched_count}, "
         f"modified_count={result.modified_count}"
     )
 
     if not result.modified_count:
-        log.info("could not update trainers due to unknown reasons, raising exception")
+        log.info("could not update trainer certifications due to unknown reasons, raising exception")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="trainers cannot be updated in the database due to unknown reasons"
+            detail="trainer certifications cannot be updated in the database due to unknown reasons"
         )
 
     updated_trainer_certifications = find_trainer_certifications_with_ids(

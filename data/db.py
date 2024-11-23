@@ -89,7 +89,7 @@ def get_trainer_collection():
 
     return trainer_collection
 
-def get_trainer_affiliation_collection():
+def get_trainer_affiliations_collection():
     log.info("inside get_trainer_collection()")
 
     trainer_affiliation_collection = get_database()["trainer_affiliations"]
@@ -107,7 +107,7 @@ def get_trainer_affiliation_collection():
 
     return trainer_affiliation_collection
 
-def get_trainer_certification_collection():
+def get_trainer_certifications_collection():
     log.info("inside get_trainer_certification_collection()")
 
     trainer_certification_collection = get_database()["trainer_certifications"]
@@ -120,6 +120,18 @@ def get_trainer_certification_collection():
 
     return trainer_certification_collection
 
+def get_trainer_specializations_collection():
+    log.info("inside get_trainer_specializations_collection()")
+
+    trainer_specializations_collection = get_database()["trainer_specializations"]
+
+    # primary-key field
+    trainer_specializations_collection.create_index([("id", 1)], unique=True)
+
+    # indices for foreign key fields
+    trainer_specializations_collection.create_index([("trainer_id", 1)])
+
+    return trainer_specializations_collection
 
 def get_uploaded_images_collection():
     log.info("inside get_uploaded_images_collection")

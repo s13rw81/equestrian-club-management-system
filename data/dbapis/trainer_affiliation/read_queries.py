@@ -2,9 +2,9 @@ from decorators import atomic_transaction
 from typing import Optional
 from models.trainer_affiliation import TrainerAffiliationInternal
 from logging_config import log
-from data.db import get_trainer_affiliation_collection
+from data.db import get_trainer_affiliations_collection
 
-trainer_affiliation_collection = get_trainer_affiliation_collection()
+trainer_affiliation_collection = get_trainer_affiliations_collection()
 
 
 @atomic_transaction

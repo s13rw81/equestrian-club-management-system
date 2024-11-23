@@ -9,6 +9,6 @@ class TrainerCertificationInternal(CommonBase):
 
     # system-fields
     # the id of the associated image
-    image_id: Optional[str] = None
+    image: Optional[str] = None
     # the id of the corresponding trainer
     trainer_id: str

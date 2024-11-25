@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_serializer, model_validator
 
 from models.clubs.enums.service import ServiceStatus, ServiceType, SubServices
 
@@ -87,3 +87,35 @@ class UpdateClubServiceRequest(BaseModel):
                 ValueError("capacity not provided for group sub service")
 
         return self
+
+
+class ResponseAvailability(BaseModel):
+    id: str
+    start_time: datetime
+    end_time: datetime
+
+
+class ResponseGetClubService(BaseModel):
+    id: str
+    service_type: Optional[ServiceType] = None
+    sub_service: Optional[SubServices] = None
+    service_status: Optional[ServiceStatus] = None
+    services: Optional[list[str]] = None
+    capacity: Optional[int] = None
+    no_of_services: Optional[int] = None
+    commision: Optional[float] = None
+    pricing: Optional[str] = None
+    discount: Optional[float] = None
+    availability: Optional[list[ResponseAvailability]] = None
+
+    @field_serializer("service_type")
+    def serialize_service_type(self, value):
+        return value.name if value else None
+
+    @field_serializer("sub_service")
+    def serialize_sub_service(self, value):
+        return value.name if value else None
+
+    @field_serializer("service_status")
+    def serialize_service_status(self, value):
+        return value.name if value else None

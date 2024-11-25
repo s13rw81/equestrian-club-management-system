@@ -11,6 +11,7 @@ from logging_config import log
 from logic.auth import get_current_user
 from logic.clubs import (
     add_club_service,
+    club_service_detailed_get_query_with_pagination,
     update_club_service,
     upload_images_logic,
     upload_logo_logic,
@@ -32,10 +33,12 @@ from .models import (
     GetTrainerAffiliationDetailedDTO,
     GetTrainerAffiliationDTO,
 )
+from .models.club_service import ResponseGetClubService
 from .role_based_parameter_control import (
     ClubIdParameterControlForm,
     ClubServiceParameterControl,
     GenerateTrainerAffiliationParamControl,
+    GetClubServicePaginatedParamControl,
     GetTrainerAffiliationPaginatedParamCtrl,
     UpdateClubParameterControl,
     UpdateClubServiceParameterControl,
@@ -360,3 +363,40 @@ def update_a_club_service(
     return Success(
         message="club service updated successfully", data={"id": club_service_id}
     )
+
+
+@clubs_api_router.get("/{club_id}/services/")
+def get_club_service_detailed_with_pagination(
+    request: Request,
+    get_club_services_param_control: Annotated[
+        GetClubServicePaginatedParamControl, Depends()
+    ],
+):
+    user = get_club_services_param_control.user
+    club_id = get_club_services_param_control.club_id
+    get_query_paginated_dto = get_club_services_param_control.get_query_paginated_dto
+
+    f = get_query_paginated_dto.f
+    s = get_query_paginated_dto.s
+    page_no = get_query_paginated_dto.page_no
+    page_size = get_query_paginated_dto.page_size
+
+    log.info(
+        f"{request.url} invoked user={user}, club_id={club_id},"
+        f"f={f}, s={s}, page_no={page_no}, page_size={page_size}"
+    )
+
+    result = club_service_detailed_get_query_with_pagination(
+        f=f, s=s, page_no=page_no, page_size=page_size
+    )
+
+    log.info(f"received data = {result}")
+
+    retval = Success(
+        message="club service details fetched successfully",
+        data=[ResponseGetClubService(**data.model_dump()) for data in result],
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval

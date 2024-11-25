@@ -34,6 +34,7 @@ class GetClubDTO(BaseModel):
         if not logo:
             return logo
 
+        # this check is there only to make it backward compatible
         # if the logo is a valid UUID, only then it needs to be converted
         # to an image url, otherwise, it can be safely assumed that the UUID has
         # already been converted to a URL and no further intervention is required

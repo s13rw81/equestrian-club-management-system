@@ -1,10 +1,10 @@
-from data.db import get_trainer_affiliation_collection
+from data.db import get_trainer_affiliations_collection
 from logging_config import log
 from models.trainer_affiliation import TrainerAffiliationInternal
 from fastapi import HTTPException, status
 from decorators import atomic_transaction
 
-trainer_affiliation_collection = get_trainer_affiliation_collection()
+trainer_affiliation_collection = get_trainer_affiliations_collection()
 
 
 @atomic_transaction

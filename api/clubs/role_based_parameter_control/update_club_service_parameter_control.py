@@ -82,6 +82,9 @@ class UpdateClubServiceParameterControl:
             )
 
     def validate_availability(self):
+        if not self.club_service.availability:
+            return True
+
         for availability in self.club_service.availability:
             is_valid_availability = get_club_service_availability(
                 club_service_id=self.club_service_id,

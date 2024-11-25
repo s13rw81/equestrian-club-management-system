@@ -350,14 +350,13 @@ def update_a_club_service(
     )
     service_availability = club_service.availability
 
-    log.info(f"update_club_service_internal {update_club_service_internal}")
     updated_club_service = update_club_service(
         club_service=update_club_service_internal,
-        club_id=club_id,
         club_service_id=club_service_id,
         user=user,
         service_availability=service_availability,
     )
 
-    # TODO: after get routes are implemented return GetClubService model in data
-    return Success(message="club service updated successfully")
+    return Success(
+        message="club service updated successfully", data={"id": club_service_id}
+    )

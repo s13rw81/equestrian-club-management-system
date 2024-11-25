@@ -38,6 +38,6 @@ class ResponseUser(BaseModel):
     )
     def enum_serializer(self, enum):
         if not enum:
-            return
+            return enum
 
         return enum.value

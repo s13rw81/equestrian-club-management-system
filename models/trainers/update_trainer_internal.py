@@ -1,6 +1,5 @@
 from ..common_base import CommonBase
 from .enums import AvailableService, WeekDay, TimeSlot
-from . import Specialization
 
 class UpdateTrainerInternal(CommonBase):
     # user-fields
@@ -12,7 +11,6 @@ class UpdateTrainerInternal(CommonBase):
     available_services: list[AvailableService] = None
     availability: list[WeekDay] = None
     preferred_time_slot: TimeSlot = None
-    specializations: list[Specialization] = None
     is_visible: bool = None
 
     # system-fields

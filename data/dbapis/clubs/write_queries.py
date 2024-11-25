@@ -174,34 +174,31 @@ def update_club_service_availability(
         f"inside update_club_service_availability(update_availability={update_availability})"
     )
 
-    update_filter = {"id": club_service_id}
+    update_filter = {"club_service_id": club_service_id}
 
     for availability in update_availability:
-        update_filter = {
-            "id": club_service_id,
-        }
+        update_filter["id"] = str(availability.id)
 
-    club_service_availability_collection.update_many()
+        update_availability_dict = availability.model_dump(exclude={"id"})
 
-    result = club_service_collection.update_one(
-        update_filter,
-        {"$set": update_club_service_data.model_dump()},
-        session=session,
-    )
+        result = club_service_availability_collection.update_one(
+            update_filter,
+            {"$set": update_availability_dict},
+            session=session,
+        )
 
-    log.info(
-        f"club service update executed, matched_count={result.matched_count}, "
-        f"modified_count={result.modified_count}"
-    )
-
-    if not result.modified_count:
         log.info(
-            "could not update club service due to unknown reasons, raising exception"
-        )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="club service cannot be updated in the database due to unknown reasons",
+            f"club service availability update executed, matched_count={result.matched_count}, "
+            f"modified_count={result.modified_count}"
         )
 
-    # for now returning None
+        if not result.modified_count:
+            log.info(
+                "could not update club service due to unknown reasons, raising exception"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="club service cannot be updated in the database due to unknown reasons",
+            )
+
     return

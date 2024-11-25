@@ -12,4 +12,5 @@ from data.dbapis.clubs.write_queries import (
     save_club_service_availability,
     update_club,
     update_club_service,
+    update_club_service_availability,
 )

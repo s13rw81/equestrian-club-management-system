@@ -1,6 +1,7 @@
 from api.clubs.models.club_service import Availability, UpdateAvailability
 from data.dbapis.clubs import save_club_service, save_club_service_availability
 from data.dbapis.clubs import update_club_service as update_club_service_db
+from data.dbapis.clubs import update_club_service_availability
 from decorators import atomic_transaction
 from logging_config import log
 from models.clubs.service_internal import (
@@ -28,7 +29,9 @@ def add_club_service(
 
     availability_internal = [
         AvailabilityInternal(
-            **availability.model_dump(), club_service_id=club_service_id
+            **availability.model_dump(),
+            club_service_id=club_service_id,
+            created_by=str(user.id),
         )
         for availability in service_availability
     ]
@@ -46,7 +49,6 @@ def add_club_service(
 def update_club_service(
     club_service: UpdateClubServiceInternal,
     user: UserInternal,
-    club_id: str,
     club_service_id: str,
     service_availability: UpdateAvailability,
     session=None,
@@ -57,5 +59,21 @@ def update_club_service(
     )
 
     updated_club_service = update_club_service_db(update_club_service_data=club_service)
+
+    if service_availability:
+        update_availability = [
+            AvailabilityInternal(
+                **availability.model_dump(exclude={"availability_id"}),
+                id=availability.availability_id,
+                club_service_id=club_service_id,
+                last_updated_by=str(user.id),
+            )
+            for availability in service_availability
+        ]
+        update_club_service_availability(
+            update_availability=update_availability,
+            club_service_id=club_service_id,
+            session=session,
+        )
 
     return updated_club_service

@@ -1,10 +1,10 @@
 from typing import Optional
-from data.db import get_trainer_certification_collection
+from data.db import get_trainer_certifications_collection
 from decorators import atomic_transaction
 from logging_config import log
 from models.trainer_certification import TrainerCertificationInternal
 
-trainer_certification_collection = get_trainer_certification_collection()
+trainer_certification_collection = get_trainer_certifications_collection()
 
 
 @atomic_transaction

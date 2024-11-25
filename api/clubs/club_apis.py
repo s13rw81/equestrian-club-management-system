@@ -9,10 +9,15 @@ from data.dbapis.clubs import update_club as update_club_db
 from data.dbapis.trainer_affiliation import save_trainer_affiliation
 from logging_config import log
 from logic.auth import get_current_user
-from logic.clubs import add_club_service, upload_images_logic, upload_logo_logic
+from logic.clubs import (
+    add_club_service,
+    update_club_service,
+    upload_images_logic,
+    upload_logo_logic,
+)
 from logic.trainer_affiliation import trainer_affiliation_get_query_with_pagination
 from models.clubs import UpdateClubInternal
-from models.clubs.service_internal import ClubServiceInternal
+from models.clubs.service_internal import ClubServiceInternal, UpdateClubServiceInternal
 from models.http_responses import Success
 from models.trainer_affiliation import TrainerAffiliationInternal
 from models.user import UserInternal
@@ -33,6 +38,7 @@ from .role_based_parameter_control import (
     GenerateTrainerAffiliationParamControl,
     GetTrainerAffiliationPaginatedParamCtrl,
     UpdateClubParameterControl,
+    UpdateClubServiceParameterControl,
 )
 
 clubs_api_router = APIRouter(prefix="/clubs", tags=["clubs"])
@@ -288,12 +294,13 @@ async def get_trainer_affiliation_paginated(
     return retval
 
 
-@clubs_api_router.post("/services")
+@clubs_api_router.post("/{club_id}/services")
 def add_a_new_club_service(
     request: Request,
     club_service_parameter_control: Annotated[ClubServiceParameterControl, Depends()],
 ):
     user = club_service_parameter_control.user
+    club_id = club_service_parameter_control.club_id
     club_service = club_service_parameter_control.club_service
 
     log.info(
@@ -301,7 +308,9 @@ def add_a_new_club_service(
     )
 
     club_service_internal = ClubServiceInternal(
-        created_by=user.id, **club_service.model_dump(exclude={"availability"})
+        created_by=user.id,
+        club_id=club_id,
+        **club_service.model_dump(exclude={"availability"}),
     )
     service_availability = club_service.availability
 
@@ -315,3 +324,40 @@ def add_a_new_club_service(
         message="club service added successfully",
         data={"id": newly_created_club_service.id},
     )
+
+
+@clubs_api_router.put("/{club_id}/services/{club_service_id}")
+def update_a_club_service(
+    request: Request,
+    update_club_service_parameter_control: Annotated[
+        UpdateClubServiceParameterControl, Depends()
+    ],
+):
+    user = update_club_service_parameter_control.user
+    club_id = update_club_service_parameter_control.club_id
+    club_service_id = update_club_service_parameter_control.club_service_id
+    club_service = update_club_service_parameter_control.club_service
+
+    log.info(
+        f"{request.url} invoked user={user}, club_id={club_id}, club_service_id={club_service_id}, club_service={club_service}"
+    )
+
+    update_club_service_internal = UpdateClubServiceInternal(
+        last_updated_by=user.id,
+        club_id=club_id,
+        id=club_service_id,
+        **club_service.model_dump(exclude_unset=True),
+    )
+    service_availability = club_service.availability
+
+    log.info(f"update_club_service_internal {update_club_service_internal}")
+    updated_club_service = update_club_service(
+        club_service=update_club_service_internal,
+        club_id=club_id,
+        club_service_id=club_service_id,
+        user=user,
+        service_availability=service_availability,
+    )
+
+    # TODO: after get routes are implemented return GetClubService model in data
+    return Success(message="club service updated successfully")

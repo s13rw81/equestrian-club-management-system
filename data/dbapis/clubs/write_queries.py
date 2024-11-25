@@ -8,7 +8,11 @@ from data.db import (
 from decorators import atomic_transaction
 from logging_config import log
 from models.clubs import ClubInternal, UpdateClubInternal
-from models.clubs.service_internal import AvailabilityInternal, ClubServiceInternal
+from models.clubs.service_internal import (
+    AvailabilityInternal,
+    ClubServiceInternal,
+    UpdateClubServiceInternal,
+)
 
 from . import find_club
 
@@ -94,6 +98,44 @@ def save_club_service(
 
 
 @atomic_transaction
+def update_club_service(
+    update_club_service_data: UpdateClubServiceInternal, session=None
+) -> ClubServiceInternal:
+    log.info(
+        f"inside update_club_service(update_club_service_data={update_club_service_data})"
+    )
+    club_service_db_id = str(update_club_service_data.id)
+
+    update_filter = {"id": club_service_db_id}
+    update_club_service_dict = update_club_service_data.model_dump(
+        exclude={"id"}, exclude_unset=True
+    )
+
+    result = club_service_collection.update_one(
+        update_filter,
+        {"$set": update_club_service_dict},
+        session=session,
+    )
+
+    log.info(
+        f"club service update executed, matched_count={result.matched_count}, "
+        f"modified_count={result.modified_count}"
+    )
+
+    if not result.modified_count:
+        log.info(
+            "could not update club service due to unknown reasons, raising exception"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="club service cannot be updated in the database due to unknown reasons",
+        )
+
+    # for now returning None
+    return
+
+
+@atomic_transaction
 def save_club_service_availability(
     service_availability: list[AvailabilityInternal], session=None
 ) -> list[AvailabilityInternal]:
@@ -122,3 +164,44 @@ def save_club_service_availability(
     )
 
     return service_availability
+
+
+@atomic_transaction
+def update_club_service_availability(
+    update_availability: list[AvailabilityInternal], club_service_id: str, session=None
+) -> AvailabilityInternal:
+    log.info(
+        f"inside update_club_service_availability(update_availability={update_availability})"
+    )
+
+    update_filter = {"id": club_service_id}
+
+    for availability in update_availability:
+        update_filter = {
+            "id": club_service_id,
+        }
+
+    club_service_availability_collection.update_many()
+
+    result = club_service_collection.update_one(
+        update_filter,
+        {"$set": update_club_service_data.model_dump()},
+        session=session,
+    )
+
+    log.info(
+        f"club service update executed, matched_count={result.matched_count}, "
+        f"modified_count={result.modified_count}"
+    )
+
+    if not result.modified_count:
+        log.info(
+            "could not update club service due to unknown reasons, raising exception"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="club service cannot be updated in the database due to unknown reasons",
+        )
+
+    # for now returning None
+    return

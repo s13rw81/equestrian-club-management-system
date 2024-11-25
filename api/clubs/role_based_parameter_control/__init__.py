@@ -8,3 +8,4 @@ from .get_trainer_affiliation_paginated_param_ctrl import (
     GetTrainerAffiliationPaginatedParamCtrl,
 )
 from .update_club_parameter_control import UpdateClubParameterControl
+from .update_club_service_parameter_control import UpdateClubServiceParameterControl

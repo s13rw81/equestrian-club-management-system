@@ -2,16 +2,16 @@ from enum import Enum
 
 
 class ServiceType(Enum):
-    TRAINING = "training"
-    STABLING = "stabling"
+    TRAINING = "TRAINING"
+    STABLING = "STABLING"
 
 
 class SubServices(Enum):
-    INDIVIDUAL = "individual"
-    GROUP = "group"
-    PACKAGE = "package"
+    INDIVIDUAL = "INDIVIDUAL"
+    GROUP = "GROUP"
+    PACKAGE = "PACKAGE"
 
 
 class ServiceStatus(Enum):
-    ENABLE = "enable"
-    DISABLE = "disable"
+    ENABLE = "ENABLE"
+    DISABLE = "DISABLE"

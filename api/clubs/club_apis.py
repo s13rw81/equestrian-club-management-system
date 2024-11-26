@@ -297,7 +297,7 @@ async def get_trainer_affiliation_paginated(
     return retval
 
 
-@clubs_api_router.post("/{club_id}/services")
+@clubs_api_router.post("/add-service")
 def add_a_new_club_service(
     request: Request,
     club_service_parameter_control: Annotated[ClubServiceParameterControl, Depends()],
@@ -336,7 +336,7 @@ def add_a_new_club_service(
     return retval
 
 
-@clubs_api_router.put("/{club_id}/services/{club_service_id}")
+@clubs_api_router.put("/update-service")
 def update_a_club_service(
     request: Request,
     update_club_service_parameter_control: Annotated[
@@ -380,7 +380,7 @@ def update_a_club_service(
     return retval
 
 
-@clubs_api_router.get("/{club_id}/services/")
+@clubs_api_router.get("/get-service-paginated")
 def get_club_service_detailed_with_pagination(
     request: Request,
     get_club_services_param_control: Annotated[

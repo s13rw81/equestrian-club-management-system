@@ -97,16 +97,16 @@ class ResponseAvailability(BaseModel):
 
 class ResponseGetClubService(BaseModel):
     id: str
-    service_type: Optional[ServiceType] = None
-    sub_service: Optional[SubServices] = None
-    service_status: Optional[ServiceStatus] = None
-    services: Optional[list[str]] = None
+    service_type: ServiceType
+    sub_service: SubServices
+    service_status: ServiceStatus
+    services: list[str]
     capacity: Optional[int] = None
-    no_of_services: Optional[int] = None
-    commision: Optional[float] = None
-    pricing: Optional[str] = None
-    discount: Optional[float] = None
-    availability: Optional[list[ResponseAvailability]] = None
+    no_of_services: int
+    commision: float
+    pricing: str
+    discount: float
+    availability: list[ResponseAvailability]
 
     @field_serializer("service_type")
     def serialize_service_type(self, value):

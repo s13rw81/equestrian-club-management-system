@@ -40,7 +40,7 @@ class GetClubServicePaginatedParamControl:
 
         elif user.user_role == UserRoles.TRAINER:
             trainer = find_trainer(user_id=str(user.id))
-            filter_predicates.append(f"phone_number$eq${trainer.phone_number}")
+            filter_predicates.append(f"club_id$eq${trainer.club_id}")
 
         get_query_paginated_dto.f = filter_predicates
 

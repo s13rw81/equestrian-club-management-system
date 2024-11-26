@@ -111,6 +111,12 @@ def update_club_service(
         exclude={"id"}, exclude_unset=True
     )
 
+    if len(update_club_service_dict) == 2:
+        log.info(
+            "since len of update_club_service_dict == 2 none of the fields are set aborting update..."
+        )
+        return
+
     result = club_service_collection.update_one(
         update_filter,
         {"$set": update_club_service_dict},
@@ -131,7 +137,6 @@ def update_club_service(
             detail="club service cannot be updated in the database due to unknown reasons",
         )
 
-    # for now returning None
     return
 
 

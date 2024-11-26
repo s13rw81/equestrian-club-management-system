@@ -354,6 +354,7 @@ def update_a_club_service(
 
     update_club_service_internal = UpdateClubServiceInternal(
         last_updated_by=user.id,
+        last_updated_on=datetime.now(pytz.utc),
         club_id=club_id,
         id=club_service_id,
         **club_service.model_dump(exclude_unset=True),

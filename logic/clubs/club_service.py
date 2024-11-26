@@ -2,7 +2,7 @@ from typing import Optional
 
 from api.clubs.models.club_service import Availability, UpdateAvailability
 from data.db import get_clubs_service_collection
-from data.dbapis.clubs import save_club_service, save_club_service_availability
+from data.dbapis.clubs import save_club_service, save_club_service_availability_bulk
 from data.dbapis.clubs import update_club_service as update_club_service_db
 from data.dbapis.clubs import update_club_service_availability
 from decorators import atomic_transaction
@@ -42,7 +42,7 @@ def add_club_service(
         for availability in service_availability
     ]
 
-    save_club_service_availability(
+    save_club_service_availability_bulk(
         service_availability=availability_internal, session=session
     )
 

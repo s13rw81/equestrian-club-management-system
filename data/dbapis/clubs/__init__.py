@@ -9,7 +9,7 @@ from data.dbapis.clubs.read_queries import (
 from data.dbapis.clubs.write_queries import (
     save_club,
     save_club_service,
-    save_club_service_availability,
+    save_club_service_availability_bulk,
     update_club,
     update_club_service,
     update_club_service_availability,

@@ -136,12 +136,12 @@ def update_club_service(
 
 
 @atomic_transaction
-def save_club_service_availability(
+def save_club_service_availability_bulk(
     service_availability: list[AvailabilityInternal], session=None
 ) -> list[AvailabilityInternal]:
 
     log.info(
-        f"inside save_club_service_availability(availability={service_availability})"
+        f"inside save_club_service_availability_bulk(availability={service_availability})"
     )
 
     result = club_service_availability_collection.insert_many(

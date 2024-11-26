@@ -27,8 +27,7 @@ class GetClubServicePaginatedParamControl:
                 )
             ),
         ],
-        get_query_paginated_dto: Annotated[GetQueryPaginatedDTO, Query()],
-        club_id: str,
+        get_query_paginated_dto: GetQueryPaginatedDTO = Query(),
     ):
         filter_predicates = (
             get_query_paginated_dto.f if get_query_paginated_dto.f else []
@@ -46,4 +45,3 @@ class GetClubServicePaginatedParamControl:
 
         self.user = user
         self.get_query_paginated_dto = get_query_paginated_dto
-        self.club_id = club_id

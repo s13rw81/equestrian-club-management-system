@@ -388,7 +388,6 @@ def get_club_service_detailed_with_pagination(
     ],
 ):
     user = get_club_services_param_control.user
-    club_id = get_club_services_param_control.club_id
     get_query_paginated_dto = get_club_services_param_control.get_query_paginated_dto
 
     f = get_query_paginated_dto.f
@@ -397,7 +396,7 @@ def get_club_service_detailed_with_pagination(
     page_size = get_query_paginated_dto.page_size
 
     log.info(
-        f"{request.url} invoked user={user}, club_id={club_id},"
+        f"{request.url} invoked user={user},"
         f"f={f}, s={s}, page_no={page_no}, page_size={page_size}"
     )
 

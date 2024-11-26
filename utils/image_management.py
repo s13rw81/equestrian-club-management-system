@@ -21,7 +21,7 @@ async def save_image(image_file: UploadFile) -> str:
     """
     saves the provided image and returns the image_id that can be used to access the image
     :param image_file: The image file. A file-like object.
-    :return: The image_id which can further be used to access tha image.
+    :return: The image_id which can further be used to access the image.
     """
     log.info(f"inside save_image(filename={image_file.filename})")
 

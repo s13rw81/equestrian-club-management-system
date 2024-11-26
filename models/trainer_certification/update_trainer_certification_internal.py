@@ -7,4 +7,4 @@ class UpdateTrainerCertificationInternal(CommonBase):
     number: str = None
 
     # system-fields
-    image_id: Optional[str] = None
+    image: Optional[str] = None

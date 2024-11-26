@@ -26,7 +26,7 @@ class ClubIdParameterControlForm:
                 log.info("user does not have an associated club... raising exception...")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="user doest not have an associated club..."
+                    detail="user does not have an associated club..."
                 )
 
             if str(club.id) != club_id:

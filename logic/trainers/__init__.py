@@ -1,1 +1,2 @@
 from .trainers_get_query_with_pagination import trainers_get_query_with_pagination
+from .image_upload_logic import upload_trainer_certificate_image

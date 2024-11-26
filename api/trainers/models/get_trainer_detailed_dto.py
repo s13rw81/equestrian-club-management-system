@@ -5,6 +5,7 @@ from typing import Optional
 from utils.image_management import generate_image_url
 
 class GetTrainerCertificationDTO(BaseModel):
+    id: str
     name: str
     number: str
     image: Optional[str] = None
@@ -17,6 +18,7 @@ class GetTrainerCertificationDTO(BaseModel):
         return generate_image_url(image_id=image)
 
 class GetTrainerSpecializationDTO(BaseModel):
+    id: str
     name: str
     years_of_experience: int
     trainer_id: str

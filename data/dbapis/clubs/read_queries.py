@@ -71,14 +71,10 @@ def find_many_clubs(session=None, **kwargs) -> list[ClubInternal]:
 
 
 @atomic_transaction
-def find_club_service(
-    club_service_id: str, session=None
-) -> Optional[ClubServiceInternal]:
-    log.info(f"inside find_club_service(club_service_id={club_service_id})")
+def find_club_service(kwargs, session=None) -> Optional[ClubServiceInternal]:
+    log.info(f"inside find_club_service(kwargs={kwargs})")
 
-    club_service = club_service_collection.find_one(
-        {"id": club_service_id}, session=session
-    )
+    club_service = club_service_collection.find_one(kwargs=kwargs, session=session)
 
     if not club_service:
         log.info(

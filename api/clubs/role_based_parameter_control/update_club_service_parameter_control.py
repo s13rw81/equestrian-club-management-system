@@ -50,7 +50,7 @@ class UpdateClubServiceParameterControl:
                     detail="user is not authorized to add service to this club...",
                 )
 
-            existing_club_service = find_club_service(club_service_id=club_service_id)
+            existing_club_service = find_club_service(id=club_service_id)
             if not existing_club_service:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,

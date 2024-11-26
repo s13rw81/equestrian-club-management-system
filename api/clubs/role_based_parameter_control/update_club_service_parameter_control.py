@@ -73,6 +73,7 @@ class UpdateClubServiceParameterControl:
         self.club_id = club_id
         self.club_service = club_service
         self.club_service_id = club_service_id
+        log.info(f"type_of_club_service {type(self.club_service)}")
 
         availability_validated = self.validate_availability()
         if not availability_validated:

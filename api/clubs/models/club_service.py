@@ -4,6 +4,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, field_serializer, model_validator
 
+from logging_config import log
 from models.clubs.enums.service import ServiceStatus, ServiceType, SubServices
 
 
@@ -77,14 +78,19 @@ class UpdateClubServiceRequest(BaseModel):
             logging.error(
                 "capacity provided but sub_service is not a group. raising error"
             )
-            ValueError(f"capacity provided for {self.sub_service} sub service")
+            raise ValueError(f"capacity provided for {self.sub_service} sub service")
+
+        log.info(
+            f"in model_validator"
+            f"sub_service {self.sub_service}, sub_service_type {type(self.sub_service)}"
+        )
 
         if self.sub_service == SubServices.GROUP:
             if not self.capacity:
                 logging.error(
                     "capacity not provided for group sub service. raising error"
                 )
-                ValueError("capacity not provided for group sub service")
+                raise ValueError("capacity not provided for group sub service")
 
         return self
 

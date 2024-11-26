@@ -323,10 +323,17 @@ def add_a_new_club_service(
         service_availability=service_availability,
     )
 
-    return Success(
-        message="club service added successfully",
-        data={"id": newly_created_club_service.id},
+    result = club_service_detailed_get_query_with_pagination(
+        f=[f"id$eq${newly_created_club_service.id}"]
+    )[0]
+
+    retval = Success(
+        message="club service updated successfully",
+        data=ResponseGetClubService(**result.model_dump()),
     )
+    log.info(f"returning {retval}")
+
+    return retval
 
 
 @clubs_api_router.put("/{club_id}/services/{club_service_id}")
@@ -360,9 +367,17 @@ def update_a_club_service(
         service_availability=service_availability,
     )
 
-    return Success(
-        message="club service updated successfully", data={"id": club_service_id}
+    result = club_service_detailed_get_query_with_pagination(
+        f=[f"id$eq${club_service_id}"]
+    )[0]
+
+    retval = Success(
+        message="club service updated successfully",
+        data=ResponseGetClubService(**result.model_dump()),
     )
+    log.info(f"returning {retval}")
+
+    return retval
 
 
 @clubs_api_router.get("/{club_id}/services/")

@@ -16,6 +16,7 @@ from logic.clubs import (
     upload_images_logic,
     upload_logo_logic,
 )
+from logic.clubs.clubs import clubs_get_query_with_pagination
 from logic.trainer_affiliation import trainer_affiliation_get_query_with_pagination
 from models.clubs import UpdateClubInternal
 from models.clubs.service_internal import ClubServiceInternal, UpdateClubServiceInternal
@@ -39,6 +40,7 @@ from .role_based_parameter_control import (
     ClubServiceParameterControl,
     GenerateTrainerAffiliationParamControl,
     GetClubServicePaginatedParamControl,
+    GetClubsPaginatedParamControl,
     GetTrainerAffiliationPaginatedParamCtrl,
     UpdateClubParameterControl,
     UpdateClubServiceParameterControl,
@@ -172,6 +174,42 @@ async def get_your_club(
     log.info(f"returning {retval}")
 
     return retval
+
+
+@clubs_api_router.get("/get-clubs-paginated")
+async def get_clubs_paginated(
+    request: Request,
+    get_clubs_paginated_param_control: Annotated[
+        GetClubsPaginatedParamControl, Depends()
+    ],
+):
+    user = get_clubs_paginated_param_control.user
+    get_query_paginated_dto = get_clubs_paginated_param_control.get_query_paginated_dto
+
+    f = get_query_paginated_dto.f
+    s = get_query_paginated_dto.s
+    page_no = get_query_paginated_dto.page_no
+    page_size = get_query_paginated_dto.page_size
+
+    log.info(
+        f"inside {request.url} (user_id={user.id}) (get_query_paginated_dto={get_query_paginated_dto})"
+    )
+
+    response_clubs = clubs_get_query_with_pagination(
+        f=f, s=s, page_no=page_no, page_size=page_size
+    )
+
+    return_clubs_list = []
+    for club in response_clubs:
+        return_clubs_list.append(
+            GetClubDTO(
+                logo=generate_image_url(image_id=club.logo),
+                images=generate_image_urls(image_ids=club.images),
+                **club.model_dump(exclude={"logo", "images"}),
+            )
+        )
+
+    return Success(message="clubs retrieved successfully...", data=return_clubs_list)
 
 
 @clubs_api_router.post("/upload-logo")

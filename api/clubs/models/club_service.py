@@ -61,16 +61,16 @@ class UpdateAvailability(BaseModel):
 
 
 class UpdateClubServiceRequest(BaseModel):
-    service_type: Optional[ServiceType] = None
-    sub_service: Optional[SubServices] = None
-    service_status: Optional[ServiceStatus] = None
-    services: Optional[list[str]] = None
+    service_type: ServiceType = None
+    sub_service: SubServices = None
+    service_status: ServiceStatus = None
+    services: list[str] = None
     capacity: Optional[int] = None
-    no_of_services: Optional[int] = None
-    commision: Optional[float] = None
-    pricing: Optional[str] = None
-    discount: Optional[float] = None
-    availability: Optional[list[UpdateAvailability]] = None
+    no_of_services: int = None
+    commision: float = None
+    pricing: str = None
+    discount: float = None
+    availability: list[UpdateAvailability] = None
 
     @model_validator(mode="after")
     def validate_sub_service(self):

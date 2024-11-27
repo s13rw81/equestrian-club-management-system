@@ -5,6 +5,7 @@ from .generate_trainer_affiliation_param_control import (
     GenerateTrainerAffiliationParamControl,
 )
 from .get_club_service_param_control import GetClubServicePaginatedParamControl
+from .get_clubs_paginated_param_control import GetClubsPaginatedParamControl
 from .get_trainer_affiliation_paginated_param_ctrl import (
     GetTrainerAffiliationPaginatedParamCtrl,
 )

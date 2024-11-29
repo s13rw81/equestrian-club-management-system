@@ -2,10 +2,18 @@
 # this is strictly for demonstration purposes. This structure should not be followed
 # anywhere except for demonstration purposes.
 
-from fastapi import APIRouter, Depends, Request, HTTPException, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Request,
+    HTTPException,
+    status,
+    Body,
+    Query
+)
 from logging_config import log
 from pydantic import BaseModel, constr, field_validator
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from role_based_access_control import RoleBasedAccessControl
 from models.user import UserInternal
 from models.user.enums import UserRoles
@@ -15,16 +23,22 @@ from data.db import get_order_demo_collection
 from external_services.payment_gateway_service.models import CreatePaymentDTO, GetPaymentDTO
 from external_services.payment_gateway_service.payment_gateway_service import create_payment_request, get_payment_info
 from decorators import atomic_transaction
-from typing import Optional
+from typing import Optional, Annotated
 from logic.generic_get_query_with_pagination import generic_get_query_with_pagination_logic
 from models.http_responses import Success
+from ..commons.models import GetQueryPaginatedDTO
 
+order_demo_api_router = APIRouter(
+    prefix="/order-demo",
+    tags=["order-demo"]
+)
 
 order_demo_collection = get_order_demo_collection()
 
+
 class CreateOrderDTO(BaseModel):
     service_name: constr(min_length=1, max_length=1000)
-    amount: Decimal
+    amount: str
     custom_data: list[constr(min_length=1, max_length=10000)] = []
     club_id: str
 
@@ -38,20 +52,26 @@ class CreateOrderDTO(BaseModel):
 
         return club_id
 
+    @field_validator("amount")
+    def validate_amount(cls, amount):
+        try:
+            Decimal(amount)
+        except (InvalidOperation, Exception) as e:
+            log.info("couldn't convert amount into a Decimal...")
+            log.exception(e)
+            log.info("raising ValueError...")
+            raise ValueError("couldn't convert amount into a Decimal...")
 
-order_demo_api_router = APIRouter(
-    prefix="/order-demo",
-    tags=["order-demo"]
-)
+        return amount
 
 
 @order_demo_api_router.post("/create-order")
 async def create_order(
         request: Request,
         create_order_dto: CreateOrderDTO,
-        user: UserInternal = Depends(
+        user: Annotated[UserInternal, Depends(
             RoleBasedAccessControl(allowed_roles={UserRoles.USER})
-        )
+        )]
 ):
     log.info(f"inside /order-demo/create-order (create_order_dto={create_order_dto}, "
              f"user_phone_number={user.phone_number}")
@@ -122,6 +142,99 @@ def create_order_demo_logic(
     return retval
 
 
+@order_demo_api_router.post("/update-payment-status")
+async def verify_payment_status(
+        user: Annotated[UserInternal, Depends(
+            RoleBasedAccessControl(allowed_roles={UserRoles.USER})
+        )],
+        order_id: str = Body(embed=True)
+):
+    log.info(f"inside /order-demo/verify-payment-status (order_id={order_id}, user_phone_number={user.phone_number})")
+
+    order_demo = order_demo_collection.find_one({"id": order_id})
+
+    if not order_demo:
+        log.info("invalid order_id, raising ValueError...")
+        raise ValueError(f"invalid order_id: {order_id}")
+
+    if order_demo["user_id"] != str(user.id):
+        log.info("user is not authorized to access this order... raising ValueError...")
+        raise ValueError(f"user is not authorized to access this order: {order_id}")
+
+    result = update_payment_status_logic(order_id=order_id)
+
+    retval = Success(
+        message="successfully update payment status...",
+        data=result
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
+@atomic_transaction
+def update_payment_status_logic(
+        order_id: str,
+        session=None
+):
+    log.info(f"inside update_payment_status_logic(order_id={order_id})")
+
+    order_demo = order_demo_collection.find_one({"id": order_id}, session=session)
+
+    payment_info = get_payment_info(payment_gateway_id=order_demo["payment_gateway_id"])
+
+    result = order_demo_collection.update_one(
+        {"id": order_id},
+        {"$set": {"payment_status": payment_info.payment_status}},
+        session=session
+    )
+
+    if not result.modified_count:
+        log.info("unable to update payment status... raising HTTPException...")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="unable to update payment status..."
+        )
+
+    retval = order_demo_get_query_with_pagination(
+        f=[f"id$eq${order_id}"],
+        session=session
+    )
+
+    log.info(f"returning {retval}")
+
+    return retval
+
+
+@order_demo_api_router.post("/get-orders-paginated")
+def get_orders_paginated_logic(
+        get_query_paginated_dto: Annotated[GetQueryPaginatedDTO, Query()],
+        user: Annotated[UserInternal, Depends(
+            RoleBasedAccessControl(allowed_roles={UserRoles.USER})
+        )]
+):
+    f = get_query_paginated_dto.f
+    s = get_query_paginated_dto.s
+    page_no = get_query_paginated_dto.page_no
+    page_size = get_query_paginated_dto.page_size
+
+    log.info(f"inside /order-demo/get-orders-paginated (f={f}, s={s}, page_no={page_no}, page_size={page_size}, "
+             f"user_phone_number={user.phone_number})")
+
+    f = f + [f"user_id$eq${user.id}"] if f else [f"user_id$eq${user.id}"]
+
+    result = order_demo_get_query_with_pagination(
+        f=f, s=s, page_no=page_no, page_size=page_size
+    )
+
+    retval = Success(
+        message="demo orders fetched successfully...",
+        data=result
+    )
+
+    log.info(f"returning {retval}")
+    return retval
 
 
 @atomic_transaction

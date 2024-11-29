@@ -165,6 +165,9 @@ def get_payment_demo_collection():
     log.info("inside get_payment_demo_collection()")
     return get_database()["payment_demo"]
 
+def get_order_demo_collection():
+    log.info("inside get_order_demo_collection()")
+    return get_database()["order_demo"]
 
 def get_horses_collection():
     log.info("inside get_horses_collection")

@@ -60,10 +60,10 @@ def create_payment_request(create_payment_dto: CreatePaymentDTO) -> GetPaymentDT
     return retval
 
 
-def get_payment_info(transaction_id: str) -> GetPaymentDTO:
-    log.info(f"inside get_payment_info(transaction_id={transaction_id})")
+def get_payment_info(payment_gateway_id: str) -> GetPaymentDTO:
+    log.info(f"inside get_payment_info(transaction_id={payment_gateway_id})")
 
-    request_endpoint = TAP_PAYMENT_API_URL + f"/charges/{transaction_id}"
+    request_endpoint = TAP_PAYMENT_API_URL + f"/charges/{payment_gateway_id}"
 
     headers = {
         "Authorization": f"Bearer {TAP_PAYMENT_API_KEY}",

@@ -1,11 +1,10 @@
 from ..common_base import CommonBase
-from decimal import Decimal
 
 
 class OrderDemoInternal(CommonBase):
     # user-fields
     service_name: str
-    amount: Decimal
+    amount: str
     custom_data: list[str] = []
     payment_gateway_id: str
     payment_url: str

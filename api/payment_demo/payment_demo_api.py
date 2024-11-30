@@ -57,7 +57,7 @@ def verify_payment_status(
 ):
     log.info(f"inside /payment-demo/verify-payment-status(id={id})")
 
-    payment_info = get_payment_info(transaction_id=id)
+    payment_info = get_payment_info(payment_gateway_id=id)
 
     update_filter = {"payment_gateway_id": payment_info.payment_gateway_id}
 

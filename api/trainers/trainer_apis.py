@@ -1,32 +1,26 @@
-from fastapi import APIRouter, Depends, UploadFile
 from typing import Annotated
-from models.http_responses import Success
-from .models import (
-    GetTrainerDetailedDTO,
-    GetTrainerCertificationDTO
-)
-from .role_based_parameter_control import (
-    GetTrainersPaginatedParamCtrl,
-    TrainerCertIdParamCtrlForm
-)
+
+from fastapi import APIRouter, Depends, UploadFile
+
 from logging_config import log
 from logic.trainers import (
     trainers_get_query_with_pagination,
-    upload_trainer_certificate_image
+    upload_trainer_certificate_image,
+)
+from models.http_responses import Success
+
+from .models import GetTrainerCertificationDTO, GetTrainerDetailedDTO
+from .role_based_parameter_control import (
+    GetTrainersPaginatedParamCtrl,
+    TrainerCertIdParamCtrlForm,
 )
 
-trainers_api_router = APIRouter(
-    prefix="/trainers",
-    tags=["trainers"]
-)
+trainers_api_router = APIRouter(prefix="/trainers", tags=["trainers"])
 
 
 @trainers_api_router.get("/get-trainers-paginated")
 async def get_trainers_paginated(
-        get_trainers_param_ctrl: Annotated[
-            GetTrainersPaginatedParamCtrl,
-            Depends()
-        ]
+    get_trainers_param_ctrl: Annotated[GetTrainersPaginatedParamCtrl, Depends()]
 ):
     user = get_trainers_param_ctrl.user
     get_query_paginated_dto = get_trainers_param_ctrl.get_query_paginated_dto
@@ -36,8 +30,10 @@ async def get_trainers_paginated(
     page_no = get_query_paginated_dto.page_no
     page_size = get_query_paginated_dto.page_size
 
-    log.info("inside /trainers/get-trainers-paginated ("
-             f"f={f}, s={s}, page_no={page_no}, page_size={page_size}, user_id={user.id})")
+    log.info(
+        "inside /trainers/get-trainers-paginated ("
+        f"f={f}, s={s}, page_no={page_no}, page_size={page_size}, user_id={user.id})"
+    )
 
     result = trainers_get_query_with_pagination(
         f=f, s=s, page_no=page_no, page_size=page_size
@@ -47,7 +43,7 @@ async def get_trainers_paginated(
 
     retval = Success(
         message="trainer details fetched successfully",
-        data=[GetTrainerDetailedDTO(**data.model_dump()) for data in result]
+        data=[GetTrainerDetailedDTO(**data.model_dump()) for data in result],
     )
 
     log.info(f"returning {retval}")
@@ -57,33 +53,28 @@ async def get_trainers_paginated(
 
 @trainers_api_router.post("/upload-certification-image")
 async def upload_certification_image(
-        image: UploadFile,
-        trainer_cert_id_param_ctrl: Annotated[
-            TrainerCertIdParamCtrlForm,
-            Depends()
-        ]
+    image: UploadFile,
+    trainer_cert_id_param_ctrl: Annotated[TrainerCertIdParamCtrlForm, Depends()],
 ):
-    log.info(f"inside upload-trainer-certification-image("
-             f"trainer_certification_id={trainer_cert_id_param_ctrl.trainer_certification_id}), "
-             f"image_filename={image.filename}, "
-             f"user_id={trainer_cert_id_param_ctrl.user.id}")
+    log.info(
+        f"inside upload-trainer-certification-image("
+        f"trainer_certification_id={trainer_cert_id_param_ctrl.trainer_certification_id}), "
+        f"image_filename={image.filename}, "
+        f"user_id={trainer_cert_id_param_ctrl.user.id}"
+    )
 
     trainer_certification = await upload_trainer_certificate_image(
-        certificate_id=trainer_cert_id_param_ctrl.trainer_certification_id,
-        image=image
+        certificate_id=trainer_cert_id_param_ctrl.trainer_certification_id, image=image
     )
 
     retval = Success(
         message="successfully saved trainer_certification_image",
-        data=GetTrainerCertificationDTO(**trainer_certification.model_dump())
+        data=GetTrainerCertificationDTO(**trainer_certification.model_dump()),
     )
 
     log.info(f"returning {retval}")
 
     return retval
-
-
-
 
 
 # @trainers_api_router.put("/update-trainer")

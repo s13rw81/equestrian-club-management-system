@@ -1,15 +1,19 @@
-from pydantic import BaseModel, constr, field_validator, Field
+from pydantic import BaseModel, Field, constr, field_validator
+
 from data.dbapis.trainer_affiliation import find_trainer_affiliation
 from logging_config import log
-from models.trainers.enums import AvailableService, WeekDay, TimeSlot
+from models.trainers.enums import AvailableService, TimeSlot, WeekDay
+
 
 class CreateTrainerCertificationDTO(BaseModel):
     name: constr(min_length=1, max_length=200)
     number: constr(min_length=1, max_length=200)
 
+
 class CreateTrainerSpecializationDTO(BaseModel):
     name: constr(min_length=1, max_length=200)
     years_of_experience: int = Field(gt=0)
+
 
 class CreateTrainerDTO(BaseModel):
     full_name: constr(min_length=1, max_length=200)
@@ -17,10 +21,12 @@ class CreateTrainerDTO(BaseModel):
     club_affiliation_number: str
     available_services: list[AvailableService]
     availability: list[WeekDay]
-    preferred_time_slot: TimeSlot
+    preferred_time_slot: list[TimeSlot]
     # using `default_factory` instead of `default` to preserve the nested key names in the openapi schema
-    certifications: list[CreateTrainerCertificationDTO] = Field(default_factory=list)
-    specializations: list[CreateTrainerSpecializationDTO] = Field(default_factory=list)
+    # certifications: list[CreateTrainerCertificationDTO] = Field(default_factory=list)
+    # specializations: list[CreateTrainerSpecializationDTO] = Field(default_factory=list)
+    specializations: list[str] = Field(min_length=1, max_length=200)
+    years_of_experience: int = Field(gt=0)
 
     @field_validator("full_name")
     def full_name_capitalize(cls, full_name):
@@ -31,9 +37,13 @@ class CreateTrainerDTO(BaseModel):
         result = find_trainer_affiliation(id=club_affiliation_number)
 
         if not result:
-            log.info(f"invalid club_affiliation_number: {club_affiliation_number}, "
-                     "raising ValueError...")
+            log.info(
+                f"invalid club_affiliation_number: {club_affiliation_number}, "
+                "raising ValueError..."
+            )
 
-            raise ValueError(f"invalid club_affiliation_number: {club_affiliation_number}, "
-                             "raising ValueError...")
+            raise ValueError(
+                f"invalid club_affiliation_number: {club_affiliation_number}, "
+                "raising ValueError..."
+            )
         return club_affiliation_number

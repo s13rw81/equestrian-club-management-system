@@ -1,10 +1,12 @@
 from typing import Optional
+
 from data.db import get_trainer_collection
 from decorators import atomic_transaction
 from logging_config import log
 from models.trainers import TrainerInternal
 
 trainer_collection = get_trainer_collection()
+
 
 @atomic_transaction
 def find_trainer(session=None, **kwargs) -> Optional[TrainerInternal]:
@@ -16,11 +18,14 @@ def find_trainer(session=None, **kwargs) -> Optional[TrainerInternal]:
         log.info(f"No trainer exists with the provided attributes, returning None")
         return None
 
+    log.info(f"trainer info {trainer}")
+
     retval = TrainerInternal(**trainer)
 
     log.info(f"returning trainer = {retval}")
 
     return retval
+
 
 @atomic_transaction
 def find_many_trainers(session=None, **kwargs) -> list[TrainerInternal]:

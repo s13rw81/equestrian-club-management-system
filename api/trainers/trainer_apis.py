@@ -2,12 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, UploadFile
 
+from data.dbapis.trainer_certifications import save_trainer_certifications_bulk
 from logging_config import log
 from logic.trainers import (
     trainers_get_query_with_pagination,
     upload_trainer_certificate_image,
 )
 from models.http_responses import Success
+from models.trainer_certification import TrainerCertificationInternal
 
 from .models import GetTrainerCertificationDTO, GetTrainerDetailedDTO
 from .role_based_parameter_control import (
@@ -58,13 +60,29 @@ async def upload_certification_image(
 ):
     log.info(
         f"inside upload-trainer-certification-image("
-        f"trainer_certification_id={trainer_cert_id_param_ctrl.trainer_certification_id}), "
         f"image_filename={image.filename}, "
-        f"user_id={trainer_cert_id_param_ctrl.user.id}"
+        f"user_id={trainer_cert_id_param_ctrl.user.id})",
     )
 
+    name = trainer_cert_id_param_ctrl.name
+    number = trainer_cert_id_param_ctrl.number
+    trainer_id = trainer_cert_id_param_ctrl.trainer_id
+
+    trainer_certification = TrainerCertificationInternal(
+        name=name,
+        number=number,
+        trainer_id=trainer_id,
+        created_by=trainer_id,
+    )
+
+    new_trainer_certifications = save_trainer_certifications_bulk(
+        new_trainer_certifications=[trainer_certification]
+    )
+
+    certificate_id = str(new_trainer_certifications[0].id)
+
     trainer_certification = await upload_trainer_certificate_image(
-        certificate_id=trainer_cert_id_param_ctrl.trainer_certification_id, image=image
+        certificate_id=certificate_id, image=image
     )
 
     retval = Success(

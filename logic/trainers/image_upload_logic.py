@@ -1,25 +1,27 @@
+from datetime import datetime
+
+import pytz
 from fastapi import UploadFile
-from models.trainer_certification import (
-    TrainerCertificationInternal,
-    UpdateTrainerCertificationInternal
-)
-from logging_config import log
+
 from data.dbapis.trainer_certifications import (
     find_trainer_certification,
-    update_trainer_certifications_bulk
+    update_trainer_certifications_bulk,
 )
-from utils.image_management import save_image, delete_image
-from datetime import datetime
-import pytz
-
+from logging_config import log
+from models.trainer_certification import (
+    TrainerCertificationInternal,
+    UpdateTrainerCertificationInternal,
+)
+from utils.image_management import delete_image, save_image
 
 
 async def upload_trainer_certificate_image(
-        certificate_id: str,
-        image: UploadFile
+    certificate_id: str, image: UploadFile
 ) -> TrainerCertificationInternal:
-    log.info(f"inside upload_trainer_certificate_image(certificate_id={certificate_id}, "
-             f"image_filename={image.filename})")
+    log.info(
+        f"inside upload_trainer_certificate_image(certificate_id={certificate_id}, "
+        f"image_filename={image.filename})"
+    )
 
     trainer_certification = find_trainer_certification(id=certificate_id)
 
@@ -34,7 +36,7 @@ async def upload_trainer_certificate_image(
     update_trainer_certification_dto = UpdateTrainerCertificationInternal(
         id=trainer_certification.id,
         last_updated_on=datetime.now(pytz.utc),
-        image=new_image_id
+        image=new_image_id,
     )
 
     updated_trainer_certifications = update_trainer_certifications_bulk(
